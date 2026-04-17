@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Inspiration / Clusters</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a;
+    --bg-panel: #0f1011;
+    --bg-surface: #191a1b;
+    --bg-elevated: #28282c;
+
+    --text-primary: #f7f8f8;
+    --text-secondary: #d0d6e0;
+    --text-tertiary: #8a8f98;
+    --text-quaternary: #62666d;
+
+    --brand: #5e6ad2;
+    --brand-accent: #7170ff;
+    --brand-hover: #828fff;
+
+    --border-subtle: rgba(255,255,255,0.05);
+    --border-standard: rgba(255,255,255,0.08);
+    --border-solid: #23252a;
+
+    --surface-1: rgba(255,255,255,0.02);
+    --surface-2: rgba(255,255,255,0.04);
+    --surface-3: rgba(255,255,255,0.05);
+
+    --status-green: #10b981;
+    --status-amber: #f59e0b;
+    --status-red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body { background: var(--bg-canvas); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
+  button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .nav-chevron { width: 10px; height: 10px; opacity: 0.5; transition: transform 0.15s; flex-shrink: 0; }
+  .nav-chevron.open { transform: rotate(90deg); }
+  .sub-nav { overflow: hidden; max-height: 0; transition: max-height 0.2s ease; }
+  .sub-nav.open { max-height: 240px; }
+  .sub-nav-item { padding: 4px 10px 4px 32px; margin: 0 8px; border-radius: 5px; color: var(--text-quaternary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: all 0.1s; text-decoration: none; display: block; }
+  .sub-nav-item:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
+  .sub-nav-item.active { color: var(--text-primary); background: var(--surface-2); }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* ═══ MAIN ═══ */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-root:hover { color: var(--text-secondary); }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 680px; margin-bottom: 28px; }
+
+  /* Stat strip */
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .stat-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .stat-meta { display: flex; flex-direction: column; gap: 0; }
+  .stat-value { font-size: 14px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.2; }
+  .stat-label { font-size: 11px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* ═══ Insight callout — the unified-platform hero ═══ */
+  .insight {
+    background: linear-gradient(to right, rgba(113,112,255,0.12), rgba(113,112,255,0.03) 80%);
+    border: 1px solid rgba(113,112,255,0.3);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .insight-icon {
+    width: 32px; height: 32px;
+    background: rgba(113,112,255,0.18);
+    border: 1px solid rgba(113,112,255,0.35);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .insight-body { flex: 1; }
+  .insight-label {
+    font-size: 10px; font-weight: 510;
+    color: var(--brand-accent);
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .insight-text {
+    font-size: 14px; font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: -0.182px;
+    line-height: 1.5;
+  }
+  .insight-text strong { color: var(--text-primary); font-weight: 510; }
+  .insight-provenance {
+    font-size: 11px; font-weight: 510;
+    color: var(--text-quaternary);
+    letter-spacing: -0.13px;
+    margin-top: 6px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .insight-provenance span { color: var(--brand-accent); }
+
+  /* ═══ Filter row ═══ */
+  .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .filter-label { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; margin-right: 4px; }
+  .filter-count { font-size: 13px; font-weight: 400; color: var(--text-tertiary); }
+  .filter-spacer { flex: 1; }
+  .filter-btn { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; background: transparent; border: 1px solid var(--border-solid); border-radius: 6px; font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; cursor: pointer; transition: all 0.12s; }
+  .filter-btn:hover { background: var(--surface-2); color: var(--text-primary); border-color: var(--border-standard); }
+  .filter-btn.active { background: var(--surface-3); color: var(--text-primary); border-color: var(--border-standard); }
+
+  .sort-group { display: inline-flex; border: 1px solid var(--border-standard); border-radius: 6px; padding: 2px; }
+  .sort-btn { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; color: var(--text-tertiary); background: transparent; border: none; transition: all 0.12s; }
+  .sort-btn:hover { color: var(--text-primary); }
+  .sort-btn.active { background: var(--surface-3); color: var(--text-primary); }
+
+  /* ═══ Cluster grid ═══ */
+  .cluster-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .cluster-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+    display: flex; flex-direction: column;
+  }
+  .cluster-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(113,112,255,0.35);
+    background: var(--surface-2);
+  }
+  .cluster-card.highlight {
+    border-color: rgba(16,185,129,0.4);
+    box-shadow: 0 0 0 1px rgba(16,185,129,0.2);
+  }
+  .cluster-card.warn {
+    border-color: rgba(245,158,11,0.35);
+  }
+
+  /* Cover mosaic (2x2 grid) */
+  .mosaic {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    padding: 2px;
+    aspect-ratio: 1 / 1;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .mosaic-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 3px;
+  }
+  .tile-gradient-1 { background: url('images/1.jpg') center/cover; }
+  .tile-gradient-2 { background: url('images/2.jpg') center/cover; }
+  .tile-gradient-3 { background: url('images/3.jpg') center/cover; }
+  .tile-gradient-4 { background: url('images/4.jpg') center/cover; }
+  .tile-gradient-5 { background: url('images/5.jpg') center/cover; }
+  .tile-gradient-6 { background: url('images/6.jpg') center/cover; }
+  .tile-gradient-7 { background: url('images/7.jpg') center/cover; }
+  .tile-gradient-8 { background: url('images/8.jpg') center/cover; }
+  .tile-gradient-9 { background: url('images/9.jpg') center/cover; }
+  .tile-gradient-10 { background: url('images/10.jpg') center/cover; }
+  .tile-gradient-11 { background: url('images/11.jpg') center/cover; }
+  .tile-gradient-12 { background: url('images/12.jpg') center/cover; }
+  .tile-gradient-13 { background: url('images/13.jpg') center/cover; }
+  .tile-gradient-14 { background: url('images/14.jpg') center/cover; }
+  .tile-gradient-15 { background: url('images/15.jpg') center/cover; }
+  .tile-gradient-16 { background: url('images/16.jpg') center/cover; }
+
+  .cluster-body {
+    padding: 12px 14px 14px;
+    display: flex; flex-direction: column;
+    gap: 10px;
+  }
+
+  .cluster-header {
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .cluster-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .cluster-name {
+    font-size: 13px; font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+    line-height: 1.35;
+    flex: 1;
+  }
+  .cluster-percentile {
+    font-size: 10px; font-weight: 510;
+    padding: 1px 6px;
+    border-radius: 9999px;
+    flex-shrink: 0;
+    letter-spacing: -0.13px;
+    margin-top: 2px;
+  }
+  .cluster-percentile.top {
+    background: rgba(16,185,129,0.12);
+    color: var(--status-green);
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+  .cluster-percentile.over {
+    background: rgba(245,158,11,0.1);
+    color: var(--status-amber);
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+
+  .cluster-metrics {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 10px;
+  }
+  .metric {
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 1px;
+  }
+  .metric + .metric {
+    border-left: 1px solid var(--border-subtle);
+    padding-left: 10px;
+    margin-left: 10px;
+  }
+  .metric-label {
+    font-size: 9px; font-weight: 510;
+    color: var(--text-quaternary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .metric-value {
+    font-size: 14px; font-weight: 590;
+    color: var(--text-primary);
+    letter-spacing: -0.182px;
+    font-variant-numeric: tabular-nums;
+  }
+  .metric-value.green { color: var(--status-green); }
+  .metric-value.amber { color: var(--status-amber); }
+  .metric-value.muted { color: var(--text-tertiary); }
+
+  /* Cluster drawer (same pattern as Visual Search) */
+  .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 90; }
+  .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 520px; max-width: 100vw; background: var(--bg-surface); border-left: 1px solid var(--border-standard); box-shadow: -8px 0 32px rgba(0,0,0,0.5); z-index: 100; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+  .drawer-title-wrap { flex: 1; min-width: 0; }
+  .drawer-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+  .drawer-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drawer-close { width: 26px; height: 26px; background: transparent; border: none; border-radius: 6px; color: var(--text-tertiary); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .drawer-close:hover { background: var(--surface-2); color: var(--text-primary); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 18px; }
+  .drawer-footer { border-top: 1px solid var(--border-subtle); padding: 14px 18px; display: flex; gap: 6px; flex-shrink: 0; background: var(--bg-surface); }
+  .drawer-btn { flex: 1; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.12s; }
+  .drawer-btn.primary { background: var(--brand); border: 1px solid var(--brand); color: white; }
+  .drawer-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .drawer-btn.secondary { background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-primary); }
+  .drawer-btn.secondary:hover { background: var(--surface-3); }
+
+  .drawer-hero-mosaic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-standard); aspect-ratio: 3 / 1; margin-bottom: 16px; background: var(--bg-panel); }
+  .drawer-hero-mosaic .tile { border-radius: 3px; }
+
+  .drawer-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .drawer-stat {
+    padding: 10px 12px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 8px;
+  }
+  .drawer-stat-label { font-size: 9px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px; line-height: 1.3; }
+  .drawer-stat-value { font-size: 15px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.165px; line-height: 1.3; font-variant-numeric: tabular-nums; }
+  .drawer-stat-value.green { color: var(--status-green); }
+  .drawer-stat-sub { font-size: 10px; color: var(--text-tertiary); letter-spacing: -0.13px; margin-top: 1px; }
+
+  .drawer-section { margin-bottom: 18px; }
+  .drawer-section-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+
+  .color-row { display: flex; align-items: center; gap: 6px; }
+  .color-dot { width: 24px; height: 24px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.12); }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { padding: 3px 9px; background: var(--surface-2); border: 1px solid var(--border-standard); border-radius: 9999px; font-size: 11px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; }
+
+  .sample-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .sample-tile { aspect-ratio: 1; border-radius: 4px; border: 1px solid var(--border-subtle); }
+
+  /* Performance quick-bars */
+  .perf-chart { display: flex; flex-direction: column; gap: 6px; }
+  .perf-row { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: -0.13px; }
+  .perf-key { color: var(--text-tertiary); width: 80px; flex-shrink: 0; font-weight: 510; }
+  .perf-bar-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .perf-fill { height: 100%; border-radius: 999px; background: var(--brand-accent); }
+  .perf-fill.green { background: var(--status-green); }
+  .perf-val { color: var(--text-primary); font-weight: 510; width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <a class="nav-item" href="brand_sandbox.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Briefs</span>
+    </a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Creator Studio</span>
+    </a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Asset Manager</span>
+    </a>
+    <a class="nav-item" href="reviews.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reviews</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">ROAS Dashboard</span>
+    </a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reports</span>
+    </a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Competitive Intel</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Team</span>
+    </a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Presets</span>
+    </a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Admin</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Inspiration</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">Clusters</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="3" cy="3" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="9" cy="4" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="6" cy="9" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 4l3.5 .5M8 5.5L7 8M3.5 4.5l2 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Map view
+      </button>
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 5l3-3 3 3M2 10h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Inspiration · Clusters</div>
+      <h1 class="page-title">Visual territories your brand owns</h1>
+      <p class="page-desc">Your marketing imagery, auto-grouped by visual similarity. Each cluster is a territory that cuts across product lines — campaigns, editorial, product shots, and store photos sharing the same visual DNA. Combined with performance data, they show which territories drive value, which are over-invested, and where white space lives.</p>
+
+      <!-- Stats -->
+      <div class="stat-strip">
+        <div class="stat-card">
+          <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" stroke="currentColor" stroke-width="1.2"/></svg></div>
+          <div class="stat-meta"><div class="stat-value">20 clusters</div><div class="stat-label">Auto-discovered</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4l6-2 6 2v8l-6 2-6-2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+          <div class="stat-meta"><div class="stat-value">89%</div><div class="stat-label">Coverage · 7,647 of 8,576</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color: var(--status-green);"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="stat-meta"><div class="stat-value">Green Camo Shark</div><div class="stat-label">Highest ROAS · 4.1x</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color: var(--status-amber);"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v5M8 11v0.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/></svg></div>
+          <div class="stat-meta"><div class="stat-value">Blue ABC Camo</div><div class="stat-label">Over-invested · 2.1x ROAS</div></div>
+        </div>
+      </div>
+
+      <!-- The unified insight -->
+      <div class="insight">
+        <div class="insight-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/></svg>
+        </div>
+        <div class="insight-body">
+          <div class="insight-label">Unified insight</div>
+          <div class="insight-text">
+            <strong>Green Camo Shark</strong> averages <strong>4.1x ROAS</strong> with only 398 assets — your highest-performing cluster. Meanwhile <strong>Blue ABC Camo</strong> has 456 assets but just 2.1x ROAS. You're over-investing in a mid-performer and under-producing your winner. <strong>Shift 15–20% of Blue ABC production into Green Camo Shark</strong> for next quarter.
+          </div>
+          <div class="insight-provenance">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Joins Mixpeek clusters × Maven ROAS · only visible in unified view</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter / sort -->
+      <div class="filter-row">
+        <span class="filter-label">All territories</span>
+        <span class="filter-count">16 of 20 shown</span>
+        <div class="filter-spacer"></div>
+        <button class="filter-btn">All sources <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-btn">All time <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="sort-group">
+          <button class="sort-btn active">ROAS</button>
+          <button class="sort-btn">Size</button>
+          <button class="sort-btn">Alphabetical</button>
+        </div>
+      </div>
+
+      <!-- Cluster grid -->
+      <div class="cluster-grid" id="clusterGrid"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Cluster detail drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title-wrap">
+      <div class="drawer-eyebrow">Cluster</div>
+      <div class="drawer-title" id="drawerTitle">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+
+  <div class="drawer-body">
+
+    <div class="drawer-stat-row">
+      <div class="drawer-stat">
+        <div class="drawer-stat-label">Members</div>
+        <div class="drawer-stat-value" id="dmMembers">—</div>
+        <div class="drawer-stat-sub" id="dmMembersSub">— of archive</div>
+      </div>
+      <div class="drawer-stat">
+        <div class="drawer-stat-label">Avg ROAS</div>
+        <div class="drawer-stat-value green" id="dmRoas">—</div>
+        <div class="drawer-stat-sub" id="dmRoasSub">—</div>
+      </div>
+      <div class="drawer-stat">
+        <div class="drawer-stat-label">Avg CTR</div>
+        <div class="drawer-stat-value" id="dmCtr">—</div>
+        <div class="drawer-stat-sub" id="dmCtrSub">vs category avg</div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-label">Dominant Palette</div>
+      <div class="color-row" id="drawerColors"></div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-label">Descriptors</div>
+      <div class="tag-list" id="drawerTags"></div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-label">Performance by Platform</div>
+      <div class="perf-chart">
+        <div class="perf-row"><span class="perf-key">Meta</span><div class="perf-bar-wrap"><div class="perf-fill green" style="width:88%"></div></div><span class="perf-val">4.4x</span></div>
+        <div class="perf-row"><span class="perf-key">Google</span><div class="perf-bar-wrap"><div class="perf-fill green" style="width:72%"></div></div><span class="perf-val">3.6x</span></div>
+        <div class="perf-row"><span class="perf-key">TikTok</span><div class="perf-bar-wrap"><div class="perf-fill" style="width:82%"></div></div><span class="perf-val">4.1x</span></div>
+        <div class="perf-row"><span class="perf-key">WeChat</span><div class="perf-bar-wrap"><div class="perf-fill" style="width:54%"></div></div><span class="perf-val">2.7x</span></div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-label">Sample Members · 8 of 398</div>
+      <div class="sample-grid" id="drawerSamples"></div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <button class="drawer-btn primary">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 2h5l2 2v7H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4.5 6.5h4M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Start brief in this territory
+    </button>
+    <button class="drawer-btn secondary" onclick="window.location.href='visual_search.html'">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 8l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Explore members
+    </button>
+  </div>
+</aside>
+
+<script>
+  // Clusters — sorted by ROAS by default (the headline sort)
+  // tiles: pick from 16 gradients to form a 4-tile mosaic per card
+  const clusters = [
+    { name: 'Green Camo Shark & Sweatwear', count: 398, pct: '4.6%', roas: 4.1, ctr: 2.8, tiles: [1, 9, 4, 1], imgs: ['images/1.jpg','images/c1.jpg','images/c2.jpg','images/2.jpg'], colors: ['#2d6b2a','#1a3a1a','#8b1a1a','#0a0a0a','#2d4a2a','#62666d'], tags: ['Green camo','Shark graphic','Heritage','Streetwear','Bold'], badge: 'top' },
+    { name: 'Gold Luxury & Neon Brights', count: 379, pct: '4.4%', roas: 3.8, ctr: 3.1, tiles: [7, 8, 7, 14], imgs: ['images/7.jpg','images/c3.jpg','images/c4.jpg','images/10.jpg'], colors: ['#e8c464','#b8a568','#3a3020','#1a1a1a','#f0ede8','#d4a86a'], tags: ['Gold foil','Premium','Editorial','Maximalist','Foil type'] },
+    { name: 'Pink/Red Camo & Sakura Prints', count: 333, pct: '3.9%', roas: 3.6, ctr: 2.5, tiles: [5, 14, 5, 2], imgs: ['images/5.jpg','images/c5.jpg','images/9.jpg','images/c6.jpg'], colors: ['#e5b4b0','#8b1a1a','#3a1a1a','#e5b4b0','#f0ede8','#d4a86a'], tags: ['Sakura','Japan seasonal','Pink','Floral','Soft'] },
+    { name: 'ABC Camo Shark Hoodies & Campaign', count: 270, pct: '3.1%', roas: 3.4, ctr: 2.3, tiles: [1, 9, 1, 12], imgs: ['images/c7.jpg','images/4.jpg','images/c8.jpg','images/1.jpg'], colors: ['#2d6b2a','#1a3a1a','#1a1a1a','#f0ede8','#8b1a1a','#62666d'], tags: ['ABC camo','Shark','Campaign','Hoodie','Core'] },
+    { name: 'Lifestyle & Street Photography', count: 337, pct: '3.9%', roas: 3.2, ctr: 2.9, tiles: [4, 6, 15, 4], imgs: ['images/c9.jpg','images/c10.jpg','images/3.jpg','images/6.jpg'], colors: ['#3a2a1a','#1a0c04','#181818','#484848','#a08878','#62666d'], tags: ['Editorial','Candid','Street','Lifestyle','Warm'] },
+    { name: 'Blue ABC Camo', count: 456, pct: '5.3%', roas: 2.1, ctr: 1.8, tiles: [3, 13, 3, 13], imgs: ['images/2.jpg','images/c1.jpg','images/8.jpg','images/c3.jpg'], colors: ['#1a2a4a','#080a1a','#2d3a5a','#0a0f1a','#a0b0c0','#f0ede8'], tags: ['Blue camo','ABC pattern','Volume'], badge: 'over' },
+    { name: 'Small Logo & Milo Details', count: 422, pct: '4.9%', roas: 3.0, ctr: 2.4, tiles: [4, 6, 7, 4], imgs: ['images/4.jpg','images/c5.jpg','images/c7.jpg','images/13.jpg'], colors: ['#3a2a1a','#1a0c04','#62666d','#f0ede8','#c8b090','#1a1a1a'], tags: ['Milo','Heritage','Archive','Logo detail','Small scale'] },
+    { name: 'Dark Apparel & Classic Logos', count: 459, pct: '5.4%', roas: 2.8, ctr: 2.2, tiles: [6, 12, 6, 15], imgs: ['images/6.jpg','images/c2.jpg','images/c4.jpg','images/11.jpg'], colors: ['#0a0a0a','#1a1a1a','#2a2a2a','#484848','#f0ede8','#62666d'], tags: ['Dark','Classic','Logos','Monochrome','Basics'] },
+    { name: 'Digital Camo & Patterned Textiles', count: 360, pct: '4.2%', roas: 2.7, ctr: 2.1, tiles: [9, 1, 9, 3], imgs: ['images/c8.jpg','images/c9.jpg','images/14.jpg','images/c6.jpg'], colors: ['#2d4a4a','#0a1a1a','#2d4a2a','#0c1a0a','#62666d','#a0b0b0'], tags: ['Digital camo','Pattern-heavy','Textile','Tech','Hybrid'] },
+    { name: 'Monochrome & Sneaker Close-ups', count: 407, pct: '4.7%', roas: 2.6, ctr: 2.0, tiles: [15, 6, 10, 15], imgs: ['images/3.jpg','images/c10.jpg','images/15.jpg','images/c1.jpg'], colors: ['#484848','#181818','#0a0a0a','#a0a0a0','#f0ede8','#62666d'], tags: ['Monochrome','Sneaker','Product detail','Studio'] },
+    { name: 'Sneaker Details & Close-ups', count: 358, pct: '4.2%', roas: 2.6, ctr: 2.3, tiles: [10, 2, 4, 10], imgs: ['images/12.jpg','images/c3.jpg','images/c5.jpg','images/16.jpg'], colors: ['#5a3a1a','#1a0a0a','#8b1a1a','#62666d','#c8b090','#f0ede8'], tags: ['Product close-up','Sneaker','Detail','Macro'] },
+    { name: 'Dark Textured Fabrics & Monograms', count: 421, pct: '4.9%', roas: 2.5, ctr: 1.9, tiles: [12, 6, 12, 15], imgs: ['images/c4.jpg','images/c7.jpg','images/17.jpg','images/c2.jpg'], colors: ['#0a0a0a','#2a2a2a','#1a1a1a','#484848','#62666d','#a0a0a0'], tags: ['Texture','Monogram','Dark','Premium','Fabric'] },
+    { name: 'Colorful Sneakers & Collectibles', count: 325, pct: '3.8%', roas: 2.4, ctr: 2.6, tiles: [7, 14, 2, 8], imgs: ['images/18.jpg','images/c6.jpg','images/c8.jpg','images/19.jpg'], colors: ['#e8c464','#8a1a6a','#8b1a1a','#4a2d5a','#b8a568','#f0ede8'], tags: ['Colorful','Collectible','Drop','Multi-color'] },
+    { name: '1st Camo Green & Graphic Bags', count: 366, pct: '4.3%', roas: 2.3, ctr: 1.9, tiles: [1, 9, 1, 4], imgs: ['images/c9.jpg','images/20.jpg','images/c10.jpg','images/c1.jpg'], colors: ['#2d6b2a','#1a3a1a','#3a2a1a','#62666d','#f0ede8','#0a0a0a'], tags: ['1st camo','Green','Bag','Archive','Heritage'] },
+    { name: 'White College Logo Tees & Basics', count: 511, pct: '6.0%', roas: 2.3, ctr: 1.7, tiles: [11, 11, 6, 11], imgs: ['images/11.jpg','images/c2.jpg','images/c3.jpg','images/7.jpg'], colors: ['#f0ede8','#e5e3de','#1a1a1a','#8b1a1a','#2d6b2a','#62666d'], tags: ['Tee','Basics','White','Logo','Volume'], badge: 'over' },
+    { name: 'Minimal Basics & Accessories', count: 433, pct: '5.0%', roas: 2.2, ctr: 1.8, tiles: [11, 6, 11, 15], imgs: ['images/c4.jpg','images/c5.jpg','images/8.jpg','images/c6.jpg'], colors: ['#f0ede8','#e5e3de','#62666d','#1a1a1a','#a0a0a0','#484848'], tags: ['Minimal','Basics','Accessories','Neutral','Calm'] },
+  ];
+
+  const grid = document.getElementById('clusterGrid');
+
+  function clusterDotColor(c) {
+    if (c.badge === 'top') return 'var(--status-green)';
+    if (c.badge === 'over') return 'var(--status-amber)';
+    return 'var(--brand-accent)';
+  }
+
+  function renderGrid() {
+    grid.innerHTML = clusters.map((c, i) => {
+      const highlight = c.badge === 'top' ? 'highlight' : (c.badge === 'over' ? 'warn' : '');
+      const pill = c.badge === 'top' ? '<span class="cluster-percentile top">Top ROAS</span>' : (c.badge === 'over' ? '<span class="cluster-percentile over">Over-invested</span>' : '');
+      return `
+        <div class="cluster-card ${highlight}" onclick="openDrawer(${i})">
+          <div class="mosaic">${c.imgs.map(img => `<img class="mosaic-img" src="${img}">`).join('')}</div>
+          <div class="cluster-body">
+            <div class="cluster-header">
+              <div class="cluster-dot" style="background: ${clusterDotColor(c)}"></div>
+              <div class="cluster-name">${c.name}</div>
+              ${pill}
+            </div>
+            <div class="cluster-metrics">
+              <div class="metric">
+                <div class="metric-label">Members</div>
+                <div class="metric-value">${c.count.toLocaleString()}</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">ROAS</div>
+                <div class="metric-value ${c.roas >= 3.5 ? 'green' : (c.roas <= 2.2 ? 'amber' : '')}">${c.roas.toFixed(1)}x</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">CTR</div>
+                <div class="metric-value muted">${c.ctr.toFixed(1)}%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  renderGrid();
+
+  function openDrawer(i) {
+    const c = clusters[i];
+    document.getElementById('drawerTitle').textContent = c.name;
+    document.getElementById('dmMembers').textContent = c.count.toLocaleString();
+    document.getElementById('dmMembersSub').textContent = c.pct + ' of archive';
+    document.getElementById('dmRoas').textContent = c.roas.toFixed(1) + 'x';
+    document.getElementById('dmRoas').className = 'drawer-stat-value ' + (c.roas >= 3.5 ? 'green' : '');
+    document.getElementById('dmRoasSub').textContent = c.roas >= 3.5 ? 'Above brand avg 2.9x' : (c.roas <= 2.2 ? 'Below brand avg 2.9x' : 'Near brand avg');
+    document.getElementById('dmCtr').textContent = c.ctr.toFixed(1) + '%';
+    document.getElementById('dmCtrSub').textContent = c.ctr >= 2.5 ? 'Above category avg' : 'Below category avg';
+    document.getElementById('drawerColors').innerHTML = c.colors.map(col => `<div class="color-dot" style="background: ${col}"></div>`).join('');
+    document.getElementById('drawerTags').innerHTML = c.tags.map(t => `<span class="tag">${t}</span>`).join('');
+    document.getElementById('drawerSamples').innerHTML = c.tiles.concat(c.tiles).slice(0,8).map(t => `<div class="sample-tile tile-gradient-${t}"></div>`).join('');
+
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerBackdrop').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerBackdrop').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+  function toggleSection(s) {
+    const sub = document.getElementById('sub-' + s);
+    const chev = document.getElementById('chev-' + s);
+    if (sub) sub.classList.toggle('open');
+    if (chev) chev.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>

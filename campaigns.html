@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Campaigns</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a; --bg-panel: #0f1011; --bg-surface: #191a1b; --bg-elevated: #28282c;
+    --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+    --brand: #5e6ad2; --brand-accent: #7170ff; --brand-hover: #828fff;
+    --border-subtle: rgba(255,255,255,0.05); --border-standard: rgba(255,255,255,0.08); --border-solid: #23252a;
+    --surface-1: rgba(255,255,255,0.02); --surface-2: rgba(255,255,255,0.04); --surface-3: rgba(255,255,255,0.05);
+    --status-green: #10b981; --status-amber: #f59e0b; --status-red: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { background: var(--bg-canvas); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
+  button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* SIDEBAR */
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-family: inherit; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 720px; margin-bottom: 20px; }
+
+  /* Role toggle */
+  .role-toggle {
+    display: inline-flex;
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 8px;
+    padding: 3px;
+    margin-bottom: 20px;
+  }
+  .role-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-tertiary);
+    font-size: 12px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.12s;
+  }
+  .role-btn:hover { color: var(--text-primary); }
+  .role-btn.active {
+    background: var(--surface-3);
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .role-btn-badge {
+    font-size: 10px; font-weight: 510;
+    padding: 1px 5px;
+    background: rgba(245,158,11,0.14);
+    color: var(--status-amber);
+    border-radius: 9999px;
+    margin-left: 2px;
+  }
+
+  /* Stat strip */
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .stat-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .stat-icon.green { color: var(--status-green); }
+  .stat-icon.amber { color: var(--status-amber); }
+  .stat-meta { display: flex; flex-direction: column; gap: 0; }
+  .stat-value { font-size: 14px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .stat-label { font-size: 11px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* Filter row */
+  .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 8px 0; flex-wrap: wrap; }
+  .filter-dropdown { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: all 0.12s; font-family: inherit; }
+  .filter-dropdown:hover { background: var(--surface-3); color: var(--text-primary); }
+  .filter-dropdown-label { font-size: 10px; color: var(--text-quaternary); font-weight: 510; text-transform: uppercase; letter-spacing: 0.4px; margin-right: 2px; }
+  .filter-chev { color: var(--text-tertiary); width: 10px; height: 10px; }
+  .filter-spacer { flex: 1; }
+  .filter-count { font-size: 12px; color: var(--text-tertiary); font-weight: 510; letter-spacing: -0.13px; }
+
+  /* Table header */
+  .table-header {
+    display: grid;
+    grid-template-columns: 1fr 100px 110px 100px 70px 90px;
+    gap: 14px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 10px; font-weight: 510;
+    color: var(--text-quaternary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .th-right { text-align: right; }
+
+  /* Campaign row */
+  .campaign-list { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+  .campaign-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 110px 100px 70px 90px;
+    gap: 14px;
+    padding: 14px 16px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: 1px solid var(--border-subtle);
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    align-items: center;
+  }
+  .campaign-row:hover {
+    background: var(--surface-1);
+    border-color: var(--border-standard);
+    border-radius: 8px;
+    border-bottom-color: var(--border-standard);
+  }
+  .campaign-row.flag {
+    background: rgba(245,158,11,0.04);
+    border-color: rgba(245,158,11,0.18);
+    border-radius: 8px;
+  }
+
+  .campaign-main { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+  .campaign-status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .campaign-status-dot.live { background: var(--status-green); box-shadow: 0 0 6px rgba(16,185,129,0.5); }
+  .campaign-status-dot.review { background: var(--status-amber); }
+  .campaign-status-dot.briefed { background: var(--brand-accent); }
+  .campaign-status-dot.draft { background: var(--text-tertiary); }
+  .campaign-status-dot.paused { background: var(--text-quaternary); opacity: 0.5; }
+  .campaign-status-dot.concluded { background: var(--text-quaternary); }
+
+  .campaign-info { flex: 1; min-width: 0; }
+  .campaign-name {
+    font-size: 14px; font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.182px;
+    line-height: 1.3;
+    margin-bottom: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .campaign-source {
+    font-size: 11px; font-weight: 400;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+    line-height: 1.3;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .campaign-source-icon { opacity: 0.6; flex-shrink: 0; }
+  .campaign-source-link { color: var(--brand-accent); }
+  .campaign-source-link:hover { text-decoration: underline; }
+  .campaign-source-score {
+    padding: 0 6px;
+    font-size: 10px; font-weight: 510;
+    background: rgba(113,112,255,0.12);
+    color: var(--brand-accent);
+    border: 1px solid rgba(113,112,255,0.28);
+    border-radius: 9999px;
+    margin-left: 2px;
+  }
+
+  .campaign-flag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 1px 7px;
+    background: rgba(245,158,11,0.14);
+    color: var(--status-amber);
+    border: 1px solid rgba(245,158,11,0.35);
+    border-radius: 9999px;
+    font-size: 10px; font-weight: 510;
+    letter-spacing: -0.13px;
+    margin-top: 4px;
+  }
+
+  .status-pill {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 10px; font-weight: 510;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .status-pill.live { background: rgba(16,185,129,0.1); color: var(--status-green); border: 1px solid rgba(16,185,129,0.3); }
+  .status-pill.review { background: rgba(245,158,11,0.1); color: var(--status-amber); border: 1px solid rgba(245,158,11,0.3); }
+  .status-pill.briefed { background: rgba(113,112,255,0.1); color: var(--brand-accent); border: 1px solid rgba(113,112,255,0.3); }
+  .status-pill.draft { background: var(--surface-3); color: var(--text-tertiary); border: 1px solid var(--border-standard); }
+  .status-pill.paused { background: rgba(239,68,68,0.08); color: var(--status-red); border: 1px solid rgba(239,68,68,0.25); }
+  .status-pill.concluded { background: transparent; color: var(--text-quaternary); border: 1px solid var(--border-solid); }
+
+  /* Progress cell */
+  .progress-cell { display: flex; flex-direction: column; gap: 3px; }
+  .progress-label { font-size: 12px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; font-variant-numeric: tabular-nums; }
+  .progress-bar {
+    height: 3px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--brand-accent);
+    border-radius: 999px;
+  }
+  .progress-fill.full { background: var(--status-green); }
+
+  .cell-value {
+    font-size: 13px; font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .cell-value.muted { color: var(--text-quaternary); font-weight: 400; }
+  .cell-value.green { color: var(--status-green); }
+  .cell-value.amber { color: var(--status-amber); }
+  .cell-sub {
+    font-size: 10px;
+    color: var(--text-quaternary);
+    text-align: right;
+    margin-top: 1px;
+  }
+
+  .cell-launch { font-size: 12px; color: var(--text-secondary); font-weight: 510; text-align: right; letter-spacing: -0.13px; }
+  .cell-launch-sub { font-size: 10px; color: var(--text-quaternary); text-align: right; margin-top: 1px; }
+
+  /* Empty state */
+  .empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    background: var(--surface-1);
+    border: 1px dashed var(--border-standard);
+    border-radius: 10px;
+    color: var(--text-tertiary);
+    font-size: 13px;
+  }
+
+  /* DRAWER */
+  .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 90; }
+  .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 640px; max-width: 100vw; background: var(--bg-surface); border-left: 1px solid var(--border-standard); box-shadow: -8px 0 32px rgba(0,0,0,0.5); z-index: 100; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+  .drawer-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+  .drawer-title-wrap { flex: 1; min-width: 0; }
+  .drawer-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drawer-close { width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--text-tertiary); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; }
+  .drawer-close:hover { background: var(--surface-2); color: var(--text-primary); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+  .d-hero { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+  .d-hero-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .d-hero-title { font-size: 20px; font-weight: 400; letter-spacing: -0.24px; color: var(--text-primary); margin-bottom: 8px; line-height: 1.3; }
+  .d-hero-desc { font-size: 13px; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.5; margin-bottom: 12px; }
+  .d-hero-stats { display: flex; gap: 20px; padding-top: 12px; border-top: 1px solid var(--border-subtle); flex-wrap: wrap; }
+  .d-stat { display: flex; flex-direction: column; }
+  .d-stat-value { font-size: 14px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .d-stat-value.green { color: var(--status-green); }
+  .d-stat-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.4px; text-transform: uppercase; margin-top: 2px; }
+
+  .panel { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+  .panel-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .panel-label-count { background: var(--surface-3); color: var(--text-tertiary); padding: 1px 6px; border-radius: 9999px; font-size: 10px; font-weight: 510; text-transform: none; letter-spacing: -0.13px; }
+  .panel-link { font-size: 11px; font-weight: 510; color: var(--text-tertiary); letter-spacing: -0.13px; margin-left: auto; text-decoration: none; text-transform: none; }
+  .panel-link:hover { color: var(--brand-accent); }
+
+  .brief-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .brief-row:last-child { border-bottom: none; }
+  .brief-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .brief-dot.done { background: var(--status-green); }
+  .brief-dot.review { background: var(--status-amber); }
+  .brief-dot.progress { background: var(--brand-accent); }
+  .brief-name { flex: 1; color: var(--text-primary); font-weight: 510; letter-spacing: -0.13px; }
+  .brief-status { font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; }
+
+  .asset-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .asset-tile { aspect-ratio: 1; border-radius: 5px; border: 1px solid var(--border-subtle); position: relative; overflow: hidden; cursor: pointer; }
+  .tile-gradient-1 { background: url('images/1.jpg') center/cover; }
+  .tile-gradient-2 { background: url('images/2.jpg') center/cover; }
+  .tile-gradient-4 { background: url('images/4.jpg') center/cover; }
+  .tile-gradient-5 { background: url('images/5.jpg') center/cover; }
+  .tile-gradient-6 { background: url('images/6.jpg') center/cover; }
+  .tile-gradient-7 { background: url('images/7.jpg') center/cover; }
+  .tile-gradient-8 { background: url('images/8.jpg') center/cover; }
+
+  .perf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .perf-stat {
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+  }
+  .perf-stat-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px; line-height: 1.3; }
+  .perf-stat-value { font-size: 15px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; font-variant-numeric: tabular-nums; }
+  .perf-stat-value.green { color: var(--status-green); }
+  .perf-stat-delta { font-size: 10px; color: var(--status-green); margin-top: 1px; }
+
+  .drawer-footer { border-top: 1px solid var(--border-subtle); padding: 12px 16px; display: flex; gap: 6px; flex-shrink: 0; background: var(--bg-surface); }
+  .d-btn { flex: 1; padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.12s; font-family: inherit; }
+  .d-btn.primary { background: var(--brand); border: 1px solid var(--brand); color: white; }
+  .d-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .d-btn.secondary { background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-primary); }
+  .d-btn.secondary:hover { background: var(--surface-3); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <a class="nav-item" href="brand_sandbox.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <a class="nav-item" href="clusters.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Briefs</span></div>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Creator Studio</span></a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Asset Manager</span></a>
+    <a class="nav-item" href="reviews.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">ROAS Dashboard</span></a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reports</span></a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg><span class="nav-label">Competitive Intel</span></a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Team</span></a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Presets</span></a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Admin</span></a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role" id="userRole">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-current">Campaigns</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 5l3-3 3 3M2 10h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export
+      </button>
+      <button class="btn btn-primary">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        New campaign
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Campaigns</div>
+      <h1 class="page-title">Campaign portfolio for BAPE</h1>
+      <p class="page-desc">Every campaign, every brief, every asset — connected. Each campaign traces back to the insight that inspired it and forward to its ROAS. Switch roles to see how Regional Leads and Creatives experience this same data.</p>
+
+      <!-- Role toggle -->
+      <div class="role-toggle" id="roleToggle">
+        <button class="role-btn active" data-role="cmo" onclick="setRole('cmo')">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4.5" r="2.3" stroke="currentColor" stroke-width="1.3"/><path d="M2 11c0-2 1.8-3.4 4-3.4s4 1.4 4 3.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          CMO
+        </button>
+        <button class="role-btn" data-role="regional" onclick="setRole('regional')">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 6h9M6 1.5c2 1.5 2 7.5 0 9M6 1.5c-2 1.5-2 7.5 0 9" stroke="currentColor" stroke-width="1.2"/></svg>
+          Regional Lead
+          <span class="role-btn-badge" id="regionalBadge">2</span>
+        </button>
+        <button class="role-btn" data-role="creative" onclick="setRole('creative')">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 10L9 3l1 1-7 7H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 2l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Creative
+        </button>
+      </div>
+
+      <!-- Stat strip -->
+      <div class="stat-strip" id="statStrip"></div>
+
+      <!-- Filter row -->
+      <div class="filter-bar">
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Status</span><span id="filterStatus">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Region</span><span id="filterRegion">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Owner</span><span id="filterOwner">Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="filter-spacer"></div>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span id="filterSort">Status</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span class="filter-count" id="campaignCount">12 campaigns</span>
+      </div>
+
+      <!-- Table -->
+      <div class="table-header">
+        <div>Campaign</div>
+        <div>Status</div>
+        <div>Region</div>
+        <div>Briefs</div>
+        <div class="th-right">ROAS</div>
+        <div class="th-right">Launch</div>
+      </div>
+      <div class="campaign-list" id="campaignList"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title-wrap">
+      <div class="drawer-eyebrow">Campaign</div>
+      <div class="drawer-title" id="drawerTitle">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer" id="drawerFooter"></div>
+</aside>
+
+<script>
+  const campaigns = [
+    { id: 'heritage', name: 'Heritage Storytelling · 30yr', status: 'live', region: 'Global', owner: 'Kathy S.',
+      source: { type: 'opportunity', label: 'Opportunities · Heritage Storytelling', score: 94, href: 'trend_matching.html' },
+      briefs: { done: 8, total: 8 }, assets: 24, roas: 3.8, spend: '$420K', launch: 'Feb 12', launchSub: 'live 64 days',
+      desc: '30-year retrospective campaign leaning into BAPE\'s archival heritage. Reissues of 2003 camo, Baby Milo archive pieces, Shibuya opening story.',
+      assignedCreatives: ['kathy'], pendingFor: [] },
+    { id: 'greencamo', name: 'Green Camo Shark · Anniversary Drop', status: 'live', region: 'Global', owner: 'Kathy S.',
+      source: { type: 'cluster', label: 'Thematic Intelligence · Green Camo Shark', score: null, subtext: 'Top ROAS cluster', href: 'clusters.html' },
+      briefs: { done: 5, total: 5 }, assets: 12, roas: 4.3, spend: '$285K', launch: 'Mar 1', launchSub: 'live 47 days',
+      desc: 'Reinvestment into BAPE\'s highest-performing visual territory. 12 SKUs centered on green camo shark-hood pieces.',
+      assignedCreatives: ['kathy'], pendingFor: [] },
+    { id: 'sport', name: 'Sport Luxe · adidas Drop 3', status: 'live', region: 'Global', owner: 'Kathy S.',
+      source: { type: 'opportunity', label: 'Opportunities · Sport Luxe', score: 76, href: 'trend_matching.html' },
+      briefs: { done: 5, total: 5 }, assets: 18, roas: 3.2, spend: '$512K', launch: 'Mar 20', launchSub: 'live 28 days',
+      desc: 'Third drop in the BAPE × adidas collab. Track suits, shark-hood windbreakers, ABC camo accent running shoes.',
+      assignedCreatives: ['kathy'], pendingFor: [] },
+    { id: 'sharkhoodie', name: 'Shark Hoodie FW26 Lookbook', status: 'live', region: 'APAC', owner: 'Regional Lead (JP)',
+      source: { type: 'manual', label: 'Seasonal · Planned in Q3 2025' },
+      briefs: { done: 3, total: 3 }, assets: 9, roas: 3.6, spend: '$180K', launch: 'Mar 5', launchSub: 'live 43 days',
+      desc: 'FW26 shark hoodie lookbook shot in Tokyo + Hong Kong. Multi-market APAC push.',
+      assignedCreatives: [], pendingFor: [] },
+    { id: 'tokyo', name: 'Tokyo After Dark', status: 'review', region: 'Japan', owner: 'Regional Lead (JP)',
+      source: { type: 'sandbox', label: 'Brand Sandbox · Tokyo After Dark', score: 85, href: 'brand_sandbox.html' },
+      briefs: { done: 4, total: 4 }, assets: 8, roas: null, spend: null, launch: 'Apr 30', launchSub: 'in 14 days',
+      desc: 'Tokyo night-streetwear capsule. Neon ABC camo, cyber typography, 3am Shibuya shoots. Rave-event partnership.',
+      assignedCreatives: ['kathy'], pendingFor: ['cmo'] },
+    { id: 'neomax', name: 'Neo-Max Store Concept · Shibuya Test', status: 'review', region: 'Japan', owner: 'Kathy S.',
+      source: { type: 'sandbox', label: 'Brand Sandbox · Neo-Max Store', score: 91, href: 'brand_sandbox.html' },
+      briefs: { done: 6, total: 6 }, assets: 14, roas: null, spend: null, launch: 'Jun 1', launchSub: 'in 46 days',
+      desc: '8-week Neo-Maximalist test store in Shibuya. Print-on-print retail moment. Anti-quiet-luxury signal.',
+      assignedCreatives: ['kathy'], pendingFor: ['cmo'] },
+    { id: 'hana', name: 'SS26 · Hana Matsuri', status: 'briefed', region: 'Japan', owner: 'Kathy S.',
+      source: { type: 'sandbox', label: 'Brand Sandbox · Hana Matsuri', score: 64, href: 'brand_sandbox.html' },
+      briefs: { done: 3, total: 5 }, assets: 0, roas: null, spend: null, launch: 'May 15', launchSub: 'in 29 days',
+      desc: 'Cherry blossom streetwear moment for Shibuya flagship reopening. Sakura-dyed ABC camo (per sandbox recommendation).',
+      assignedCreatives: ['kathy'], pendingFor: [] },
+    { id: 'abccamo', name: 'ABC Camo Drop SS26', status: 'briefed', region: 'Global', owner: 'Kathy S.',
+      source: { type: 'manual', label: 'Seasonal · Core capsule' },
+      briefs: { done: 4, total: 6 }, assets: 0, roas: null, spend: null, launch: 'May 1', launchSub: 'in 15 days',
+      desc: 'SS26 ABC Camo capsule. New colorways: Tokyo Night, Blush Pink, Monochrome.',
+      assignedCreatives: ['kathy'], pendingFor: [] },
+    { id: 'y2k', name: 'Y2K Revival Capsule', status: 'draft', region: 'Global', owner: 'Kathy S.',
+      source: { type: 'opportunity', label: 'Opportunities · Y2K Revival', score: 91, href: 'trend_matching.html' },
+      briefs: { done: 0, total: 4 }, assets: 0, roas: null, spend: null, launch: 'Q3', launchSub: 'not yet scheduled',
+      desc: 'Chrome Milo reissue. 2003 archive capsule. "Baby Milo Was Always Y2K" positioning.',
+      assignedCreatives: ['kathy'], pendingFor: [] },
+    { id: 'anime', name: 'Anime Collab · Jujutsu Kaisen', status: 'draft', region: 'Global', owner: 'Kathy S.',
+      source: { type: 'opportunity', label: 'Opportunities · Anime Crossover', score: 88, href: 'trend_matching.html' },
+      briefs: { done: 0, total: 6 }, assets: 0, roas: null, spend: null, launch: 'TBD', launchSub: 'licensing in progress',
+      desc: 'JJK × Baby Milo crossover. Pitch stage — licensing conversation open. Window 4-6 months before Uniqlo UT closes.',
+      assignedCreatives: ['kathy'], pendingFor: [] },
+    { id: 'quiet', name: 'Quiet Luxury Stealth Collection', status: 'paused', region: 'Global', owner: 'Kathy S.',
+      source: { type: 'opportunity', label: 'Opportunities · Quiet Luxury', score: 42, href: 'trend_matching.html' },
+      briefs: { done: 0, total: 3 }, assets: 0, roas: null, spend: null, launch: 'paused', launchSub: 'mixed brand fit',
+      desc: 'Initially scoped as stealth-wealth capsule. Paused after Brand Sandbox scored the direction 42 — recommended going louder, not quieter.',
+      assignedCreatives: [], pendingFor: [] },
+    { id: 'babymilo', name: 'Baby Milo Holiday 2025', status: 'concluded', region: 'Global', owner: 'Kathy S.',
+      source: { type: 'manual', label: 'Seasonal · Dec 2024 – Feb 2025' },
+      briefs: { done: 8, total: 8 }, assets: 22, roas: 2.8, spend: '$340K', launch: 'Dec 2024', launchSub: 'concluded Feb 11',
+      desc: 'Holiday 2025 Baby Milo capsule. Standard holiday drop. Concluded Feb 11, 2025.',
+      assignedCreatives: [], pendingFor: [] },
+  ];
+
+  // Role config
+  const ROLES = {
+    cmo: {
+      label: 'CMO',
+      filter: () => campaigns,
+      stats: (list) => ({
+        a: { v: list.filter(c => c.status === 'live').length, l: 'Live', icon: 'live' },
+        b: { v: list.filter(c => c.status === 'review').length, l: 'In review', icon: 'review' },
+        c: { v: list.filter(c => c.status === 'briefed' || c.status === 'draft').length, l: 'In production', icon: 'work' },
+        d: { v: '3.6x', l: 'Portfolio ROAS', icon: 'roas' }
+      }),
+      desc: 'CMO · Portfolio view · all campaigns, all regions'
+    },
+    regional: {
+      label: 'Regional Lead',
+      filter: () => campaigns.filter(c => c.region === 'Japan' || c.region === 'APAC'),
+      stats: (list) => ({
+        a: { v: list.filter(c => c.status === 'live').length, l: 'Live in region', icon: 'live' },
+        b: { v: list.filter(c => c.pendingFor.includes('cmo') || c.pendingFor.includes('regional')).length, l: 'In your queue', icon: 'queue', highlight: true },
+        c: { v: list.filter(c => c.status === 'briefed' || c.status === 'draft').length, l: 'In production', icon: 'work' },
+        d: { v: '3.7x', l: 'Region ROAS', icon: 'roas' }
+      }),
+      desc: 'Regional Lead · Japan/APAC · approval queue prioritized'
+    },
+    creative: {
+      label: 'Creative',
+      filter: () => campaigns.filter(c => c.assignedCreatives.includes('kathy')),
+      stats: (list) => ({
+        a: { v: list.filter(c => c.briefs.done < c.briefs.total && c.status !== 'concluded' && c.status !== 'paused').length, l: 'Active assigned', icon: 'assigned' },
+        b: { v: list.reduce((s,c) => s + (c.briefs.total - c.briefs.done), 0), l: 'Briefs to deliver', icon: 'briefs', highlight: true },
+        c: { v: list.filter(c => c.status === 'review').length, l: 'Awaiting review', icon: 'review' },
+        d: { v: list.filter(c => c.status === 'live').length, l: 'Shipped live', icon: 'shipped' }
+      }),
+      desc: 'Creative · assigned campaigns only · brief queue prioritized'
+    }
+  };
+
+  let currentRole = 'cmo';
+
+  function setRole(role) {
+    currentRole = role;
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
+    document.getElementById('userRole').textContent = ROLES[role].label;
+    render();
+  }
+
+  function statIconSvg(kind) {
+    const icons = {
+      live: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" opacity="0.4"/></svg>',
+      review: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+      work: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="5" width="12" height="9" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M6 5V3h4v2" stroke="currentColor" stroke-width="1.2"/></svg>',
+      roas: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      queue: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="3" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="8" width="12" height="3" rx="1" stroke="currentColor" stroke-width="1.2" opacity="0.5"/></svg>',
+      assigned: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 13c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
+      briefs: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
+      shipped: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    };
+    return icons[kind] || '';
+  }
+
+  function sourceIcon(type) {
+    const icons = {
+      opportunity: '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="campaign-source-icon"><path d="M2 9l3-3 2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 4h2v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+      sandbox: '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="campaign-source-icon"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+      cluster: '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="campaign-source-icon"><rect x="1.5" y="1.5" width="4" height="4" stroke="currentColor" stroke-width="1.3"/><rect x="6.5" y="1.5" width="4" height="4" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="6.5" width="4" height="4" stroke="currentColor" stroke-width="1.3"/><rect x="6.5" y="6.5" width="4" height="4" stroke="currentColor" stroke-width="1.3"/></svg>',
+      manual: '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="campaign-source-icon"><rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>'
+    };
+    return icons[type] || icons.manual;
+  }
+
+  function renderStats(stats) {
+    const order = ['a','b','c','d'];
+    return order.map(k => {
+      const s = stats[k];
+      const iconCls = s.highlight ? 'amber' : (k === 'd' ? 'green' : '');
+      return `
+        <div class="stat-card">
+          <div class="stat-icon ${iconCls}">${statIconSvg(s.icon)}</div>
+          <div class="stat-meta">
+            <div class="stat-value">${s.v}</div>
+            <div class="stat-label">${s.l}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderCampaignRow(c) {
+    const sourceHtml = `${sourceIcon(c.source.type)}<span>${c.source.label}</span>`;
+
+    const briefsPct = Math.round((c.briefs.done / c.briefs.total) * 100) || 0;
+    const briefsFull = briefsPct === 100 ? 'full' : '';
+
+    const roasHtml = c.roas
+      ? `<div class="cell-value green">${c.roas}x</div><div class="cell-sub">${c.spend}</div>`
+      : `<div class="cell-value muted">—</div>`;
+
+    const statusLabels = {
+      live: 'Live', review: 'In Review', briefed: 'Briefed',
+      draft: 'Draft', paused: 'Paused', concluded: 'Concluded'
+    };
+
+    return `
+      <div class="campaign-row" onclick="openDrawer('${c.id}')">
+        <div class="campaign-main">
+          <div class="campaign-status-dot ${c.status}"></div>
+          <div class="campaign-info">
+            <div class="campaign-name">${c.name}</div>
+            <div class="campaign-source">${sourceHtml}</div>
+          </div>
+        </div>
+        <div><span class="status-pill ${c.status}">${statusLabels[c.status]}</span></div>
+        <div style="font-size: 12px; color: var(--text-secondary); letter-spacing: -0.13px;">${c.region}</div>
+        <div class="progress-cell">
+          <div class="progress-label">${c.briefs.done}/${c.briefs.total}</div>
+          <div class="progress-bar"><div class="progress-fill ${briefsFull}" style="width: ${briefsPct}%"></div></div>
+        </div>
+        <div>${roasHtml}</div>
+        <div>
+          <div class="cell-launch">${c.launch}</div>
+          <div class="cell-launch-sub">${c.launchSub}</div>
+        </div>
+      </div>`;
+  }
+
+  function render() {
+    const role = ROLES[currentRole];
+    const list = role.filter();
+
+    // Stats
+    const stats = role.stats(list);
+    document.getElementById('statStrip').innerHTML = renderStats(stats);
+
+    // Campaign list
+    document.getElementById('campaignList').innerHTML = list.length
+      ? list.map(renderCampaignRow).join('')
+      : '<div class="empty-state">No campaigns match this view.</div>';
+
+    // Count
+    document.getElementById('campaignCount').textContent = `${list.length} campaign${list.length !== 1 ? 's' : ''}`;
+
+    // Regional badge (count of items pending your approval)
+    const regionalPending = campaigns.filter(c =>
+      (c.region === 'Japan' || c.region === 'APAC') && c.pendingFor.length > 0
+    ).length;
+    const badge = document.getElementById('regionalBadge');
+    if (regionalPending > 0) {
+      badge.textContent = regionalPending;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  render();
+
+  /* ═══ Drawer ═══ */
+  function openDrawer(id) {
+    const c = campaigns.find(x => x.id === id);
+    if (!c) return;
+
+    document.getElementById('drawerTitle').textContent = c.name;
+
+    // Build briefs (mock sample)
+    const briefSamples = {
+      heritage: [
+        { n: '30yr Retrospective · Hero Film', s: 'Shipped', d: 'done' },
+        { n: 'Archive Reissue · 2003 Camo', s: 'Shipped', d: 'done' },
+        { n: 'Baby Milo Anniversary Series', s: 'Shipped', d: 'done' },
+        { n: 'Shibuya Opening Story · Social', s: 'Shipped', d: 'done' }
+      ],
+      greencamo: [
+        { n: 'Green Camo Shark Hero Product', s: 'Shipped', d: 'done' },
+        { n: 'Editorial Shoot · Tokyo Night', s: 'Shipped', d: 'done' },
+        { n: 'Shibuya Store Takeover', s: 'Shipped', d: 'done' }
+      ],
+      tokyo: [
+        { n: 'Neon ABC Camo · Hero Product', s: 'Awaiting CMO approval', d: 'review' },
+        { n: 'Shibuya 3am Street Shoot', s: 'Awaiting CMO approval', d: 'review' },
+        { n: 'Katakana Typography System', s: 'Approved', d: 'done' },
+        { n: 'Rave Event Partnership · Vent', s: 'Approved', d: 'done' }
+      ],
+      hana: [
+        { n: 'Sakura Camo Hero Pattern', s: 'In production', d: 'progress' },
+        { n: 'Shibuya Flagship Reopening Film', s: 'In production', d: 'progress' },
+        { n: 'Japanese Typography System', s: 'Shipped', d: 'done' }
+      ]
+    };
+
+    const briefs = briefSamples[c.id] || [
+      { n: 'Brief 1', s: c.briefs.done > 0 ? 'Shipped' : 'Not started', d: c.briefs.done > 0 ? 'done' : 'progress' }
+    ];
+
+    const statusPill = `<span class="status-pill ${c.status}">${c.status}</span>`;
+
+    let sourceHtml = '';
+    if (c.source.href) {
+      sourceHtml = `<div class="panel">
+        <div class="panel-label">Source <a class="panel-link" href="${c.source.href}">Open →</a></div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 28px; height: 28px; border-radius: 7px; background: rgba(113,112,255,0.14); border: 1px solid rgba(113,112,255,0.3); display: flex; align-items: center; justify-content: center; color: var(--brand-accent);">${sourceIcon(c.source.type).replace('width="10" height="10"', 'width="14" height="14"')}</div>
+          <div style="flex: 1;">
+            <div style="font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px;">${c.source.label.split('·').pop().trim()}</div>
+            <div style="font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; margin-top: 1px;">${c.source.label.split('·')[0].trim()} ${c.source.score != null ? '· score ' + c.source.score : ''}</div>
+          </div>
+        </div>
+      </div>`;
+    } else {
+      sourceHtml = `<div class="panel">
+        <div class="panel-label">Source</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">${c.source.label}</div>
+      </div>`;
+    }
+
+    const perfHtml = c.roas ? `
+      <div class="panel">
+        <div class="panel-label">Performance <a class="panel-link" href="#">Open ROAS →</a></div>
+        <div class="perf-grid">
+          <div class="perf-stat">
+            <div class="perf-stat-label">ROAS</div>
+            <div class="perf-stat-value green">${c.roas}x</div>
+            <div class="perf-stat-delta">vs 2.9x brand avg</div>
+          </div>
+          <div class="perf-stat">
+            <div class="perf-stat-label">Spend</div>
+            <div class="perf-stat-value">${c.spend}</div>
+          </div>
+          <div class="perf-stat">
+            <div class="perf-stat-label">Assets live</div>
+            <div class="perf-stat-value">${c.assets}</div>
+          </div>
+        </div>
+      </div>` : '';
+
+    const assetHtml = c.assets > 0 ? `
+      <div class="panel">
+        <div class="panel-label">Assets <span class="panel-label-count">${c.assets}</span><a class="panel-link" href="#">Open in Asset Manager →</a></div>
+        <div class="asset-grid">
+          ${[1,2,4,5,6,7,8,1].slice(0, Math.min(8, c.assets)).map(g => `<div class="asset-tile tile-gradient-${g}"></div>`).join('')}
+        </div>
+      </div>` : '';
+
+    document.getElementById('drawerBody').innerHTML = `
+      <div class="d-hero">
+        <div class="d-hero-top">${statusPill} <span style="font-size: 11px; color: var(--text-tertiary);">· ${c.region} · Owner: ${c.owner}</span></div>
+        <div class="d-hero-title">${c.name}</div>
+        <div class="d-hero-desc">${c.desc}</div>
+        <div class="d-hero-stats">
+          <div class="d-stat"><div class="d-stat-value">${c.briefs.done}/${c.briefs.total}</div><div class="d-stat-label">Briefs complete</div></div>
+          <div class="d-stat"><div class="d-stat-value">${c.assets}</div><div class="d-stat-label">Assets ready</div></div>
+          <div class="d-stat"><div class="d-stat-value ${c.roas ? 'green' : ''}">${c.roas ? c.roas + 'x' : '—'}</div><div class="d-stat-label">ROAS</div></div>
+          <div class="d-stat"><div class="d-stat-value">${c.launch}</div><div class="d-stat-label">Launch</div></div>
+        </div>
+      </div>
+
+      ${sourceHtml}
+
+      <div class="panel">
+        <div class="panel-label">Briefs <span class="panel-label-count">${c.briefs.done}/${c.briefs.total}</span><a class="panel-link" href="#">Open in Briefs →</a></div>
+        ${briefs.map(b => `
+          <div class="brief-row">
+            <div class="brief-dot ${b.d}"></div>
+            <span class="brief-name">${b.n}</span>
+            <span class="brief-status">${b.s}</span>
+          </div>
+        `).join('')}
+      </div>
+
+      ${assetHtml}
+      ${perfHtml}
+    `;
+
+    // Footer actions change per role + status
+    let footer = '';
+    if (currentRole === 'regional' && c.pendingFor.includes('cmo')) {
+      footer = `
+        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 6l2.5 2.5L9 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve for your region</button>
+        <button class="d-btn secondary">Request changes</button>`;
+    } else if (currentRole === 'cmo' && c.pendingFor.includes('cmo')) {
+      footer = `
+        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 6l2.5 2.5L9 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve campaign</button>
+        <button class="d-btn secondary">Request changes</button>
+        <button class="d-btn secondary">Kill</button>`;
+    } else if (c.status === 'live') {
+      footer = `
+        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,9 5,5 7,7 10,3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Open ROAS dashboard</button>
+        <button class="d-btn secondary">Pause</button>
+        <button class="d-btn secondary">Duplicate</button>`;
+    } else if (c.status === 'briefed' && currentRole === 'creative') {
+      footer = `
+        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2h5l2 2v7H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Open my next brief</button>
+        <button class="d-btn secondary">View all briefs</button>`;
+    } else if (c.status === 'draft') {
+      footer = `
+        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Start first brief</button>
+        <button class="d-btn secondary">Edit campaign</button>`;
+    } else {
+      footer = `
+        <button class="d-btn primary">Open in Briefs</button>
+        <button class="d-btn secondary">Edit campaign</button>`;
+    }
+    document.getElementById('drawerFooter').innerHTML = footer;
+
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerBackdrop').classList.add('open');
+    document.getElementById('drawerBody').scrollTop = 0;
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerBackdrop').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+
+</body>
+</html>

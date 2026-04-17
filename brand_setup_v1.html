@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Brand Setup / Data Sources</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; display: flex; height: 100vh; overflow: hidden; font-size: 13px; }
+
+  .sidebar {
+    width: 220px; min-width: 220px; background: #111110;
+    display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid #222;
+  }
+  .sidebar-logo { padding: 18px 16px 14px; border-bottom: 1px solid #222; display: flex; align-items: center; gap: 8px; }
+  .logo-mark { width: 26px; height: 26px; background: #E8502A; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: white; }
+  .logo-text { font-family: 'DM Serif Display', serif; font-size: 15px; color: #f0ede8; }
+  .brand-pill { margin-left: auto; background: #1e1e1c; border: 1px solid #2a2a28; border-radius: 4px; padding: 2px 6px; font-size: 10px; color: #666; }
+
+  .nav-section { padding: 8px 0 4px; }
+  .nav-section-label { padding: 6px 16px 4px; font-size: 10px; font-weight: 500; color: #444; letter-spacing: 0.8px; text-transform: uppercase; }
+
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 7px 16px; cursor: pointer; color: #888; transition: all 0.12s; position: relative; }
+  .nav-item:hover { background: #1a1a18; color: #ccc; }
+  .nav-item.active { color: #f0ede8; background: #1d1d1b; }
+  .nav-item.active::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; background: #E8502A; border-radius: 0 2px 2px 0; }
+  .nav-icon { width: 15px; height: 15px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { font-size: 13px; flex: 1; }
+  .nav-chevron { width: 12px; height: 12px; opacity: 0.4; transition: transform 0.15s; }
+  .nav-chevron.open { transform: rotate(90deg); }
+  .sub-nav { overflow: hidden; max-height: 0; transition: max-height 0.2s ease; }
+  .sub-nav.open { max-height: 200px; }
+  .sub-nav-item { display: flex; align-items: center; gap: 9px; padding: 5px 16px 5px 38px; cursor: pointer; color: #555; font-size: 12.5px; transition: all 0.1s; }
+  .sub-nav-item:hover { color: #aaa; background: #161614; }
+  .sub-nav-item.active { color: #f0ede8; background: #1d1d1b; position: relative; }
+  .sub-nav-item.active::before { content: ''; position: absolute; left: 0; top: 3px; bottom: 3px; width: 2px; background: #E8502A; border-radius: 0 2px 2px 0; }
+  .sub-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex-shrink: 0; opacity: 0.5; }
+  .sub-nav-item.active .sub-dot { opacity: 1; background: #E8502A; }
+
+  .sidebar-divider { border: none; border-top: 1px solid #1e1e1c; margin: 4px 0; }
+  .sidebar-bottom { padding: 8px 0 12px; }
+  .sb-user { display: flex; align-items: center; gap: 8px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: #E8502A; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 500; }
+  .avatar-text { font-size: 11px; color: #555; flex: 1; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { background: #faf9f7; border-bottom: 1px solid #e8e6e1; padding: 0 24px; height: 48px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .bc-root { color: #999; font-size: 13px; }
+  .bc-sep { color: #ccc; font-size: 14px; }
+  .bc-current { color: #222; font-size: 13px; font-weight: 500; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; border: 1px solid #ddd; background: white; color: #444; }
+  .btn-primary { background: #E8502A; border-color: #E8502A; color: white; }
+
+  .content { flex: 1; overflow-y: auto; padding: 24px 32px; }
+
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase; color: #E8502A; margin-bottom: 3px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: #111; font-weight: 400; margin-bottom: 4px; }
+  .page-desc { font-size: 13px; color: #999; margin-bottom: 24px; line-height: 1.5; }
+
+  .source-tabs { display: flex; gap: 0; border-bottom: 1px solid #e8e6e1; margin-bottom: 24px; }
+  .source-tab { padding: 8px 16px; font-size: 13px; color: #999; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.1s; }
+  .source-tab:hover { color: #555; }
+  .source-tab.active { color: #111; border-bottom-color: #E8502A; font-weight: 500; }
+
+  .source-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .source-card { background: white; border: 1px solid #e8e6e1; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .source-card.connected { border-color: #c0dd97; }
+  .source-card-header { display: flex; align-items: center; gap: 10px; }
+  .source-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .source-name { font-size: 13px; font-weight: 500; color: #222; }
+  .source-desc { font-size: 11px; color: #aaa; }
+  .source-status { margin-left: auto; }
+  .status-pill { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .status-connected { background: #eaf3de; color: #3B6D11; }
+  .status-pending { background: #faeeda; color: #854F0B; }
+  .status-empty { background: #f1efe8; color: #888; }
+
+  .input-row { display: flex; gap: 8px; align-items: center; }
+  .source-input { flex: 1; padding: 7px 10px; border: 1px solid #e8e6e1; border-radius: 6px; font-size: 12px; color: #333; font-family: 'DM Sans', sans-serif; background: #faf9f7; outline: none; }
+  .source-input:focus { border-color: #E8502A; background: white; }
+  .source-input::placeholder { color: #bbb; }
+  .source-btn { padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .source-btn-add { background: #111; color: white; }
+  .source-btn-add:hover { background: #333; }
+  .source-btn-remove { background: #fcebeb; color: #A32D2D; }
+
+  .connected-list { display: flex; flex-direction: column; gap: 6px; }
+  .connected-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #f5f4f0; border-radius: 6px; }
+  .connected-label { font-size: 12px; color: #333; flex: 1; font-family: monospace; }
+  .connected-meta { font-size: 11px; color: #aaa; }
+  .remove-btn { width: 16px; height: 16px; border-radius: 4px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+  .remove-btn:hover { color: #E8502A; background: #fcebeb; }
+
+  .upload-zone { border: 1.5px dashed #ddd; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s; background: #faf9f7; }
+  .upload-zone:hover { border-color: #E8502A; background: white; }
+  .upload-icon { font-size: 22px; margin-bottom: 6px; opacity: 0.4; }
+  .upload-label { font-size: 12px; color: #888; }
+  .upload-sub { font-size: 11px; color: #bbb; margin-top: 3px; }
+
+  .sync-bar { background: white; border: 1px solid #e8e6e1; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #639922; flex-shrink: 0; }
+  .sync-dot.syncing { background: #E8502A; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .sync-label { font-size: 12px; color: #555; flex: 1; }
+  .sync-meta { font-size: 11px; color: #aaa; }
+
+  .section-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.7px; color: #bbb; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">K</div>
+    <span class="logo-text">KittyKat</span>
+    <span class="brand-pill">BAPE</span>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+      <span class="nav-label">Home</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Intelligence</div>
+    <div class="nav-item" onclick="toggleSection('inspiration')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 11.5v3M6 13h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Inspiration</span>
+      <svg class="nav-chevron" id="chev-inspiration" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="sub-nav" id="sub-inspiration">
+      <div class="sub-nav-item"><div class="sub-dot"></div>Visual Search</div>
+      <div class="sub-nav-item"><div class="sub-dot"></div>Trend Matching</div>
+      <div class="sub-nav-item"><div class="sub-dot"></div>Brand Alignment</div>
+      <div class="sub-nav-item"><div class="sub-dot"></div>Clusters</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Production</div>
+    <div class="nav-item" onclick="toggleSection('execution')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Execution</span>
+      <svg class="nav-chevron" id="chev-execution" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="sub-nav" id="sub-execution">
+      <div class="sub-nav-item"><div class="sub-dot"></div>Creator Studio</div>
+      <div class="sub-nav-item"><div class="sub-dot"></div>Briefs</div>
+      <div class="sub-nav-item"><div class="sub-dot"></div>Asset Manager</div>
+      <div class="sub-nav-item"><div class="sub-dot"></div>Reviews & Approvals</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Analytics</div>
+    <div class="nav-item" onclick="toggleSection('performance')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Performance</span>
+      <svg class="nav-chevron" id="chev-performance" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="sub-nav" id="sub-performance">
+      <div class="sub-nav-item"><div class="sub-dot"></div>ROAS Dashboard</div>
+      <div class="sub-nav-item"><div class="sub-dot"></div>Reports</div>
+      <div class="sub-nav-item"><div class="sub-dot"></div>Competitive Intel</div>
+    </div>
+  </div>
+
+  <hr class="sidebar-divider" style="margin-top: auto;">
+
+  <div class="nav-section" style="padding-top: 4px;">
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Brand Setup</span>
+      <svg class="nav-chevron open" id="chev-setup" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="sub-nav open" id="sub-setup">
+      <div class="sub-nav-item active"><div class="sub-dot"></div>Data Sources</div>
+      <div class="sub-nav-item"><div class="sub-dot"></div>Brand Profile</div>
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="sb-user">
+      <div class="avatar">K</div>
+      <span class="avatar-text">Kathy S. · CMO</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <span class="bc-root">Brand Setup</span>
+    <span class="bc-sep">/</span>
+    <span class="bc-current">Data Sources</span>
+    <div class="topbar-right">
+      <button class="btn">Sync All</button>
+      <button class="btn btn-primary">+ Add Source</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="page-eyebrow">Brand Setup · Data Sources</div>
+    <div class="page-title">Brand Data Ingestion</div>
+    <div class="page-desc">Connect your brand's visual archive, website, product catalog, and competitor handles. Everything you connect here powers your Brand Brain — and flows into Inspiration, Execution, and Performance automatically.</div>
+
+    <div class="source-tabs">
+      <div class="source-tab active" onclick="switchTab(this, 'own')">Own Brand</div>
+      <div class="source-tab" onclick="switchTab(this, 'competitors')">Competitors</div>
+      <div class="source-tab" onclick="switchTab(this, 'catalog')">Product Catalog</div>
+      <div class="source-tab" onclick="switchTab(this, 'ads')">Ad Accounts</div>
+    </div>
+
+    <div id="tab-content"></div>
+  </div>
+</div>
+
+<script>
+  const tabContent = {
+    own: `
+      <div class="section-label">Social channels</div>
+      <div class="source-grid">
+        <div class="source-card connected">
+          <div class="source-card-header">
+            <div class="source-icon" style="background:#fce4ec;">📸</div>
+            <div><div class="source-name">Instagram</div><div class="source-desc">Posts, reels, stories archive</div></div>
+            <div class="source-status"><span class="status-pill status-connected">Live</span></div>
+          </div>
+          <div class="connected-list">
+            <div class="connected-item"><span class="connected-label">@bape_us</span><span class="connected-meta">8,576 assets · syncing daily</span><button class="remove-btn">×</button></div>
+          </div>
+          <div class="input-row"><input class="source-input" placeholder="Add another handle e.g. @bape_jp"><button class="source-btn source-btn-add">Add</button></div>
+        </div>
+        <div class="source-card connected">
+          <div class="source-card-header">
+            <div class="source-icon" style="background:#e8f5e9;">🌐</div>
+            <div><div class="source-name">Website</div><div class="source-desc">Product pages, campaigns, lookbooks</div></div>
+            <div class="source-status"><span class="status-pill status-connected">Live</span></div>
+          </div>
+          <div class="connected-list">
+            <div class="connected-item"><span class="connected-label">us.bape.com</span><span class="connected-meta">Crawling weekly</span><button class="remove-btn">×</button></div>
+          </div>
+          <div class="input-row"><input class="source-input" placeholder="Add another URL e.g. bape.com/jp"><button class="source-btn source-btn-add">Add</button></div>
+        </div>
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon" style="background:#e3f2fd;">📌</div>
+            <div><div class="source-name">Pinterest</div><div class="source-desc">Boards and saved inspiration</div></div>
+            <div class="source-status"><span class="status-pill status-empty">Not connected</span></div>
+          </div>
+          <div class="input-row"><input class="source-input" placeholder="Pinterest board URL or handle"><button class="source-btn source-btn-add">Connect</button></div>
+        </div>
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon" style="background:#fff3e0;">🎵</div>
+            <div><div class="source-name">TikTok</div><div class="source-desc">Brand video content archive</div></div>
+            <div class="source-status"><span class="status-pill status-empty">Not connected</span></div>
+          </div>
+          <div class="input-row"><input class="source-input" placeholder="TikTok handle e.g. @bapeofficial"><button class="source-btn source-btn-add">Connect</button></div>
+        </div>
+      </div>
+      <div class="sync-bar"><div class="sync-dot"></div><div class="sync-label">Brand Brain last synced <strong>2 hours ago</strong> · 8,576 assets indexed across 2 sources</div><div class="sync-meta">Next sync in 22h</div></div>`,
+
+    competitors: `
+      <div class="section-label">Competitor Instagram handles</div>
+      <div class="source-grid">
+        <div class="source-card connected">
+          <div class="source-card-header">
+            <div class="source-icon" style="background:#f3e5f5;">👁</div>
+            <div><div class="source-name">Competitor Tracking</div><div class="source-desc">Visual benchmarking & trend delta</div></div>
+            <div class="source-status"><span class="status-pill status-connected">2 tracked</span></div>
+          </div>
+          <div class="connected-list">
+            <div class="connected-item"><span class="connected-label">@supremenewyork</span><span class="connected-meta">4,201 assets · weekly sync</span><button class="remove-btn">×</button></div>
+            <div class="connected-item"><span class="connected-label">@palace_latest</span><span class="connected-meta">2,887 assets · weekly sync</span><button class="remove-btn">×</button></div>
+          </div>
+          <div class="input-row"><input class="source-input" placeholder="Add competitor Instagram handle"><button class="source-btn source-btn-add">Track</button></div>
+        </div>
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon" style="background:#e8f5e9;">🌐</div>
+            <div><div class="source-name">Competitor Websites</div><div class="source-desc">Campaign pages, lookbooks</div></div>
+            <div class="source-status"><span class="status-pill status-empty">Not set up</span></div>
+          </div>
+          <div class="input-row"><input class="source-input" placeholder="Competitor website URL"><button class="source-btn source-btn-add">Add</button></div>
+        </div>
+      </div>
+      <div class="sync-bar"><div class="sync-dot"></div><div class="sync-label">Competitor data feeds into <strong>Trend Matching</strong> and <strong>Competitive Intel</strong> automatically</div><div class="sync-meta">Used in 2 modules</div></div>`,
+
+    catalog: `
+      <div class="section-label">Product catalog</div>
+      <div class="source-grid" style="grid-template-columns: 1fr;">
+        <div class="source-card connected">
+          <div class="source-card-header">
+            <div class="source-icon" style="background:#fff8e1;">📦</div>
+            <div><div class="source-name">Product Catalog</div><div class="source-desc">SKUs, images, descriptions, pricing</div></div>
+            <div class="source-status"><span class="status-pill status-connected">1,240 SKUs</span></div>
+          </div>
+          <div class="connected-list">
+            <div class="connected-item"><span class="connected-label">bape_catalog_ss26.csv</span><span class="connected-meta">Uploaded 3 days ago · 1,240 products</span><button class="remove-btn">×</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="upload-zone">
+        <div class="upload-icon">⬆</div>
+        <div class="upload-label">Drop a new catalog file here, or click to upload</div>
+        <div class="upload-sub">Supports CSV, XLSX, Shopify export, or direct Shopify / WooCommerce URL</div>
+      </div>
+      <div style="margin-top: 16px;">
+        <div class="section-label">Or connect directly</div>
+        <div class="source-grid">
+          <div class="source-card"><div class="source-card-header"><div class="source-icon" style="background:#e8f5e9;">🛍</div><div><div class="source-name">Shopify</div><div class="source-desc">Auto-sync product catalog</div></div><div class="source-status"><span class="status-pill status-empty">Not connected</span></div></div><div class="input-row"><input class="source-input" placeholder="yourstore.myshopify.com"><button class="source-btn source-btn-add">Connect</button></div></div>
+          <div class="source-card"><div class="source-card-header"><div class="source-icon" style="background:#e3f2fd;">🔗</div><div><div class="source-name">Custom API</div><div class="source-desc">Connect any product feed via URL</div></div><div class="source-status"><span class="status-pill status-empty">Not connected</span></div></div><div class="input-row"><input class="source-input" placeholder="Product feed URL (JSON/XML)"><button class="source-btn source-btn-add">Add</button></div></div>
+        </div>
+      </div>`,
+
+    ads: `
+      <div class="section-label">Ad platform connections</div>
+      <div class="source-grid">
+        <div class="source-card"><div class="source-card-header"><div class="source-icon" style="background:#e3f2fd;">📘</div><div><div class="source-name">Meta Ads</div><div class="source-desc">Facebook + Instagram campaigns</div></div><div class="source-status"><span class="status-pill status-empty">Not connected</span></div></div><div class="input-row"><input class="source-input" placeholder="Meta Ads Account ID"><button class="source-btn source-btn-add">Connect</button></div></div>
+        <div class="source-card"><div class="source-card-header"><div class="source-icon" style="background:#e8f5e9;">🔍</div><div><div class="source-name">Google Ads</div><div class="source-desc">Search + Display + Shopping</div></div><div class="source-status"><span class="status-pill status-empty">Not connected</span></div></div><div class="input-row"><input class="source-input" placeholder="Google Ads Customer ID"><button class="source-btn source-btn-add">Connect</button></div></div>
+        <div class="source-card"><div class="source-card-header"><div class="source-icon" style="background:#fff3e0;">🎵</div><div><div class="source-name">TikTok Ads</div><div class="source-desc">TikTok for Business campaigns</div></div><div class="source-status"><span class="status-pill status-empty">Not connected</span></div></div><div class="input-row"><input class="source-input" placeholder="TikTok Advertiser ID"><button class="source-btn source-btn-add">Connect</button></div></div>
+        <div class="source-card"><div class="source-card-header"><div class="source-icon" style="background:#fce4ec;">💬</div><div><div class="source-name">WeChat / LRB</div><div class="source-desc">WeChat Moments + Mini Program ads</div></div><div class="source-status"><span class="status-pill status-empty">Not connected</span></div></div><div class="input-row"><input class="source-input" placeholder="WeChat Official Account ID"><button class="source-btn source-btn-add">Connect</button></div></div>
+      </div>
+      <div class="sync-bar"><div class="sync-dot" style="background:#ddd;"></div><div class="sync-label">Connect ad accounts to activate the <strong>ROAS Dashboard</strong> and <strong>Performance Reports</strong></div><div class="sync-meta">0 of 4 connected</div></div>`
+  };
+
+  function switchTab(el, tab) {
+    document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-content').innerHTML = tabContent[tab];
+  }
+
+  function toggleSection(s) {
+    const sub = document.getElementById('sub-' + s);
+    const chev = document.getElementById('chev-' + s);
+    if (sub) sub.classList.toggle('open');
+    if (chev) chev.classList.toggle('open');
+  }
+
+  // Load default tab
+  document.getElementById('tab-content').innerHTML = tabContent.own;
+</script>
+</body>
+</html>

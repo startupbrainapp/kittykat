@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Inspiration / Brand Sandbox</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a; --bg-panel: #0f1011; --bg-surface: #191a1b; --bg-elevated: #28282c;
+    --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+    --brand: #5e6ad2; --brand-accent: #7170ff; --brand-hover: #828fff;
+    --border-subtle: rgba(255,255,255,0.05); --border-standard: rgba(255,255,255,0.08); --border-solid: #23252a;
+    --surface-1: rgba(255,255,255,0.02); --surface-2: rgba(255,255,255,0.04); --surface-3: rgba(255,255,255,0.05);
+    --status-green: #10b981; --status-amber: #f59e0b; --status-red: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { background: var(--bg-canvas); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
+  button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* SIDEBAR */
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-family: inherit; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 640px; margin-bottom: 28px; }
+
+  /* ═══ Input boxes ═══ */
+  .input-box {
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 12px;
+    padding: 20px 22px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .input-box:focus-within {
+    border-color: rgba(113,112,255,0.45);
+    background: var(--surface-2);
+  }
+  .input-box-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px;
+  }
+  .input-box-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: rgba(113,112,255,0.14);
+    border: 1px solid rgba(113,112,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-accent);
+    flex-shrink: 0;
+  }
+  .input-box-meta { flex: 1; }
+  .input-box-title { font-size: 15px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.21px; line-height: 1.3; margin-bottom: 1px; }
+  .input-box-sub { font-size: 12px; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  .concept-textarea {
+    width: 100%;
+    background: transparent;
+    border: none; outline: none;
+    color: var(--text-primary);
+    font-size: 14px; font-weight: 400;
+    letter-spacing: -0.165px;
+    line-height: 1.55;
+    resize: none;
+    padding: 0;
+    min-height: 56px;
+    margin-bottom: 12px;
+  }
+  .concept-textarea::placeholder { color: var(--text-quaternary); }
+
+  /* Image row in input box */
+  .image-row { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; }
+  .image-thumb { width: 52px; height: 52px; border-radius: 7px; border: 1px solid var(--border-standard); flex-shrink: 0; }
+  .image-add { width: 52px; height: 52px; border-radius: 7px; border: 1.5px dashed var(--border-standard); background: transparent; color: var(--text-quaternary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; flex-shrink: 0; font-family: inherit; }
+  .image-add:hover { border-color: rgba(113,112,255,0.45); color: var(--brand-accent); background: rgba(113,112,255,0.04); }
+  .image-row-hint { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; margin-left: 6px; }
+
+  /* Image strip in cards */
+  .hc-images { display: flex; gap: 4px; margin-bottom: 8px; }
+  .hc-img { width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--border-subtle); flex-shrink: 0; }
+  .hc-img.more { position: relative; overflow: hidden; }
+  .hc-img.more::after { content: attr(data-more); position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 590; letter-spacing: -0.13px; border-radius: 5px; }
+
+  .drop-area {
+    border: 1.5px dashed var(--border-standard);
+    border-radius: 8px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(255,255,255,0.01);
+    transition: all 0.15s;
+    margin-bottom: 12px;
+  }
+  .drop-area:hover {
+    border-color: rgba(113,112,255,0.45);
+    background: rgba(113,112,255,0.03);
+  }
+  .drop-hint {
+    font-size: 13px; font-weight: 510;
+    color: var(--text-secondary);
+    letter-spacing: -0.13px;
+    margin-bottom: 3px;
+  }
+  .drop-sub { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; }
+  .drop-formats { display: flex; justify-content: center; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+  .dz-format { padding: 2px 7px; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 9999px; font-size: 10px; font-weight: 510; color: var(--text-tertiary); letter-spacing: -0.13px; }
+
+  .input-box-footer {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .input-box-footer-meta { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; flex: 1; }
+  .score-btn {
+    padding: 6px 14px;
+    background: var(--brand);
+    border: 1px solid var(--brand);
+    border-radius: 6px;
+    color: white;
+    font-size: 13px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background 0.12s;
+  }
+  .score-btn:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  /* OR divider */
+  .or-divider {
+    display: flex; align-items: center; gap: 14px;
+    margin: 16px 0;
+  }
+  .or-line { flex: 1; height: 1px; background: var(--border-subtle); }
+  .or-label {
+    font-size: 11px; font-weight: 510;
+    color: var(--text-quaternary);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 0 4px;
+  }
+
+  /* ═══ History sections ═══ */
+  .history-block { margin-top: 40px; }
+  .history-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+    padding: 0 2px;
+  }
+  .history-icon { color: var(--text-tertiary); }
+  .history-icon.pinned { color: var(--status-amber); }
+  .history-label {
+    font-size: 11px; font-weight: 510;
+    color: var(--text-quaternary);
+    letter-spacing: 0.6px; text-transform: uppercase;
+  }
+  .history-count {
+    font-size: 11px; font-weight: 510;
+    color: var(--text-tertiary);
+    background: var(--surface-2);
+    border-radius: 9999px;
+    padding: 1px 7px;
+    letter-spacing: -0.13px;
+  }
+  .history-spacer { flex: 1; }
+  .history-viewall {
+    font-size: 12px; font-weight: 510;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+    cursor: pointer;
+  }
+  .history-viewall:hover { color: var(--text-primary); }
+
+  .history-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .history-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .history-card:hover {
+    background: var(--surface-2);
+    border-color: rgba(113,112,255,0.35);
+    transform: translateY(-1px);
+  }
+
+  .hc-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .hc-thumb {
+    width: 42px; height: 42px;
+    border-radius: 7px;
+    border: 1px solid var(--border-standard);
+    flex-shrink: 0;
+  }
+  .hc-thumb.empty {
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-quaternary);
+  }
+  .hc-score {
+    margin-left: auto;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    font-size: 13px; font-weight: 590;
+    letter-spacing: -0.13px;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .hc-score.strong { background: rgba(16,185,129,0.12); color: var(--status-green); border: 1px solid rgba(16,185,129,0.3); }
+  .hc-score.good { background: rgba(113,112,255,0.12); color: var(--brand-accent); border: 1px solid rgba(113,112,255,0.3); }
+  .hc-score.mid { background: rgba(245,158,11,0.12); color: var(--status-amber); border: 1px solid rgba(245,158,11,0.3); }
+  .hc-score.low { background: rgba(239,68,68,0.1); color: var(--status-red); border: 1px solid rgba(239,68,68,0.3); }
+
+  .hc-name {
+    font-size: 13px; font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+    line-height: 1.3;
+    margin-bottom: 3px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+  .hc-preview {
+    font-size: 12px; font-weight: 400;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .hc-meta {
+    display: flex; align-items: center; gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 11px;
+    color: var(--text-quaternary);
+    letter-spacing: -0.13px;
+  }
+  .hc-meta-type { display: inline-flex; align-items: center; gap: 3px; }
+  .hc-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-quaternary); }
+  .hc-meta-time { margin-left: auto; }
+  .hc-pin {
+    position: absolute;
+    top: 10px; right: 10px;
+    color: var(--status-amber);
+  }
+
+  .tile-gradient-1 { background: radial-gradient(circle at 30% 20%, #2d4a2a, #0c1a0a); }
+  .tile-gradient-2 { background: radial-gradient(circle at 70% 30%, #8b1a1a, #1a0808); }
+  .tile-gradient-4 { background: linear-gradient(135deg, #3a2a1a, #1a0c04); }
+  .tile-gradient-5 { background: radial-gradient(circle at 40% 70%, #e5b4b0, #3a1a1a); }
+  .tile-gradient-6 { background: linear-gradient(180deg, #1a1a1a, #0a0a0a); }
+  .tile-gradient-7 { background: radial-gradient(circle at 50% 50%, #b8a568, #3a3020); }
+  .tile-gradient-8 { background: radial-gradient(circle at 30% 80%, #4a2d5a, #0c0814); }
+
+  /* ═══ DRAWER ═══ */
+  .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 90; }
+  .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 620px; max-width: 100vw; background: var(--bg-surface); border-left: 1px solid var(--border-standard); box-shadow: -8px 0 32px rgba(0,0,0,0.5); z-index: 100; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+  .drawer-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+  .drawer-title-wrap { flex: 1; min-width: 0; }
+  .drawer-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drawer-pin {
+    padding: 5px 10px;
+    background: transparent;
+    border: 1px solid var(--border-standard);
+    border-radius: 6px;
+    color: var(--text-tertiary);
+    font-size: 12px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: all 0.12s;
+    font-family: inherit;
+  }
+  .drawer-pin:hover { background: var(--surface-2); color: var(--text-primary); }
+  .drawer-pin.active {
+    background: rgba(245,158,11,0.12);
+    border-color: rgba(245,158,11,0.4);
+    color: var(--status-amber);
+  }
+  .drawer-close { width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--text-tertiary); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; }
+  .drawer-close:hover { background: var(--surface-2); color: var(--text-primary); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+  .input-summary {
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .is-thumb { width: 48px; height: 48px; border-radius: 7px; flex-shrink: 0; border: 1px solid var(--border-standard); }
+  .is-body { flex: 1; min-width: 0; }
+  .is-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; margin-bottom: 2px; }
+  .is-desc { font-size: 12px; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.5; margin-bottom: 4px; }
+  .is-meta { font-size: 11px; color: var(--text-quaternary); }
+
+  .score-hero {
+    background: linear-gradient(to bottom right, rgba(113,112,255,0.08), rgba(113,112,255,0.01) 70%);
+    border: 1px solid var(--border-standard);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .score-row { display: flex; align-items: center; gap: 14px; }
+  .score-badge { width: 64px; height: 64px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 590; letter-spacing: -0.3px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .score-badge.tier-strong { background: linear-gradient(135deg, rgba(16,185,129,0.28), rgba(16,185,129,0.08)); border: 1px solid rgba(16,185,129,0.4); color: var(--status-green); }
+  .score-badge.tier-good { background: linear-gradient(135deg, rgba(113,112,255,0.28), rgba(113,112,255,0.08)); border: 1px solid rgba(113,112,255,0.4); color: var(--brand-accent); }
+  .score-badge.tier-mid { background: linear-gradient(135deg, rgba(245,158,11,0.22), rgba(245,158,11,0.06)); border: 1px solid rgba(245,158,11,0.35); color: var(--status-amber); }
+  .score-badge.tier-low { background: linear-gradient(135deg, rgba(239,68,68,0.18), rgba(239,68,68,0.04)); border: 1px solid rgba(239,68,68,0.3); color: var(--status-red); }
+  .score-info { flex: 1; }
+  .score-verdict { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; margin-bottom: 3px; }
+  .score-note { font-size: 12px; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.5; }
+
+  .reco { background: linear-gradient(to bottom right, rgba(113,112,255,0.1), rgba(113,112,255,0.02)); border: 1px solid rgba(113,112,255,0.28); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .reco-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+  .reco-icon { width: 22px; height: 22px; background: rgba(113,112,255,0.18); border: 1px solid rgba(113,112,255,0.35); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .reco-label { font-size: 9px; font-weight: 510; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 0.5px; }
+  .reco-title { font-size: 15px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.21px; line-height: 1.3; margin-bottom: 6px; }
+  .reco-body { font-size: 13px; font-weight: 400; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.55; }
+  .reco-body strong { color: var(--text-primary); font-weight: 510; }
+
+  .panel { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+  .panel-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+  .bd-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 12px; letter-spacing: -0.13px; }
+  .bd-key { color: var(--text-secondary); width: 120px; flex-shrink: 0; font-weight: 510; }
+  .bd-bar { flex: 1; height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .bd-fill { height: 100%; border-radius: 999px; }
+  .bd-fill.strong { background: var(--status-green); }
+  .bd-fill.mid { background: var(--brand-accent); }
+  .bd-fill.amber { background: var(--status-amber); }
+  .bd-fill.weak { background: var(--status-red); }
+  .bd-val { color: var(--text-primary); font-weight: 510; width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .ev-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .ev-tile { aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--border-subtle); position: relative; overflow: hidden; cursor: pointer; }
+  .ev-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 5px 7px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); font-size: 10px; font-weight: 510; color: rgba(255,255,255,0.95); line-height: 1.3; letter-spacing: -0.13px; }
+  .ev-score-mini { position: absolute; top: 5px; right: 5px; padding: 1px 6px; background: rgba(16,185,129,0.25); color: var(--status-green); border: 1px solid rgba(16,185,129,0.4); border-radius: 9999px; font-size: 9px; font-weight: 590; }
+
+  .adj-list { display: flex; flex-direction: column; gap: 8px; }
+  .adj-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-standard); }
+  .adj-row.keep { background: rgba(16,185,129,0.04); border-color: rgba(16,185,129,0.2); }
+  .adj-row.change { background: rgba(245,158,11,0.04); border-color: rgba(245,158,11,0.2); }
+  .adj-row.preserve { background: rgba(113,112,255,0.04); border-color: rgba(113,112,255,0.2); }
+  .adj-icon { width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .adj-row.keep .adj-icon { background: rgba(16,185,129,0.15); color: var(--status-green); }
+  .adj-row.change .adj-icon { background: rgba(245,158,11,0.15); color: var(--status-amber); }
+  .adj-row.preserve .adj-icon { background: rgba(113,112,255,0.18); color: var(--brand-accent); }
+  .adj-body { flex: 1; font-size: 12px; letter-spacing: -0.13px; color: var(--text-secondary); line-height: 1.5; }
+  .adj-body strong { color: var(--text-primary); font-weight: 510; }
+  .adj-type { font-size: 9px; font-weight: 510; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; display: block; }
+  .adj-row.keep .adj-type { color: var(--status-green); }
+  .adj-row.change .adj-type { color: var(--status-amber); }
+  .adj-row.preserve .adj-type { color: var(--brand-accent); }
+
+  .drawer-footer { border-top: 1px solid var(--border-subtle); padding: 12px 16px; display: flex; gap: 6px; flex-shrink: 0; background: var(--bg-surface); }
+  .d-btn { flex: 1; padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.12s; font-family: inherit; }
+  .d-btn.primary { background: var(--brand); border: 1px solid var(--brand); color: white; }
+  .d-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .d-btn.secondary { background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-primary); }
+  .d-btn.secondary:hover { background: var(--surface-3); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </div>
+    <a class="nav-item" href="clusters.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Briefs</span></div>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Creator Studio</span></a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Asset Manager</span></a>
+    <a class="nav-item" href="reviews.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">ROAS Dashboard</span></a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reports</span></a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg><span class="nav-label">Competitive Intel</span></a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Team</span></a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Presets</span></a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Admin</span></a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Inspiration</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">Brand Sandbox</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 5l3-3 3 3M2 10h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Share
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Inspiration · Brand Sandbox</div>
+      <h1 class="page-title">Test any concept against BAPE</h1>
+      <p class="page-desc">Write an idea or drop an image. We score it against your brand genome, archive, and audience — then tell you what to keep, change, or preserve.</p>
+
+      <!-- Combined input box -->
+      <div class="input-box">
+        <div class="input-box-header">
+          <div class="input-box-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="input-box-meta">
+            <div class="input-box-title">Test a concept</div>
+            <div class="input-box-sub">Write an idea, drop images, or both</div>
+          </div>
+        </div>
+        <textarea class="concept-textarea" placeholder='Describe the concept… e.g., "SS26 cherry blossom streetwear — pastel palette, Shibuya flagship reopening" or drop images below'></textarea>
+
+        <!-- Image row: shows added reference images -->
+        <div class="image-row">
+          <div class="image-thumb" style="background: url('images/5.jpg') center/cover;"></div>
+          <div class="image-thumb" style="background: url('images/7.jpg') center/cover;"></div>
+          <div class="image-thumb" style="background: url('images/1.jpg') center/cover;"></div>
+          <button class="image-add">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 3v8M3 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <span class="image-row-hint">Drop more images or click +</span>
+        </div>
+
+        <div class="input-box-footer">
+          <span class="input-box-footer-meta">Scored against Brand Profile · 8,576 archive assets</span>
+          <button class="score-btn">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M6 4v2.5l1.5 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Score it
+          </button>
+        </div>
+      </div>
+
+      <!-- Pinned section -->
+      <div class="history-block">
+        <div class="history-header">
+          <svg class="history-icon pinned" width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1l2 4 4 .5-3 3 .5 4-3.5-2-3.5 2 .5-4-3-3 4-.5z" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <span class="history-label">Pinned</span>
+          <span class="history-count">4</span>
+          <div class="history-spacer"></div>
+          <span class="history-viewall">View all →</span>
+        </div>
+        <div class="history-grid">
+          <div class="history-card" onclick="openDrawer('y2k')">
+            <svg class="hc-pin" width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" fill="currentColor"/></svg>
+            <div class="hc-header">
+              <div class="hc-name">Y2K Chrome Drop</div>
+              <span class="hc-score strong">95</span>
+            </div>
+            <div class="hc-preview">Chrome puffer w/ Milo silhouette. Your founding era.</div>
+            <div class="hc-images">
+              <div class="hc-img" style="background: url('images/7.jpg') center/cover;"></div>
+              <div class="hc-img" style="background: url('images/10.jpg') center/cover;"></div>
+              <div class="hc-img more" style="background: url('images/4.jpg') center/cover;" data-more="+2"></div>
+            </div>
+            <div class="hc-meta">
+              <span class="hc-meta-type">4 images</span>
+              <span class="hc-meta-dot"></span>
+              <span class="hc-meta-time">1d ago</span>
+            </div>
+          </div>
+
+          <div class="history-card" onclick="openDrawer('heritage')">
+            <svg class="hc-pin" width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" fill="currentColor"/></svg>
+            <div class="hc-header">
+              <div class="hc-name">Heritage 30yr Retrospective</div>
+              <span class="hc-score strong">94</span>
+            </div>
+            <div class="hc-preview">30-year archival story. 2003 camo reissues.</div>
+            <div class="hc-images">
+              <div class="hc-img" style="background: url('images/4.jpg') center/cover;"></div>
+              <div class="hc-img" style="background: url('images/13.jpg') center/cover;"></div>
+              <div class="hc-img" style="background: url('images/14.jpg') center/cover;"></div>
+            </div>
+            <div class="hc-meta">
+              <span class="hc-meta-type">Text + 3 refs</span>
+              <span class="hc-meta-dot"></span>
+              <span class="hc-meta-time">3d ago</span>
+            </div>
+          </div>
+
+          <div class="history-card" onclick="openDrawer('neomax')">
+            <svg class="hc-pin" width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" fill="currentColor"/></svg>
+            <div class="hc-header">
+              <div class="hc-name">Neo-Max Store Concept</div>
+              <span class="hc-score strong">91</span>
+            </div>
+            <div class="hc-preview">Print-on-print. Shark-green camo floor-to-ceiling.</div>
+            <div class="hc-images">
+              <div class="hc-img" style="background: url('images/1.jpg') center/cover;"></div>
+              <div class="hc-img" style="background: url('images/2.jpg') center/cover;"></div>
+              <div class="hc-img more" style="background: url('images/3.jpg') center/cover;" data-more="+4"></div>
+            </div>
+            <div class="hc-meta">
+              <span class="hc-meta-type">6 images</span>
+              <span class="hc-meta-dot"></span>
+              <span class="hc-meta-time">5d ago</span>
+            </div>
+          </div>
+
+          <div class="history-card" onclick="openDrawer('tokyo')">
+            <svg class="hc-pin" width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" fill="currentColor"/></svg>
+            <div class="hc-header">
+              <div class="hc-name">Tokyo After Dark</div>
+              <span class="hc-score strong">92</span>
+            </div>
+            <div class="hc-preview">Shibuya night. Neon ABC camo. Cyber katakana.</div>
+            <div class="hc-images">
+              <div class="hc-img" style="background: url('images/6.jpg') center/cover;"></div>
+              <div class="hc-img" style="background: url('images/8.jpg') center/cover;"></div>
+            </div>
+            <div class="hc-meta">
+              <span class="hc-meta-type">Text + 2 refs</span>
+              <span class="hc-meta-dot"></span>
+              <span class="hc-meta-time">1w ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent section -->
+      <div class="history-block">
+        <div class="history-header">
+          <svg class="history-icon" width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3.5l2 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span class="history-label">Recent</span>
+          <span class="history-count">5</span>
+          <div class="history-spacer"></div>
+          <span class="history-viewall">View all →</span>
+        </div>
+        <div class="history-grid">
+          <div class="history-card" onclick="openDrawer('anime')">
+            <div class="hc-header">
+              <div class="hc-name">Anime Collab Pitch</div>
+              <span class="hc-score good">79</span>
+            </div>
+            <div class="hc-preview">Jujutsu Kaisen × Milo concept.</div>
+            <div class="hc-meta">
+              <span class="hc-meta-type">Text only</span>
+              <span class="hc-meta-dot"></span>
+              <span class="hc-meta-time">3d</span>
+            </div>
+          </div>
+          <div class="history-card" onclick="openDrawer('camo')">
+            <div class="hc-header">
+              <div class="hc-name">Camo Windbreaker FW26</div>
+              <span class="hc-score strong">82</span>
+            </div>
+            <div class="hc-preview">Outdoor tech × ABC camo hybrid.</div>
+            <div class="hc-images">
+              <div class="hc-img" style="background: url('images/4.jpg') center/cover;"></div>
+              <div class="hc-img" style="background: url('images/13.jpg') center/cover;"></div>
+            </div>
+            <div class="hc-meta">
+              <span class="hc-meta-type">2 images + URL</span>
+              <span class="hc-meta-dot"></span>
+              <span class="hc-meta-time">4d</span>
+            </div>
+          </div>
+          <div class="history-card" onclick="openDrawer('soft')">
+            <div class="hc-header">
+              <div class="hc-name">"Soft Milo" Palette Test</div>
+              <span class="hc-score mid">52</span>
+            </div>
+            <div class="hc-preview">Cozycore pastel take on Milo IP.</div>
+            <div class="hc-meta">
+              <span class="hc-meta-type">Text only</span>
+              <span class="hc-meta-dot"></span>
+              <span class="hc-meta-time">6d</span>
+            </div>
+          </div>
+          <div class="history-card" onclick="openDrawer('gorp')">
+            <div class="hc-header">
+              <div class="hc-name">Gorpcore Collab Test</div>
+              <span class="hc-score good">66</span>
+            </div>
+            <div class="hc-preview">BAPE × Salomon gorp-adjacent.</div>
+            <div class="hc-images">
+              <div class="hc-img" style="background: url('images/14.jpg') center/cover;"></div>
+              <div class="hc-img" style="background: url('images/15.jpg') center/cover;"></div>
+              <div class="hc-img" style="background: url('images/16.jpg') center/cover;"></div>
+            </div>
+            <div class="hc-meta">
+              <span class="hc-meta-type">3 images</span>
+              <span class="hc-meta-dot"></span>
+              <span class="hc-meta-time">1w</span>
+            </div>
+          </div>
+          <div class="history-card" onclick="openDrawer('min')">
+            <div class="hc-header">
+              <div class="hc-name">Minimalist Brand Test</div>
+              <span class="hc-score low">38</span>
+            </div>
+            <div class="hc-preview">"What if BAPE went quiet?"</div>
+            <div class="hc-meta">
+              <span class="hc-meta-type">Text only</span>
+              <span class="hc-meta-dot"></span>
+              <span class="hc-meta-time">2w</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- Drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title-wrap">
+      <div class="drawer-eyebrow">Sandbox Analysis</div>
+      <div class="drawer-title" id="drawerTitle">—</div>
+    </div>
+    <button class="drawer-pin" id="drawerPin" onclick="togglePin()">
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      <span id="drawerPinLabel">Pin</span>
+    </button>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+
+  <div class="drawer-body" id="drawerBody"></div>
+
+  <div class="drawer-footer">
+    <button class="d-btn primary">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2h5l2 2v7H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4.5 6.5h4M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Start brief with adjustments
+    </button>
+    <button class="d-btn secondary">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l4 4 4-8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Re-score
+    </button>
+  </div>
+</aside>
+
+<script>
+  const analyses = {
+    hana: {
+      title: 'SS26 · Hana Matsuri', thumb: 'tile-gradient-5',
+      desc: 'Cherry blossom streetwear moment for Shibuya flagship reopening. Pastel palette — blush pink and pale gold. Flowing botanical patterns replacing ABC camo. Japanese typography prominence.',
+      meta: 'Text + 3 refs · 12 min ago · 127 archive matches',
+      score: 64, tier: 'mid',
+      verdict: 'Directionally on-brand · adjust before briefing',
+      note: 'Strong cultural + audience fit. Palette and pattern need work. <strong>You\'ve made something like this before</strong> — see matches.',
+      recoTitle: '"Sakura-Dyed ABC Camo" — don\'t invent new botanicals, re-run your own playbook',
+      recoBody: 'The cultural moment fits (92%) and your audience lives here. But <strong>abandoning ABC camo for generic botanicals reads off-brand</strong>. You\'ve already solved this: your <strong>Sakura Pink Camo</strong> assets (2024) scored 84%. Reinterpret that playbook.',
+      bars: [['Visual identity',48,'amber'],['Tonal alignment',72,'mid'],['Cultural fit',92,'strong'],['Audience',91,'strong']],
+      evidence: [{g:5,l:'Sakura Pink Camo 2024',s:84},{g:7,l:'Gold Foil JP Type',s:72},{g:1,l:'Spring Editorial 2025',s:68},{g:4,l:'Shibuya Petals',s:61}],
+      adjustments: [
+        ['keep','Keep','<strong>Sakura moment and pastel color story.</strong> Seasonal + market fit are your strongest signals.'],
+        ['change','Change','<strong>Botanicals → sakura-dyed ABC camo.</strong> Keep geometric camo, re-color blush pink and pale gold.'],
+        ['preserve','Preserve','<strong>Logo prominence + shark integration.</strong> Soft palette doesn\'t mean quiet branding.']
+      ],
+      pinned: true
+    },
+    neomax: {
+      title: 'Neo-Max Store Concept', thumb: 'tile-gradient-1',
+      desc: 'Loud-louder-loudest retail moment. Print-on-print. Shark-green camo floor-to-ceiling. Shibuya test store. Anti-quiet-luxury signal.',
+      meta: '6 images · 2 days ago · 210 archive matches',
+      score: 91, tier: 'strong',
+      verdict: 'Strong brand fit · move on it',
+      note: 'Your DNA expressed at full volume. Competitors drifting quieter — this claims space they\'re leaving open.',
+      recoTitle: '"Louder, On Purpose" — ship it as a statement',
+      recoBody: 'Don\'t soften anything. Go with <strong>every BAPE signature at once</strong> — camo, shark, Milo, gold foil. Shibuya timing hits the Neo-Maximalism wave at peak. Test store runs 8 weeks then rotates to global flagships.',
+      bars: [['Visual identity',96,'strong'],['Tonal alignment',92,'strong'],['Cultural fit',88,'strong'],['Audience',86,'strong']],
+      evidence: [{g:1,l:'Tokyo Green Store',s:94},{g:2,l:'Shark Red Hoodie',s:91},{g:7,l:'Gold Type Drop',s:88},{g:5,l:'Pink Camo Window',s:84}],
+      adjustments: [
+        ['keep','Keep','<strong>Everything. Ship as-is.</strong> The concept already IS your brand at peak expression.'],
+        ['preserve','Preserve','<strong>Shibuya test placement.</strong> Right market, right timing for Neo-Max wave.']
+      ],
+      pinned: true
+    },
+    tokyo: {
+      title: 'Tokyo After Dark', thumb: 'tile-gradient-8',
+      desc: 'Shibuya night drop. Neon ABC camo. Cyber typography in katakana. Rave-adjacent energy. 3am street photography aesthetic.',
+      meta: 'Text + 2 refs · 5 days ago · 84 archive matches',
+      score: 85, tier: 'strong',
+      verdict: 'Strong brand fit · own this space',
+      note: 'Berlin rave is Marine Serre\'s. Tokyo rave is unclaimed — and authentically yours.',
+      recoTitle: '"After Dark" drop · take the Tokyo rave space',
+      recoBody: 'Nobody owns Tokyo night streetwear yet. <strong>Lean in hard</strong>: neon ABC camo, katakana typography, Shibuya 3am shoots. Spring capsule + rave event partnership with a Tokyo club. White space closes in 6 months.',
+      bars: [['Visual identity',82,'strong'],['Tonal alignment',88,'strong'],['Cultural fit',90,'strong'],['Audience',86,'strong']],
+      evidence: [{g:8,l:'Neon Editorial',s:88},{g:1,l:'Shibuya Night',s:82},{g:2,l:'Red Cyber Drop',s:78}],
+      adjustments: [
+        ['keep','Keep','<strong>Tokyo night positioning.</strong> Irreproducible by US competitors.'],
+        ['preserve','Preserve','<strong>Katakana typography.</strong> Core Japanese-IP differentiator.']
+      ],
+      pinned: true
+    },
+    y2k: {
+      title: 'Y2K Chrome Drop', thumb: 'tile-gradient-7',
+      desc: 'Chrome puffer silhouette with Baby Milo chrome-embossed graphic. Rave-metal aesthetic meets 2003 archive. Matrix-era reference.',
+      meta: '4 images · 1 day ago · 156 archive matches',
+      score: 88, tier: 'strong',
+      verdict: 'Strong brand fit · ship fast',
+      note: 'Your founding era. You invented Y2K streetwear. Let others interpret; you own it.',
+      recoTitle: '"Baby Milo Was Always Y2K"',
+      recoBody: 'Don\'t chase Y2K — <strong>reclaim it</strong>. Reissue 2003 Chrome Camo. Revive the Milo chrome-embossed tee. <strong>Your archive IS the trend.</strong> Peak signal right now.',
+      bars: [['Visual identity',92,'strong'],['Tonal alignment',84,'strong'],['Cultural fit',88,'strong'],['Audience',88,'strong']],
+      evidence: [{g:7,l:'2003 Chrome Archive',s:95},{g:4,l:'Milo Chrome 2002',s:91},{g:2,l:'Matrix Campaign',s:85}],
+      adjustments: [
+        ['keep','Keep','<strong>Every reference is archival.</strong> Don\'t reinvent.'],
+        ['preserve','Preserve','<strong>Chrome embossing technique.</strong> Harder to copy than a graphic.']
+      ]
+    },
+    anime: {
+      title: 'Anime Collab Pitch', thumb: 'tile-gradient-4',
+      desc: 'Jujutsu Kaisen × Baby Milo crossover. Key art adapted as drop exclusive. Summer 2026 timing.',
+      meta: 'Text only · 3 days ago · 48 archive matches',
+      score: 79, tier: 'good',
+      verdict: 'Good fit · worth exploring',
+      note: 'Right category. Need to lock licensing before Uniqlo UT gets there.',
+      recoTitle: 'Move fast — Uniqlo UT window is 4-6 months',
+      recoBody: 'Japanese IP is core territory. JJK is peaking internationally. <strong>Lock the licensing deal now</strong>, drop during Season 3 premiere. Risk: if Uniqlo closes exclusivity, you\'re locked out of this IP for 18 months.',
+      bars: [['Visual identity',82,'strong'],['Tonal alignment',76,'good'],['Cultural fit',88,'strong'],['Audience',94,'strong']],
+      evidence: [{g:4,l:'DBZ Collab 2021',s:86},{g:2,l:'Pokémon Gold Tee',s:78}],
+      adjustments: [
+        ['change','Change','<strong>Explore alternatives if JJK window closes</strong> — Chainsaw Man, Demon Slayer S5.'],
+        ['preserve','Preserve','<strong>Drop window timing.</strong> Anime S3 premiere is the hero moment.']
+      ]
+    },
+    camo: {
+      title: 'Camo Windbreaker FW26', thumb: 'tile-gradient-4',
+      desc: 'BAPE × Columbia follow-up. Outdoor-tech shell with ABC camo. Urban gorp positioning.',
+      meta: '2 images + URL · 4 days ago · 92 archive matches',
+      score: 82, tier: 'strong',
+      verdict: 'Strong brand fit · ship',
+      note: 'Builds on successful Columbia 2022 collab. Urban gorp moment fits.',
+      recoTitle: 'Columbia playbook v2 — elevate the camo',
+      recoBody: 'Previous Columbia collab scored 88% post-launch ROAS. Repeat with <strong>updated pattern — ABC camo in Tokyo-night colorway</strong>. Launch at Shibuya flagship + Dover Street Market drop.',
+      bars: [['Visual identity',88,'strong'],['Tonal alignment',82,'strong'],['Cultural fit',78,'good'],['Audience',82,'strong']],
+      evidence: [{g:1,l:'Columbia 2022',s:92},{g:4,l:'Tech Shell Archive',s:84}],
+      adjustments: [
+        ['change','Change','<strong>Update ABC camo colorway</strong> to Tokyo-night vs 2022 Green.'],
+        ['preserve','Preserve','<strong>Columbia co-branding lockup.</strong> Proven partnership equity.']
+      ]
+    },
+    soft: {
+      title: '"Soft Milo" Palette Test', thumb: 'tile-gradient-5',
+      desc: 'Cozycore pastel take on Milo IP. Fuzzy plush texture, muted pink palette. Drop into accessories, not apparel core.',
+      meta: 'Text only · 6 days ago · 34 archive matches',
+      score: 52, tier: 'mid',
+      verdict: 'Mixed fit · test as micro-moment only',
+      note: 'Cozycore diverges from loud DNA. Could work as accessories drop, not campaign direction.',
+      recoTitle: 'Test, don\'t pivot',
+      recoBody: '<strong>Don\'t rebuild the brand around this.</strong> Single SKU test: plush Baby Milo slippers, one drop. If it lands, expand to soft-goods accessories line. If not, archive it.',
+      bars: [['Visual identity',38,'weak'],['Tonal alignment',44,'amber'],['Cultural fit',62,'mid'],['Audience',58,'mid']],
+      evidence: [{g:5,l:'Baby Milo Plush 2019',s:66}],
+      adjustments: [
+        ['change','Change','<strong>Accessories-only scope.</strong> Don\'t let it touch core apparel.'],
+        ['preserve','Preserve','<strong>Milo IP ownership.</strong> Soft aesthetic still needs the character anchor.']
+      ]
+    },
+    gorp: {
+      title: 'Gorpcore Collab Test', thumb: 'tile-gradient-1',
+      desc: 'BAPE × Salomon. Trail-running silhouette with camo accent. Urban gorp positioning.',
+      meta: '3 images · 1 week ago · 67 archive matches',
+      score: 66, tier: 'good',
+      verdict: 'Good fit · needs distinct angle',
+      note: 'Gorpcore is crowded. Palace is testing. Need a sharper angle than "outdoor + camo."',
+      recoTitle: '"Urban Gorp, Made in Tokyo" — geographic twist',
+      recoBody: 'Palace is entering this space. Differentiate with <strong>Tokyo-street context, not trailhead.</strong> Shoot in Shibuya/Shimokitazawa, not in nature. Trail silhouette, metropolis setting.',
+      bars: [['Visual identity',68,'mid'],['Tonal alignment',62,'mid'],['Cultural fit',72,'mid'],['Audience',58,'mid']],
+      evidence: [{g:1,l:'Columbia 2022',s:78}],
+      adjustments: [
+        ['change','Change','<strong>Reframe context</strong> — Tokyo urban, not outdoor trail.'],
+        ['preserve','Preserve','<strong>Technical silhouette.</strong> The trend IS the tech-gear shape.']
+      ]
+    },
+    min: {
+      title: 'Minimalist Brand Test', thumb: 'tile-gradient-6',
+      desc: '"What if BAPE went quiet?" Neutral palette, reduced logo, stealth-wealth positioning. Thought experiment.',
+      meta: 'Text only · 2 weeks ago · 12 archive matches',
+      score: 38, tier: 'low',
+      verdict: 'Low fit · likely skip',
+      note: 'Core brand contradiction. Losing what makes you recognizable.',
+      recoTitle: 'Don\'t go quiet — claim the opposite',
+      recoBody: 'Quiet luxury is Aimé Leon Dore\'s territory. <strong>You\'re the Neo-Max anchor.</strong> Every time a peer goes quieter, it makes your loudness more valuable. Skip this direction entirely; double down on Neo-Max instead.',
+      bars: [['Visual identity',18,'weak'],['Tonal alignment',24,'weak'],['Cultural fit',52,'amber'],['Audience',54,'amber']],
+      evidence: [],
+      adjustments: [
+        ['change','Change','<strong>Reverse the premise.</strong> Go LOUDER while competitors go quieter.']
+      ]
+    }
+  };
+
+  let currentId = null;
+
+  function openDrawer(id) {
+    const a = analyses[id];
+    if (!a) return;
+    currentId = id;
+
+    document.getElementById('drawerTitle').textContent = a.title;
+
+    // Pin button state
+    const pinBtn = document.getElementById('drawerPin');
+    const pinLabel = document.getElementById('drawerPinLabel');
+    if (a.pinned) {
+      pinBtn.classList.add('active');
+      pinLabel.textContent = 'Pinned';
+    } else {
+      pinBtn.classList.remove('active');
+      pinLabel.textContent = 'Pin';
+    }
+
+    // Body
+    const barsHtml = a.bars.map(([key, val, cls]) =>
+      `<div class="bd-row"><span class="bd-key">${key}</span><div class="bd-bar"><div class="bd-fill ${cls}" style="width:${val}%"></div></div><span class="bd-val">${val}</span></div>`
+    ).join('');
+
+    const evidenceHtml = a.evidence.length ? `
+      <div class="panel">
+        <div class="panel-label">Closest Archive Matches · ${a.evidence.length} shown</div>
+        <div class="ev-grid">
+          ${a.evidence.map(e => `
+            <div class="ev-tile tile-gradient-${e.g}">
+              <span class="ev-score-mini">${e.s}%</span>
+              <div class="ev-label">${e.l}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : '';
+
+    const adjHtml = a.adjustments.length ? `
+      <div class="panel">
+        <div class="panel-label">Suggested Adjustments</div>
+        <div class="adj-list">
+          ${a.adjustments.map(([cls,type,body]) => `
+            <div class="adj-row ${cls}">
+              <div class="adj-icon">
+                ${cls === 'keep' ? '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 6l2.5 2.5L9 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                ${cls === 'change' ? '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5h5M5 2.5l3 3-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                ${cls === 'preserve' ? '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 2l5 2v4c0 2-2 3-5 4-3-1-5-2-5-4V4l5-2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>' : ''}
+              </div>
+              <div class="adj-body"><span class="adj-type">${type}</span>${body}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : '';
+
+    document.getElementById('drawerBody').innerHTML = `
+      <div class="input-summary">
+        <div class="is-thumb ${a.thumb}"></div>
+        <div class="is-body">
+          <div class="is-name">${a.title}</div>
+          <div class="is-desc">${a.desc}</div>
+          <div class="is-meta">${a.meta}</div>
+        </div>
+      </div>
+
+      <div class="score-hero">
+        <div class="score-row">
+          <div class="score-badge tier-${a.tier}">${a.score}</div>
+          <div class="score-info">
+            <div class="score-verdict">${a.verdict}</div>
+            <div class="score-note">${a.note}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reco">
+        <div class="reco-header">
+          <div class="reco-icon"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.2"/></svg></div>
+          <div class="reco-label">Recommended Angle</div>
+        </div>
+        <div class="reco-title">${a.recoTitle}</div>
+        <div class="reco-body">${a.recoBody}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-label">Fit Breakdown</div>
+        ${barsHtml}
+      </div>
+
+      ${evidenceHtml}
+      ${adjHtml}
+    `;
+
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerBackdrop').classList.add('open');
+    document.getElementById('drawerBody').scrollTop = 0;
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerBackdrop').classList.remove('open');
+  }
+
+  function togglePin() {
+    if (!currentId) return;
+    const pinBtn = document.getElementById('drawerPin');
+    const pinLabel = document.getElementById('drawerPinLabel');
+    const isPinned = pinBtn.classList.toggle('active');
+    pinLabel.textContent = isPinned ? 'Pinned' : 'Pin';
+    analyses[currentId].pinned = isPinned;
+  }
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+
+</body>
+</html>

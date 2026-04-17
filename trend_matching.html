@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Inspiration / Opportunities</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a;
+    --bg-panel: #0f1011;
+    --bg-surface: #191a1b;
+    --bg-elevated: #28282c;
+
+    --text-primary: #f7f8f8;
+    --text-secondary: #d0d6e0;
+    --text-tertiary: #8a8f98;
+    --text-quaternary: #62666d;
+
+    --brand: #5e6ad2;
+    --brand-accent: #7170ff;
+    --brand-hover: #828fff;
+
+    --border-subtle: rgba(255,255,255,0.05);
+    --border-standard: rgba(255,255,255,0.08);
+    --border-solid: #23252a;
+
+    --surface-1: rgba(255,255,255,0.02);
+    --surface-2: rgba(255,255,255,0.04);
+    --surface-3: rgba(255,255,255,0.05);
+
+    --status-green: #10b981;
+    --status-amber: #f59e0b;
+    --status-red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { background: var(--bg-canvas); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
+  button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* ═══ MAIN ═══ */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-root:hover { color: var(--text-secondary); }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-family: inherit; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 720px; margin-bottom: 28px; }
+
+  /* Stat strip */
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .stat-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .stat-icon.green { color: var(--status-green); }
+  .stat-meta { display: flex; flex-direction: column; gap: 0; }
+  .stat-value { font-size: 14px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .stat-label { font-size: 11px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* Filter bar */
+  .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 8px 0; flex-wrap: wrap; }
+  .filter-dropdown { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: all 0.12s; font-family: inherit; }
+  .filter-dropdown:hover { background: var(--surface-3); color: var(--text-primary); }
+  .filter-dropdown-label { font-size: 10px; color: var(--text-quaternary); font-weight: 510; text-transform: uppercase; letter-spacing: 0.4px; margin-right: 2px; }
+  .filter-chev { color: var(--text-tertiary); width: 10px; height: 10px; }
+  .filter-spacer { flex: 1; }
+  .filter-count { font-size: 12px; color: var(--text-tertiary); font-weight: 510; letter-spacing: -0.13px; }
+
+  /* Opportunity cards */
+  .opp-list { display: flex; flex-direction: column; gap: 8px; }
+  .opp-card { display: grid; grid-template-columns: 82px 1fr auto; gap: 18px; padding: 16px 18px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; cursor: pointer; transition: all 0.14s; align-items: center; }
+  .opp-card:hover { background: var(--surface-2); border-color: rgba(113,112,255,0.35); transform: translateY(-1px); }
+
+  .opp-score-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .opp-score { width: 68px; height: 68px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 590; letter-spacing: -0.4px; font-variant-numeric: tabular-nums; }
+  .opp-score.tier-strong { background: linear-gradient(135deg, rgba(16,185,129,0.28), rgba(16,185,129,0.08)); border: 1px solid rgba(16,185,129,0.4); color: var(--status-green); }
+  .opp-score.tier-good { background: linear-gradient(135deg, rgba(113,112,255,0.28), rgba(113,112,255,0.08)); border: 1px solid rgba(113,112,255,0.4); color: var(--brand-accent); }
+  .opp-score.tier-mid { background: linear-gradient(135deg, rgba(245,158,11,0.22), rgba(245,158,11,0.06)); border: 1px solid rgba(245,158,11,0.35); color: var(--status-amber); }
+  .opp-score.tier-low { background: linear-gradient(135deg, rgba(239,68,68,0.18), rgba(239,68,68,0.04)); border: 1px solid rgba(239,68,68,0.3); color: var(--status-red); }
+  .opp-score-label { font-size: 9px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .opp-body { min-width: 0; }
+  .opp-name { font-size: 16px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.21px; line-height: 1.3; margin-bottom: 3px; }
+  .opp-desc { font-size: 13px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.45; margin-bottom: 8px; }
+  .opp-reason { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.45; margin-bottom: 10px; font-style: italic; }
+  .opp-stats { display: flex; align-items: center; gap: 12px; font-size: 11px; letter-spacing: -0.13px; }
+  .opp-stat { display: inline-flex; align-items: center; gap: 4px; color: var(--text-quaternary); }
+  .opp-stat strong { color: var(--text-secondary); font-weight: 510; font-variant-numeric: tabular-nums; }
+  .opp-stat-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-quaternary); }
+
+  .opp-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 130px; }
+  .opp-tag-row { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  .opp-tag { font-size: 9px; font-weight: 510; padding: 2px 7px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
+  .opp-tag.core { background: rgba(113,112,255,0.14); color: var(--brand-accent); border: 1px solid rgba(113,112,255,0.3); }
+  .opp-tag.secondary { background: var(--surface-3); color: var(--text-secondary); border: 1px solid var(--border-standard); }
+  .opp-tag.emerging { background: rgba(16,185,129,0.12); color: var(--status-green); border: 1px solid rgba(16,185,129,0.3); }
+  .opp-tag.all { background: rgba(255,255,255,0.04); color: var(--text-tertiary); border: 1px solid var(--border-standard); }
+  .opp-tag.rising { background: rgba(16,185,129,0.1); color: var(--status-green); border: 1px solid rgba(16,185,129,0.28); }
+  .opp-tag.peaking { background: rgba(245,158,11,0.1); color: var(--status-amber); border: 1px solid rgba(245,158,11,0.3); }
+  .opp-tag.declining { background: rgba(239,68,68,0.08); color: var(--status-red); border: 1px solid rgba(239,68,68,0.3); }
+  .opp-chevron { color: var(--text-tertiary); transition: color 0.12s, transform 0.12s; }
+  .opp-card:hover .opp-chevron { color: var(--brand-accent); transform: translateX(2px); }
+
+  /* ═══ Drawer ═══ */
+  .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 90; }
+  .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 620px; max-width: 100vw; background: var(--bg-surface); border-left: 1px solid var(--border-standard); box-shadow: -8px 0 32px rgba(0,0,0,0.5); z-index: 100; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+  .drawer-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+  .drawer-title-wrap { flex: 1; min-width: 0; }
+  .drawer-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drawer-close { width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--text-tertiary); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; }
+  .drawer-close:hover { background: var(--surface-2); color: var(--text-primary); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+  .d-hero { background: linear-gradient(to bottom right, rgba(113,112,255,0.08), rgba(113,112,255,0.01) 70%); border: 1px solid var(--border-standard); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .d-tag-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .d-hero-title { font-size: 22px; font-weight: 400; letter-spacing: -0.288px; line-height: 1.2; color: var(--text-primary); margin-bottom: 6px; }
+  .d-hero-desc { font-size: 13px; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.5; margin-bottom: 14px; }
+  .d-score-row { display: flex; align-items: center; gap: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+  .d-score-badge { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 590; letter-spacing: -0.3px; flex-shrink: 0; }
+  .d-score-info { flex: 1; }
+  .d-verdict { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; margin-bottom: 2px; }
+  .d-verdict-note { font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; }
+  .d-signal { display: flex; align-items: flex-end; gap: 2px; height: 22px; }
+  .d-signal-bar { width: 5px; background: var(--brand-accent); border-radius: 1px; opacity: 0.85; }
+
+  .d-reco { background: linear-gradient(to bottom right, rgba(113,112,255,0.1), rgba(113,112,255,0.02)); border: 1px solid rgba(113,112,255,0.28); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+  .d-reco-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+  .d-reco-icon { width: 22px; height: 22px; background: rgba(113,112,255,0.18); border: 1px solid rgba(113,112,255,0.35); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .d-reco-label { font-size: 9px; font-weight: 510; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 0.5px; }
+  .d-reco-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; margin-bottom: 6px; }
+  .d-reco-body { font-size: 13px; font-weight: 400; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.55; }
+  .d-reco-body strong { color: var(--text-primary); font-weight: 510; }
+
+  .d-section { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .d-section-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+  .bd-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 12px; letter-spacing: -0.13px; }
+  .bd-key { color: var(--text-secondary); width: 110px; flex-shrink: 0; font-weight: 510; }
+  .bd-bar { flex: 1; height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .bd-fill { height: 100%; border-radius: 999px; }
+  .bd-fill.strong { background: var(--status-green); }
+  .bd-fill.mid { background: var(--brand-accent); }
+  .bd-fill.amber { background: var(--status-amber); }
+  .bd-fill.weak { background: var(--status-red); }
+  .bd-val { color: var(--text-primary); font-weight: 510; width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .comp-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12px; letter-spacing: -0.13px; border-bottom: 1px solid var(--border-subtle); }
+  .comp-row:last-child { border-bottom: none; }
+  .comp-logo { width: 24px; height: 24px; border-radius: 5px; background: var(--surface-2); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 590; color: var(--text-primary); flex-shrink: 0; }
+  .comp-name { flex: 1; color: var(--text-primary); font-weight: 510; }
+  .comp-bar { width: 70px; height: 4px; background: var(--surface-2); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+  .comp-fill { height: 100%; border-radius: 999px; }
+  .comp-pct { font-size: 11px; color: var(--text-primary); font-weight: 510; width: 30px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .ev-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .ev-tile { aspect-ratio: 1; border-radius: 5px; border: 1px solid var(--border-subtle); position: relative; overflow: hidden; cursor: pointer; }
+  .ev-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 4px 6px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); font-size: 9px; font-weight: 510; color: rgba(255,255,255,0.95); line-height: 1.2; letter-spacing: -0.13px; }
+  .tile-gradient-1 { background: radial-gradient(circle at 30% 20%, #2d4a2a, #0c1a0a); }
+  .tile-gradient-2 { background: radial-gradient(circle at 70% 30%, #8b1a1a, #1a0808); }
+  .tile-gradient-4 { background: linear-gradient(135deg, #3a2a1a, #1a0c04); }
+  .tile-gradient-5 { background: radial-gradient(circle at 40% 70%, #e5b4b0, #3a1a1a); }
+  .tile-gradient-6 { background: linear-gradient(180deg, #1a1a1a, #0a0a0a); }
+  .tile-gradient-7 { background: radial-gradient(circle at 50% 50%, #b8a568, #3a3020); }
+  .tile-gradient-8 { background: radial-gradient(circle at 30% 80%, #4a2d5a, #0c0814); }
+
+  .div-row { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; font-size: 12px; letter-spacing: -0.13px; border-bottom: 1px solid var(--border-subtle); }
+  .div-row:last-child { border-bottom: none; }
+  .div-icon { width: 18px; height: 18px; background: rgba(239,68,68,0.12); color: var(--status-red); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .div-text { flex: 1; color: var(--text-secondary); line-height: 1.5; }
+  .div-text strong { color: var(--text-primary); font-weight: 510; }
+
+  .drawer-footer { border-top: 1px solid var(--border-subtle); padding: 12px 16px; display: flex; gap: 6px; flex-shrink: 0; background: var(--bg-surface); }
+  .d-btn { flex: 1; padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.12s; font-family: inherit; }
+  .d-btn.primary { background: var(--brand); border: 1px solid var(--brand); color: white; }
+  .d-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .d-btn.secondary { background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-primary); }
+  .d-btn.secondary:hover { background: var(--surface-3); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </div>
+    <a class="nav-item" href="brand_sandbox.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <a class="nav-item" href="clusters.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Briefs</span>
+    </a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Creator Studio</span>
+    </a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Asset Manager</span>
+    </a>
+    <a class="nav-item" href="reviews.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reviews</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">ROAS Dashboard</span>
+    </a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reports</span>
+    </a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Competitive Intel</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Team</span>
+    </a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Presets</span>
+    </a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Admin</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Inspiration</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">Opportunities</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="3" width="8" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M4 3V2M8 3V2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Watchlist
+      </button>
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 5l3-3 3 3M2 10h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Share
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Inspiration · Opportunities</div>
+      <h1 class="page-title">Cultural opportunities for BAPE</h1>
+      <p class="page-desc">Global trends ranked by how they fit your brand, audience, and timing. Scored on DNA alignment (Current Brand) × audience overlap × competitor whitespace × market signal. Click any opportunity for the full analysis and recommended angle.</p>
+
+      <div class="stat-strip">
+        <div class="stat-card">
+          <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="stat-meta"><div class="stat-value">47</div><div class="stat-label">Opportunities tracked</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="stat-meta"><div class="stat-value">12</div><div class="stat-label">High-fit (score &gt; 70)</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 13V7M8 13V4M12 13V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <div class="stat-meta"><div class="stat-value">8</div><div class="stat-label">Rising fast this week</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+          <div class="stat-meta"><div class="stat-value">67</div><div class="stat-label">Avg opportunity score</div></div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Region</span><span>All regions</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Audience</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Stage</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Age</span><span>All ages</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="filter-spacer"></div>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Opportunity</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span class="filter-count">12 of 47</span>
+      </div>
+
+      <div class="opp-list" id="oppList"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title-wrap">
+      <div class="drawer-eyebrow">Trend Analysis</div>
+      <div class="drawer-title" id="drawerTitle">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer">
+    <button class="d-btn primary">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2h5l2 2v7H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4.5 6.5h4M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Start brief from this angle
+    </button>
+    <button class="d-btn secondary">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="3" width="8" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+      Track
+    </button>
+    <button class="d-btn secondary">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 7.5L10 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Refs
+    </button>
+  </div>
+</aside>
+
+<script>
+  const opportunities = [
+    { id: 'heritage', name: 'Heritage Storytelling', score: 94, tier: 'strong',
+      desc: 'Brands leaning into archival, lineage, and decades-deep narrative. Dominant in luxury, rising in streetwear.',
+      reason: 'Core brand DNA. Rising market signal. Competitor space wide open.',
+      brandFit: 95, audience: 68, compOpen: 72,
+      tags: [['core','Core'],['rising','Rising']],
+      category: ['Narrative'],
+      signal: [20, 35, 48, 62, 75, 88, 96],
+      competitors: [{n:'Supreme',v:12,c:'muted'},{n:'Palace',v:18,c:'muted'},{n:'ALD',v:34,c:'brand'},{n:'Stüssy',v:28,c:'brand'}],
+      evidence: [{g:4,l:'Milo Archive 2004'},{g:1,l:'1st Camo Green'},{g:7,l:'30yr Retrospective'},{g:6,l:'FW23 Lookbook'}],
+      divergence: []
+    },
+    { id: 'neomax', name: 'Neo-Maximalism', score: 93, tier: 'strong',
+      desc: 'Pop-culture saturation, loud graphics, bright colorways. Generational reaction to quiet-luxury fatigue.',
+      reason: 'Your DNA exactly. Palace barely started. You\'re the obvious anchor.',
+      brandFit: 96, audience: 82, compOpen: 65,
+      tags: [['core','Core'],['rising','Rising']],
+      category: ['Aesthetic'],
+      signal: [15, 28, 42, 58, 72, 85, 93],
+      competitors: [{n:'Supreme',v:58,c:'brand'},{n:'Palace',v:22,c:'muted'},{n:'BAPE',v:88,c:'self'},{n:'Stüssy',v:35,c:'brand'}],
+      evidence: [{g:2,l:'Red Shark Hoodie'},{g:7,l:'Gold Foil Type'},{g:5,l:'Sakura Pink Camo'},{g:1,l:'Green Camo Store'}],
+      divergence: []
+    },
+    { id: 'y2k', name: 'Y2K Revival', score: 91, tier: 'strong',
+      desc: 'Early-2000s aesthetics: chromes, bubbles, low-rise, pixelated graphics. Gen Z rediscovery.',
+      reason: 'Your founding era. Strong audience nostalgia. Peak signal now.',
+      brandFit: 88, audience: 72, compOpen: 40,
+      tags: [['core','Core'],['secondary','Secondary'],['peaking','Peaking']],
+      category: ['Era'],
+      signal: [45, 60, 72, 82, 88, 94, 91],
+      competitors: [{n:'Supreme',v:62,c:'brand'},{n:'Stüssy',v:48,c:'brand'},{n:'Palace',v:38,c:'brand'},{n:'Dsquared2',v:72,c:'brand'}],
+      evidence: [{g:4,l:'2003 Campaign'},{g:7,l:'Chrome Milo'},{g:2,l:'Baggy Graphic Tee'},{g:6,l:'Matrix Shoot'}],
+      divergence: []
+    },
+    { id: 'anime', name: 'Anime Crossover', score: 88, tier: 'strong',
+      desc: 'Anime × fashion collabs driving hypebeast attention. Demon Slayer, Jujutsu Kaisen, One Piece energy.',
+      reason: 'Your Japanese IP. Highest audience overlap (94%). Stüssy entering — move fast.',
+      brandFit: 91, audience: 94, compOpen: 55,
+      tags: [['core','Core'],['rising','Rising']],
+      category: ['Collab'],
+      signal: [30, 42, 55, 68, 78, 85, 88],
+      competitors: [{n:'Stüssy',v:28,c:'muted'},{n:'Supreme',v:42,c:'brand'},{n:'Uniqlo UT',v:85,c:'brand'},{n:'BAPE',v:68,c:'self'}],
+      evidence: [{g:4,l:'Milo × Shonen'},{g:2,l:'DBZ Collab 2021'},{g:7,l:'Pokémon Gold'},{g:8,l:'Manga Hoodie'}],
+      divergence: []
+    },
+    { id: 'rave', name: 'Rave Revival', score: 82, tier: 'strong',
+      desc: 'Tokyo and Berlin rave aesthetics. Neon graphics, cyber fonts, strobe visuals. TikTok-driven.',
+      reason: 'Tokyo-native. Your audience lives here. Huge white space.',
+      brandFit: 78, audience: 86, compOpen: 78,
+      tags: [['core','Core'],['rising','Rising']],
+      category: ['Subculture'],
+      signal: [22, 38, 52, 66, 74, 80, 82],
+      competitors: [{n:'Palace',v:12,c:'muted'},{n:'Stüssy',v:22,c:'muted'},{n:'Marine Serre',v:45,c:'brand'},{n:'Supreme',v:18,c:'muted'}],
+      evidence: [{g:8,l:'Tokyo Nightlife'},{g:1,l:'Neon ABC Camo'},{g:6,l:'Strobe Editorial'},{g:2,l:'Cyber Typography'}],
+      divergence: []
+    },
+    { id: 'sportluxe', name: 'Sport Luxe', score: 76, tier: 'good',
+      desc: 'Athletic performance × premium materials. Track suits, technical outerwear, sneaker culture.',
+      reason: 'Collab territory. Nike/Adidas crowded. Needs distinct angle to matter.',
+      brandFit: 72, audience: 78, compOpen: 22,
+      tags: [['core','Core'],['peaking','Peaking']],
+      category: ['Category'],
+      signal: [60, 68, 74, 80, 82, 80, 76],
+      competitors: [{n:'Supreme',v:78,c:'brand'},{n:'Palace',v:72,c:'brand'},{n:'Stüssy',v:68,c:'brand'},{n:'adidas',v:95,c:'brand'}],
+      evidence: [{g:4,l:'adidas BAPE 2024'},{g:6,l:'Track Suit Archive'},{g:1,l:'Camo Windbreaker'}],
+      divergence: [{k:'Saturation', t:'Every streetwear brand has a sport line. Need a sharper angle.'}]
+    },
+    { id: 'ai', name: 'AI Aesthetics', score: 72, tier: 'good',
+      desc: 'Generative imagery, digital-native visuals, synthetic fashion. Hot on TikTok, dividing opinion.',
+      reason: 'Strong audience signal. Risk: feels inauthentic to a heritage brand.',
+      brandFit: 58, audience: 91, compOpen: 88,
+      tags: [['core','Core'],['rising','Rising']],
+      category: ['Aesthetic'],
+      signal: [18, 32, 48, 62, 70, 72, 72],
+      competitors: [{n:'Coperni',v:82,c:'brand'},{n:'Marine Serre',v:35,c:'muted'},{n:'Supreme',v:8,c:'muted'},{n:'Palace',v:12,c:'muted'}],
+      evidence: [{g:8,l:'Cyberpunk Campaign'},{g:6,l:'Digital Milo Test'}],
+      divergence: [{k:'Authenticity', t:'AI aesthetics can undercut a heritage brand\'s craft story. Frame as toolkit not identity.'}]
+    },
+    { id: 'gorpcore', name: 'Gorpcore Outdoor', score: 68, tier: 'good',
+      desc: 'Technical outdoor gear worn as urban fashion. Patagonia, Arc\'teryx, Salomon as hype currency.',
+      reason: 'Palace is testing. Peripheral fit. North Face collab path if you want in.',
+      brandFit: 62, audience: 55, compOpen: 45,
+      tags: [['secondary','Secondary'],['rising','Rising']],
+      category: ['Category'],
+      signal: [35, 48, 58, 66, 72, 70, 68],
+      competitors: [{n:'Palace',v:45,c:'brand'},{n:'Supreme',v:58,c:'brand'},{n:'Stüssy',v:32,c:'muted'},{n:'Arc\'teryx',v:95,c:'brand'}],
+      evidence: [{g:1,l:'Columbia × BAPE 2022'},{g:6,l:'Tech Shell Archive'}],
+      divergence: [{k:'Audience', t:'Not your core segment. Requires earning the space authentically.'},{k:'DNA', t:'Utility-first diverges from your pop-maximalism.'}]
+    },
+    { id: 'sustain', name: 'Sustainability', score: 51, tier: 'mid',
+      desc: 'Recycled materials, circular fashion, take-back programs. Regulatory and consumer pressure.',
+      reason: 'Not native to BAPE. Requires narrative reframe. Competitor-heavy.',
+      brandFit: 48, audience: 62, compOpen: 15,
+      tags: [['all','All segments'],['peaking','Peaking']],
+      category: ['Values'],
+      signal: [70, 75, 78, 80, 78, 72, 51],
+      competitors: [{n:'Patagonia',v:98,c:'brand'},{n:'Stüssy',v:62,c:'brand'},{n:'Supreme',v:28,c:'brand'},{n:'ALD',v:35,c:'brand'}],
+      evidence: [{g:6,l:'Recycled Camo 2023'}],
+      divergence: [{k:'Heritage mismatch', t:'Archival drops undercut circular narrative. Pick moments, not full pivot.'},{k:'Crowded', t:'Every brand saying the same thing. Hard to stand out.'}]
+    },
+    { id: 'cozy', name: 'Cozycore', score: 45, tier: 'mid',
+      desc: 'Soft textures, muted tones, comfort-first aesthetics. Teddy coats, fuzzy slippers, oversized knits.',
+      reason: 'Soft aesthetic diverges from loud DNA. Lower cultural fit.',
+      brandFit: 38, audience: 52, compOpen: 68,
+      tags: [['emerging','Emerging'],['peaking','Peaking']],
+      category: ['Aesthetic'],
+      signal: [58, 62, 65, 62, 55, 48, 45],
+      competitors: [{n:'Palace',v:32,c:'muted'},{n:'ALD',v:58,c:'brand'},{n:'The Row',v:95,c:'brand'}],
+      evidence: [{g:5,l:'Pink Milo Plush'}],
+      divergence: [{k:'DNA', t:'You\'re not a "cozy" brand. Soft aesthetic reads off-brand.'}]
+    },
+    { id: 'quiet', name: 'Quiet Luxury', score: 42, tier: 'mid',
+      desc: 'Minimal, neutral-toned, logo-averse aesthetics favoring craftsmanship over branding.',
+      reason: 'Your audience engages but DNA diverges. Play oblique — stealth-wealth for streetwear natives.',
+      brandFit: 18, audience: 68, compOpen: 8,
+      tags: [['all','All segments'],['rising','Rising']],
+      category: ['Aesthetic'],
+      signal: [25, 35, 48, 62, 75, 85, 92],
+      competitors: [{n:'ALD',v:92,c:'brand'},{n:'Fear of God',v:78,c:'brand'},{n:'Stüssy',v:42,c:'brand'},{n:'Loro Piana',v:98,c:'brand'}],
+      evidence: [{g:6,l:'Monochrome Lookbook'},{g:4,l:'Milo Archival'},{g:7,l:'Gold Type Detail'},{g:1,l:'Soft Light Store'}],
+      divergence: [{k:'Logo prominence', t:'Your DNA is loud; QL is logo-averse.'},{k:'Saturation', t:'You lean bright; QL is neutrals.'},{k:'Volume', t:'You\'re maximalist; QL is restraint.'}]
+    },
+    { id: 'coastal', name: 'Coastal Grandma', score: 28, tier: 'low',
+      desc: 'Preppy coastal aesthetic. Linen, stripes, pastels, quiet East-Coast lifestyle vibes.',
+      reason: 'Demographic mismatch. Avoid.',
+      brandFit: 15, audience: 22, compOpen: 92,
+      tags: [['emerging','Emerging'],['peaking','Peaking']],
+      category: ['Aesthetic'],
+      signal: [42, 48, 50, 48, 45, 40, 28],
+      competitors: [{n:'J.Crew',v:88,c:'brand'},{n:'ALD',v:45,c:'brand'},{n:'Polo',v:92,c:'brand'}],
+      evidence: [],
+      divergence: [{k:'Audience', t:'Different demographic entirely. Not your game.'},{k:'Aesthetic', t:'Preppy neutrals fundamentally off-brand.'}]
+    },
+  ];
+
+  const tierClass = (t) => 'tier-' + t;
+  const tagsHtml = (arr) => arr.map(([cls, label]) => `<span class="opp-tag ${cls}">${label}</span>`).join('');
+
+  function renderList() {
+    document.getElementById('oppList').innerHTML = opportunities.map(o => {
+      const trending = Math.min(95, o.signal[o.signal.length - 1]);
+      return `
+      <div class="opp-card" onclick="openDrawer('${o.id}')">
+        <div class="opp-score-wrap">
+          <div class="opp-score ${tierClass(o.tier)}">${o.score}</div>
+          <div class="opp-score-label">Opp.</div>
+        </div>
+        <div class="opp-body">
+          <div class="opp-name">${o.name}</div>
+          <div class="opp-desc">${o.desc}</div>
+          <div class="opp-reason">${o.reason}</div>
+          <div class="opp-stats">
+            <span class="opp-stat">Brand fit <strong>${o.brandFit}%</strong></span>
+            <span class="opp-stat-dot"></span>
+            <span class="opp-stat">Audience <strong>${o.audience}%</strong></span>
+            <span class="opp-stat-dot"></span>
+            <span class="opp-stat">Whitespace <strong>${o.compOpen}%</strong></span>
+            <span class="opp-stat-dot"></span>
+            <span class="opp-stat">Trending <strong>${trending}%</strong></span>
+          </div>
+        </div>
+        <div class="opp-right">
+          <div class="opp-tag-row">${tagsHtml(o.tags)}</div>
+          <svg class="opp-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    `;}).join('');
+  }
+  renderList();
+
+  const tierFill = (v) => v >= 80 ? 'strong' : v >= 60 ? 'mid' : v >= 40 ? 'amber' : 'weak';
+  const scoreVerdict = (s) => s >= 80 ? 'Strong brand fit · move on it' : s >= 60 ? 'Good fit · worth exploring' : s >= 40 ? 'Mixed fit · play adjacent' : 'Low fit · likely skip';
+  const scoreNote = (s) => s >= 80 ? 'DNA, audience, and timing all align.' : s >= 60 ? 'Fit is directional — use the recommended angle.' : s >= 40 ? 'Required reframe to avoid inauthenticity.' : 'Demographic or DNA mismatch.';
+  const competitorColor = (c) => ({ 'self': 'var(--brand)', 'brand': 'var(--brand-accent)', 'muted': 'var(--text-tertiary)' })[c];
+
+  const angles = {
+    heritage: { title: '"30 Years of Camo" — tell your lineage, uncompromised', body: 'You\'re in pure territory. Lean into archival depth, your 2003 Shibuya opening, your first-Milo moment. Competitors are reaching for heritage they don\'t own. <strong>Lead with decades, not descriptions.</strong>' },
+    neomax: { title: '"Louder, On Purpose" — claim the return', body: 'Palace, Supreme are drifting quieter. This is your moment. <strong>Double down on logo prominence, print-on-print, saturated color.</strong> Signal: "while they went quiet, we turned it up."' },
+    y2k: { title: '"Baby Milo Was Always Y2K" — reclaim the nostalgia', body: 'Don\'t chase Y2K aesthetics — <strong>remind everyone you invented them.</strong> Reissue 2003 Camo, archival Baby Milo. Your archive IS the trend. Let Supreme and Dsquared2 interpret it; you own it.' },
+    anime: { title: '"Made in Tokyo" — Japanese IP × Japanese characters', body: 'Stüssy is testing. Uniqlo UT is crowded. Your play: <strong>partner with Japanese anime IP (not US-distributed).</strong> Chainsaw Man, Oshi no Ko, Jujutsu Kaisen — land a collab before Palace does.' },
+    rave: { title: '"Tokyo After Dark" — own the Japanese rave aesthetic', body: 'Berlin rave is Marine Serre\'s. <strong>Tokyo rave is unclaimed and authentically yours.</strong> Shibuya at 3am. Neon ABC Camo. Cyber typography in katakana. 2026 is the moment.' },
+    sportluxe: { title: '"Sport Camo" — performance made unmistakably BAPE', body: 'adidas slot is already yours — deepen it. <strong>Don\'t chase Nike territory. Make performance gear that still reads BAPE from 20 feet.</strong> Camo tracksuits, shark-hood windbreakers, Milo-branded cleats.' },
+    ai: { title: '"Hand-drawn × AI-assisted" — tools, not replacement', body: 'Going fully AI-native risks craft erosion. <strong>Position AI as a tool inside your design process</strong>, not the aesthetic itself. A Milo variant generator for fans. AI-assisted pattern creation, stamped with your heritage.' },
+    gorpcore: { title: '"Urban Gorp" — outdoor silhouettes, pop-maximalist colorways', body: 'Don\'t become Arc\'teryx. <strong>Take outdoor forms and make them unmistakably BAPE.</strong> A shark-hood puffer. ABC Camo hiking boots. Keeps you recognizable while earning the trend.' },
+    sustain: { title: '"Archival Circularity" — take-back for your own drops', body: 'Don\'t greenwash. <strong>Launch a BAPE resale program for pre-2015 archival pieces.</strong> Your heritage becomes the sustainability angle. Every piece is worth saving.' },
+    cozy: { title: '"Milo Soft" — micro moment, not strategic pivot', body: 'Test with a single drop — fuzzy Milo slippers, soft camo blankets. <strong>Micro-moment, not core direction.</strong> Don\'t dilute the brand by going broadly cozy.' },
+    quiet: { title: '"Stealth Wealth for the Streetwear Native"', body: 'BAPE can\'t play quiet luxury straight — your DNA is loud. <strong>Position as the knowing-nod alternative.</strong> Reference ALD\'s playbook — heritage logos scaled down, saturation lowered. Not adopting QL, reinterpreting within your language.' },
+    coastal: { title: 'Skip this trend', body: 'Different demographic, different aesthetic, different life. <strong>No authentic angle available.</strong> Save energy for trends where you can lead.' }
+  };
+
+  function openDrawer(id) {
+    const o = opportunities.find(x => x.id === id);
+    if (!o) return;
+    const angle = angles[o.id] || { title: 'Recommended Angle', body: '' };
+    const sigMax = Math.max(...o.signal);
+    const timing = Math.min(95, o.signal[o.signal.length-1]);
+
+    document.getElementById('drawerTitle').textContent = o.name;
+    document.getElementById('drawerBody').innerHTML = `
+      <div class="d-hero">
+        <div class="d-tag-row">
+          ${o.category.map(c => `<span class="opp-tag all">${c}</span>`).join('')}
+          ${o.tags.map(([cls,label]) => `<span class="opp-tag ${cls}">${label}</span>`).join('')}
+        </div>
+        <div class="d-hero-title">${o.name}</div>
+        <div class="d-hero-desc">${o.desc}</div>
+        <div class="d-score-row">
+          <div class="d-score-badge opp-score ${tierClass(o.tier)}">${o.score}</div>
+          <div class="d-score-info">
+            <div class="d-verdict">${scoreVerdict(o.score)}</div>
+            <div class="d-verdict-note">${scoreNote(o.score)}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px;">Market signal</div>
+            <div class="d-signal">
+              ${o.signal.map(v => `<div class="d-signal-bar" style="height: ${Math.max(16, (v/sigMax) * 100)}%"></div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-reco">
+        <div class="d-reco-header">
+          <div class="d-reco-icon"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.2"/></svg></div>
+          <div class="d-reco-label">Recommended Angle</div>
+        </div>
+        <div class="d-reco-title">${angle.title}</div>
+        <div class="d-reco-body">${angle.body}</div>
+      </div>
+
+      <div class="d-section">
+        <div class="d-section-label">Fit Breakdown</div>
+        <div class="bd-row"><span class="bd-key">Brand DNA</span><div class="bd-bar"><div class="bd-fill ${tierFill(o.brandFit)}" style="width:${o.brandFit}%"></div></div><span class="bd-val">${o.brandFit}</span></div>
+        <div class="bd-row"><span class="bd-key">Audience</span><div class="bd-bar"><div class="bd-fill ${tierFill(o.audience)}" style="width:${o.audience}%"></div></div><span class="bd-val">${o.audience}</span></div>
+        <div class="bd-row"><span class="bd-key">Whitespace</span><div class="bd-bar"><div class="bd-fill ${tierFill(o.compOpen)}" style="width:${o.compOpen}%"></div></div><span class="bd-val">${o.compOpen}</span></div>
+        <div class="bd-row"><span class="bd-key">Timing</span><div class="bd-bar"><div class="bd-fill ${tierFill(timing)}" style="width:${timing}%"></div></div><span class="bd-val">${timing}</span></div>
+      </div>
+
+      ${o.competitors.length ? `
+      <div class="d-section">
+        <div class="d-section-label">Competitor Activity</div>
+        ${o.competitors.map(c => `
+          <div class="comp-row">
+            <div class="comp-logo">${c.n[0]}</div>
+            <span class="comp-name">${c.n}</span>
+            <div class="comp-bar"><div class="comp-fill" style="width:${c.v}%; background: ${competitorColor(c.c)};"></div></div>
+            <span class="comp-pct">${c.v}</span>
+          </div>
+        `).join('')}
+      </div>` : ''}
+
+      ${o.evidence.length ? `
+      <div class="d-section">
+        <div class="d-section-label">What We Found In Your Archive · ${o.evidence.length} match${o.evidence.length>1?'es':''}</div>
+        <div class="ev-grid">
+          ${o.evidence.map(e => `
+            <div class="ev-tile tile-gradient-${e.g}">
+              <div class="ev-label">${e.l}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : ''}
+
+      ${o.divergence.length ? `
+      <div class="d-section">
+        <div class="d-section-label">Where You Diverge</div>
+        ${o.divergence.map(d => `
+          <div class="div-row">
+            <div class="div-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M2 8l6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+            <div class="div-text"><strong>${d.k}.</strong> ${d.t}</div>
+          </div>
+        `).join('')}
+      </div>` : ''}
+    `;
+
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerBackdrop').classList.add('open');
+    document.getElementById('drawerBody').scrollTop = 0;
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerBackdrop').classList.remove('open');
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+
+</body>
+</html>

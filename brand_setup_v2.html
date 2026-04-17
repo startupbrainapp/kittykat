@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Settings / Data Sources</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a;
+    --bg-panel: #0f1011;
+    --bg-surface: #191a1b;
+    --bg-elevated: #28282c;
+
+    --text-primary: #f7f8f8;
+    --text-secondary: #d0d6e0;
+    --text-tertiary: #8a8f98;
+    --text-quaternary: #62666d;
+
+    --brand: #5e6ad2;
+    --brand-accent: #7170ff;
+    --brand-hover: #828fff;
+
+    --border-subtle: rgba(255,255,255,0.05);
+    --border-standard: rgba(255,255,255,0.08);
+    --border-solid: #23252a;
+
+    --surface-1: rgba(255,255,255,0.02);
+    --surface-2: rgba(255,255,255,0.04);
+    --surface-3: rgba(255,255,255,0.05);
+
+    --status-green: #10b981;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -0.165px;
+  }
+
+  button, input { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--bg-panel);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-subtle);
+  }
+
+  .workspace-switcher {
+    margin: 10px 8px 4px;
+    padding: 8px 10px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 6px;
+    display: flex; align-items: center; gap: 9px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .workspace-switcher:hover { background: var(--surface-2); }
+
+  .ws-logo {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    background: var(--brand);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 590;
+    flex-shrink: 0;
+  }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label {
+    font-size: 10px; font-weight: 510;
+    color: var(--text-quaternary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+  }
+  .ws-name {
+    font-size: 13px; font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+    line-height: 1.3;
+  }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+
+  .nav-section { padding: 4px 0; }
+
+  .nav-section-label {
+    padding: 12px 20px 4px;
+    font-size: 10px; font-weight: 510;
+    color: var(--text-quaternary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 10px;
+    margin: 0 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    font-size: 13px;
+    font-weight: 510;
+    letter-spacing: -0.13px;
+    transition: background 0.1s, color 0.1s;
+  }
+  .nav-item:hover {
+    background: rgba(255,255,255,0.03);
+    color: var(--text-secondary);
+  }
+  .nav-item.active {
+    background: var(--surface-2);
+    color: var(--text-primary);
+  }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge {
+    font-size: 11px; font-weight: 510;
+    color: var(--text-tertiary);
+    background: rgba(255,255,255,0.04);
+    padding: 1px 6px;
+    border-radius: 4px;
+    letter-spacing: -0.13px;
+  }
+  .nav-chevron {
+    width: 10px; height: 10px;
+    opacity: 0.5;
+    transition: transform 0.15s;
+    flex-shrink: 0;
+  }
+  .nav-chevron.open { transform: rotate(90deg); }
+
+  .sub-nav { overflow: hidden; max-height: 0; transition: max-height 0.2s ease; }
+  .sub-nav.open { max-height: 240px; }
+
+  .sub-nav-item {
+    padding: 4px 10px 4px 32px;
+    margin: 0 8px;
+    border-radius: 5px;
+    color: var(--text-quaternary);
+    font-size: 13px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+  .sub-nav-item:hover {
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.03);
+  }
+  .sub-nav-item.active {
+    color: var(--text-primary);
+    background: var(--surface-2);
+  }
+
+  .sidebar-bottom-spacer { flex: 1; }
+
+  .sidebar-bottom {
+    padding: 8px 0 10px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .user-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px;
+  }
+  .avatar {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 590;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name {
+    font-size: 12px; font-weight: 510;
+    color: var(--text-secondary);
+    letter-spacing: -0.13px;
+    line-height: 1.3;
+  }
+  .user-role {
+    font-size: 11px; font-weight: 400;
+    color: var(--text-quaternary);
+    letter-spacing: -0.13px;
+    line-height: 1.3;
+  }
+
+  /* ═══ MAIN ═══ */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-canvas);
+  }
+
+  .topbar {
+    height: 48px;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px;
+    font-weight: 510;
+    letter-spacing: -0.13px;
+  }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-root:hover { color: var(--text-secondary); }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+
+  .topbar-right {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .btn-ghost {
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover {
+    background: var(--surface-3);
+    color: var(--text-primary);
+  }
+  .btn-primary {
+    background: var(--brand);
+    border: 1px solid var(--brand);
+    color: #ffffff;
+  }
+  .btn-primary:hover {
+    background: var(--brand-hover);
+    border-color: var(--brand-hover);
+  }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 40px 80px;
+  }
+  .content-max { max-width: 1200px; }
+
+  .page-eyebrow {
+    font-size: 10px; font-weight: 510;
+    color: var(--text-quaternary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .page-title {
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.33;
+    letter-spacing: -0.288px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .page-desc {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.60;
+    letter-spacing: -0.165px;
+    color: var(--text-tertiary);
+    max-width: 680px;
+    margin-bottom: 28px;
+  }
+
+  /* Tabs */
+  .source-tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 24px;
+  }
+  .source-tab {
+    padding: 8px 12px;
+    font-size: 13px; font-weight: 510;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .source-tab:hover { color: var(--text-secondary); }
+  .source-tab.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--brand-accent);
+  }
+
+  .section-label {
+    font-size: 10px; font-weight: 510;
+    color: var(--text-quaternary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .source-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .source-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 8px;
+    padding: 14px;
+    display: flex; flex-direction: column;
+    gap: 10px;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .source-card.connected {
+    border-color: rgba(16, 185, 129, 0.22);
+    background: rgba(16, 185, 129, 0.02);
+  }
+
+  .source-card-header { display: flex; align-items: center; gap: 10px; }
+
+  .source-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-standard);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+  }
+  .source-name {
+    font-size: 14px;
+    font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.182px;
+    line-height: 1.3;
+  }
+  .source-desc {
+    font-size: 12px; font-weight: 400;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+    margin-top: 1px;
+  }
+  .source-status { margin-left: auto; }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 11px; font-weight: 510;
+    letter-spacing: -0.13px;
+    border: 1px solid var(--border-solid);
+    background: transparent;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .status-pill.live {
+    color: var(--status-green);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+  .status-pill .pill-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .status-pill.empty { color: var(--text-tertiary); }
+
+  .connected-list { display: flex; flex-direction: column; gap: 4px; }
+  .connected-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+  }
+  .connected-label {
+    flex: 1;
+    font-family: 'Berkeley Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-primary);
+  }
+  .connected-meta {
+    font-size: 11px; font-weight: 400;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+  }
+  .remove-btn {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    background: none; border: none;
+    color: var(--text-quaternary);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s, color 0.12s;
+  }
+  .remove-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .input-row { display: flex; gap: 6px; align-items: center; }
+  .source-input {
+    flex: 1;
+    padding: 6px 10px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 6px;
+    font-size: 13px; font-weight: 400;
+    letter-spacing: -0.13px;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.12s;
+  }
+  .source-input:focus { border-color: rgba(113, 112, 255, 0.45); }
+  .source-input::placeholder { color: var(--text-quaternary); }
+
+  .source-btn {
+    padding: 6px 10px;
+    background: var(--surface-3);
+    border: 1px solid var(--border-standard);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 12px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.12s;
+  }
+  .source-btn:hover { background: rgba(255,255,255,0.08); }
+
+  .upload-zone {
+    border: 1.5px dashed var(--border-standard);
+    border-radius: 8px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(255,255,255,0.01);
+    transition: all 0.15s;
+    margin-bottom: 20px;
+  }
+  .upload-zone:hover {
+    border-color: rgba(113, 112, 255, 0.4);
+    background: var(--surface-1);
+  }
+  .upload-icon { color: var(--text-tertiary); margin-bottom: 8px; }
+  .upload-label {
+    font-size: 13px; font-weight: 510;
+    color: var(--text-secondary);
+    letter-spacing: -0.13px;
+  }
+  .upload-sub {
+    font-size: 12px; font-weight: 400;
+    color: var(--text-quaternary);
+    letter-spacing: -0.13px;
+    margin-top: 4px;
+  }
+
+  .sync-bar {
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 4px;
+  }
+  .sync-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--status-green);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    flex-shrink: 0;
+  }
+  .sync-dot.dim { background: var(--text-quaternary); box-shadow: none; }
+  .sync-label {
+    flex: 1;
+    font-size: 12px; font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: -0.13px;
+  }
+  .sync-label strong { font-weight: 510; color: var(--text-primary); }
+  .sync-meta {
+    font-size: 11px; font-weight: 400;
+    color: var(--text-quaternary);
+    letter-spacing: -0.13px;
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <a class="nav-item" href="brand_sandbox.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <a class="nav-item" href="clusters.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Briefs</span>
+    </a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Creator Studio</span>
+    </a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Asset Manager</span>
+    </a>
+    <a class="nav-item" href="reviews.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reviews</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">ROAS Dashboard</span>
+    </a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reports</span>
+    </a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Competitive Intel</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </div>
+    <a class="nav-item" href="team.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Team</span>
+    </a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Presets</span>
+    </a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Admin</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Settings</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">Data Sources</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">Sync All</button>
+      <button class="btn btn-primary">+ Add Source</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Settings · Data Sources</div>
+      <h1 class="page-title">Brand Data Ingestion</h1>
+      <p class="page-desc">Connect your brand's visual archive, website, product catalog, and competitor handles. Everything you connect here powers your Brand Brain — and flows into Inspiration, Execution, and Performance automatically.</p>
+
+      <div class="source-tabs">
+        <div class="source-tab active" onclick="switchTab(this, 'own')">Own Brand</div>
+        <div class="source-tab" onclick="switchTab(this, 'competitors')">Competitors</div>
+        <div class="source-tab" onclick="switchTab(this, 'catalog')">Product Catalog</div>
+        <div class="source-tab" onclick="switchTab(this, 'ads')">Ad Accounts</div>
+      </div>
+
+      <div id="tab-content"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const tabContent = {
+    own: `
+      <div class="section-label">Social Channels</div>
+      <div class="source-grid">
+        <div class="source-card connected">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="2" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="11.5" cy="4.5" r="0.8" fill="currentColor"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Instagram</div>
+              <div class="source-desc">Posts, reels, stories archive</div>
+            </div>
+            <div class="source-status">
+              <span class="status-pill live"><span class="pill-dot"></span>Live</span>
+            </div>
+          </div>
+          <div class="connected-list">
+            <div class="connected-item">
+              <span class="connected-label">@bape_us</span>
+              <span class="connected-meta">8,576 assets · syncing daily</span>
+              <button class="remove-btn">×</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="Add another handle e.g. @bape_jp">
+            <button class="source-btn">Add</button>
+          </div>
+        </div>
+
+        <div class="source-card connected">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M2 8h12M8 2c2 2 3 4 3 6s-1 4-3 6M8 2c-2 2-3 4-3 6s1 4 3 6" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Website</div>
+              <div class="source-desc">Product pages, campaigns, lookbooks</div>
+            </div>
+            <div class="source-status">
+              <span class="status-pill live"><span class="pill-dot"></span>Live</span>
+            </div>
+          </div>
+          <div class="connected-list">
+            <div class="connected-item">
+              <span class="connected-label">us.bape.com</span>
+              <span class="connected-meta">Crawling weekly</span>
+              <button class="remove-btn">×</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="Add another URL e.g. bape.com/jp">
+            <button class="source-btn">Add</button>
+          </div>
+        </div>
+
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M8 4v6M6 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Pinterest</div>
+              <div class="source-desc">Boards and saved inspiration</div>
+            </div>
+            <div class="source-status">
+              <span class="status-pill empty">Not connected</span>
+            </div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="Pinterest board URL or handle">
+            <button class="source-btn">Connect</button>
+          </div>
+        </div>
+
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M9 2v8a3 3 0 1 1-3-3V4c1 1 2 1.5 3 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">TikTok</div>
+              <div class="source-desc">Brand video content archive</div>
+            </div>
+            <div class="source-status">
+              <span class="status-pill empty">Not connected</span>
+            </div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="TikTok handle e.g. @bapeofficial">
+            <button class="source-btn">Connect</button>
+          </div>
+        </div>
+      </div>
+      <div class="sync-bar">
+        <div class="sync-dot"></div>
+        <div class="sync-label">Brand Brain last synced <strong>2 hours ago</strong> · 8,576 assets indexed across 2 sources</div>
+        <div class="sync-meta">Next sync in 22h</div>
+      </div>`,
+
+    competitors: `
+      <div class="section-label">Competitor Instagram Handles</div>
+      <div class="source-grid">
+        <div class="source-card connected">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Competitor Tracking</div>
+              <div class="source-desc">Visual benchmarking & trend delta</div>
+            </div>
+            <div class="source-status">
+              <span class="status-pill live"><span class="pill-dot"></span>2 tracked</span>
+            </div>
+          </div>
+          <div class="connected-list">
+            <div class="connected-item">
+              <span class="connected-label">@supremenewyork</span>
+              <span class="connected-meta">4,201 assets · weekly sync</span>
+              <button class="remove-btn">×</button>
+            </div>
+            <div class="connected-item">
+              <span class="connected-label">@palace_latest</span>
+              <span class="connected-meta">2,887 assets · weekly sync</span>
+              <button class="remove-btn">×</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="Add competitor Instagram handle">
+            <button class="source-btn">Track</button>
+          </div>
+        </div>
+
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M2 8h12M8 2c2 2 3 4 3 6s-1 4-3 6M8 2c-2 2-3 4-3 6s1 4 3 6" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Competitor Websites</div>
+              <div class="source-desc">Campaign pages, lookbooks</div>
+            </div>
+            <div class="source-status">
+              <span class="status-pill empty">Not set up</span>
+            </div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="Competitor website URL">
+            <button class="source-btn">Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="sync-bar">
+        <div class="sync-dot"></div>
+        <div class="sync-label">Competitor data feeds into <strong>Trend Matching</strong> and <strong>Competitive Intel</strong> automatically</div>
+        <div class="sync-meta">Used in 2 modules</div>
+      </div>`,
+
+    catalog: `
+      <div class="section-label">Product Catalog</div>
+      <div class="source-grid" style="grid-template-columns: 1fr;">
+        <div class="source-card connected">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4l6-2 6 2v8l-6 2-6-2V4zM8 2v12M2 4l6 2 6-2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Product Catalog</div>
+              <div class="source-desc">SKUs, images, descriptions, pricing</div>
+            </div>
+            <div class="source-status">
+              <span class="status-pill live"><span class="pill-dot"></span>1,240 SKUs</span>
+            </div>
+          </div>
+          <div class="connected-list">
+            <div class="connected-item">
+              <span class="connected-label">bape_catalog_ss26.csv</span>
+              <span class="connected-meta">Uploaded 3 days ago · 1,240 products</span>
+              <button class="remove-btn">×</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="upload-zone">
+        <svg class="upload-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:block; margin: 0 auto;">
+          <path d="M12 16V4M12 4l-4 4M12 4l4 4M4 20h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="upload-label">Drop a new catalog file here, or click to upload</div>
+        <div class="upload-sub">Supports CSV, XLSX, Shopify export, or direct Shopify / WooCommerce URL</div>
+      </div>
+
+      <div class="section-label">Or Connect Directly</div>
+      <div class="source-grid">
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 6l1-3h8l1 3v7H3V6zM3 6h10" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Shopify</div>
+              <div class="source-desc">Auto-sync product catalog</div>
+            </div>
+            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="yourstore.myshopify.com">
+            <button class="source-btn">Connect</button>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M5 11l-3-3 3-3M11 5l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Custom API</div>
+              <div class="source-desc">Connect any product feed via URL</div>
+            </div>
+            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="Product feed URL (JSON/XML)">
+            <button class="source-btn">Add</button>
+          </div>
+        </div>
+      </div>`,
+
+    ads: `
+      <div class="section-label">Ad Platform Connections</div>
+      <div class="source-grid">
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M9 14V8h-2M9 8a2 2 0 0 0-4 0" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Meta Ads</div>
+              <div class="source-desc">Facebook + Instagram campaigns</div>
+            </div>
+            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="Meta Ads Account ID">
+            <button class="source-btn">Connect</button>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">Google Ads</div>
+              <div class="source-desc">Search + Display + Shopping</div>
+            </div>
+            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="Google Ads Customer ID">
+            <button class="source-btn">Connect</button>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M9 2v8a3 3 0 1 1-3-3V4c1 1 2 1.5 3 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">TikTok Ads</div>
+              <div class="source-desc">TikTok for Business campaigns</div>
+            </div>
+            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="TikTok Advertiser ID">
+            <button class="source-btn">Connect</button>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-card-header">
+            <div class="source-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 5c0-1.5 2-3 5-3s5 1.5 5 3-2 3-5 3c-1 0-2-.2-3-.5L3 9l.5-2.5C3 6 3 5.5 3 5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                <circle cx="6" cy="5" r="0.5" fill="currentColor"/>
+                <circle cx="8" cy="5" r="0.5" fill="currentColor"/>
+                <circle cx="10" cy="5" r="0.5" fill="currentColor"/>
+              </svg>
+            </div>
+            <div>
+              <div class="source-name">WeChat / LRB</div>
+              <div class="source-desc">WeChat Moments + Mini Program ads</div>
+            </div>
+            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
+          </div>
+          <div class="input-row">
+            <input class="source-input" placeholder="WeChat Official Account ID">
+            <button class="source-btn">Connect</button>
+          </div>
+        </div>
+      </div>
+      <div class="sync-bar">
+        <div class="sync-dot dim"></div>
+        <div class="sync-label">Connect ad accounts to activate the <strong>ROAS Dashboard</strong> and <strong>Performance Reports</strong></div>
+        <div class="sync-meta">0 of 4 connected</div>
+      </div>`
+  };
+
+  function switchTab(el, tab) {
+    document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-content').innerHTML = tabContent[tab];
+  }
+
+  function toggleSection(s) {
+    const sub = document.getElementById('sub-' + s);
+    const chev = document.getElementById('chev-' + s);
+    if (sub) sub.classList.toggle('open');
+    if (chev) chev.classList.toggle('open');
+  }
+
+  // Load default tab
+  document.getElementById('tab-content').innerHTML = tabContent.own;
+</script>
+
+</body>
+</html>

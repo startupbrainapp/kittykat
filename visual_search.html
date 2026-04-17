@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Inspiration / Visual Vault</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a;
+    --bg-panel: #0f1011;
+    --bg-surface: #191a1b;
+    --bg-elevated: #28282c;
+
+    --text-primary: #f7f8f8;
+    --text-secondary: #d0d6e0;
+    --text-tertiary: #8a8f98;
+    --text-quaternary: #62666d;
+
+    --brand: #5e6ad2;
+    --brand-accent: #7170ff;
+    --brand-hover: #828fff;
+
+    --border-subtle: rgba(255,255,255,0.05);
+    --border-standard: rgba(255,255,255,0.08);
+    --border-solid: #23252a;
+
+    --surface-1: rgba(255,255,255,0.02);
+    --surface-2: rgba(255,255,255,0.04);
+    --surface-3: rgba(255,255,255,0.05);
+
+    --status-green: #10b981;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -0.165px;
+  }
+
+  button, input { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar {
+    width: 240px; min-width: 240px;
+    background: var(--bg-panel);
+    display: flex; flex-direction: column;
+    height: 100%; overflow-y: auto;
+    border-right: 1px solid var(--border-subtle);
+  }
+
+  .workspace-switcher {
+    margin: 10px 8px 4px; padding: 8px 10px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 6px;
+    display: flex; align-items: center; gap: 9px;
+    cursor: pointer; transition: background 0.12s;
+  }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 10px; margin: 0 8px;
+    border-radius: 5px; cursor: pointer;
+    color: var(--text-tertiary);
+    font-size: 13px; font-weight: 510;
+    letter-spacing: -0.13px;
+    transition: background 0.1s, color 0.1s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .nav-chevron { width: 10px; height: 10px; opacity: 0.5; transition: transform 0.15s; flex-shrink: 0; }
+  .nav-chevron.open { transform: rotate(90deg); }
+
+  .sub-nav { overflow: hidden; max-height: 0; transition: max-height 0.2s ease; }
+  .sub-nav.open { max-height: 240px; }
+
+  .sub-nav-item {
+    padding: 4px 10px 4px 32px; margin: 0 8px;
+    border-radius: 5px;
+    color: var(--text-quaternary);
+    font-size: 13px; font-weight: 510;
+    letter-spacing: -0.13px; cursor: pointer;
+    transition: all 0.1s;
+    text-decoration: none; display: block;
+  }
+  .sub-nav-item:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
+  .sub-nav-item.active { color: var(--text-primary); background: var(--surface-2); }
+
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* ═══ MAIN ═══ */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar {
+    height: 48px; padding: 0 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-root:hover { color: var(--text-secondary); }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  .demo-toggle {
+    background: rgba(113, 112, 255, 0.08);
+    border: 1px solid rgba(113, 112, 255, 0.3);
+    color: var(--brand-accent);
+  }
+  .demo-toggle:hover { background: rgba(113, 112, 255, 0.14); }
+
+  .content { flex: 1; overflow-y: auto; padding: 0 0 80px; }
+  .content-inner { padding: 32px 40px 0; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  /* ═══ Embedded banner ═══ */
+  .embedded-banner {
+    display: none;
+    background: linear-gradient(to right, rgba(113, 112, 255, 0.14), rgba(113, 112, 255, 0.04));
+    border-bottom: 1px solid rgba(113, 112, 255, 0.25);
+    padding: 12px 40px;
+  }
+  body.embedded .embedded-banner { display: block; }
+  .banner-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .banner-icon {
+    width: 28px; height: 28px;
+    background: rgba(113, 112, 255, 0.2);
+    border: 1px solid rgba(113, 112, 255, 0.4);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-accent);
+  }
+  .banner-text { flex: 1; }
+  .banner-label {
+    font-size: 11px; font-weight: 510;
+    color: var(--brand-accent);
+    letter-spacing: 0.3px; text-transform: uppercase;
+    line-height: 1.3;
+  }
+  .banner-title {
+    font-size: 13px; font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+    line-height: 1.3;
+  }
+  .banner-back {
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--border-standard);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 12px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: background 0.12s;
+  }
+  .banner-back:hover { background: var(--surface-2); color: var(--text-primary); }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 680px; margin-bottom: 28px; }
+
+  /* ═══ Stat strip ═══ */
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .stat-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .stat-meta { display: flex; flex-direction: column; gap: 0; }
+  .stat-value { font-size: 14px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.2; }
+  .stat-label { font-size: 11px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* ═══ Search hero ═══ */
+  .search-shell { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 14px; transition: border-color 0.15s, background 0.15s; }
+  .search-shell:focus-within { border-color: rgba(113, 112, 255, 0.45); background: var(--surface-2); }
+  .search-icon { color: var(--text-tertiary); flex-shrink: 0; }
+  .search-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 16px; font-weight: 400; letter-spacing: -0.165px; }
+  .search-input::placeholder { color: var(--text-quaternary); }
+  .search-kbd { display: inline-flex; align-items: center; padding: 2px 6px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-standard); border-radius: 4px; font-family: 'Berkeley Mono', ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; color: var(--text-tertiary); }
+
+  /* ═══ Chips ═══ */
+  .try-these { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .try-these-label { font-size: 11px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.4px; text-transform: uppercase; margin-right: 4px; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 5px; background: transparent; border: 1px solid var(--border-solid); border-radius: 9999px; font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; cursor: pointer; transition: all 0.12s; }
+  .chip:hover { background: var(--surface-2); color: var(--text-primary); border-color: var(--border-standard); }
+  .chip-arrow { color: var(--text-tertiary); width: 12px; height: 12px; flex-shrink: 0; }
+  .chip:hover .chip-arrow { color: var(--brand-accent); }
+
+  /* ═══ Filter row ═══ */
+  .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .filter-label { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; margin-right: 4px; }
+  .filter-count { font-size: 13px; font-weight: 400; color: var(--text-tertiary); }
+  .filter-spacer { flex: 1; }
+  .filter-btn { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; background: transparent; border: 1px solid var(--border-solid); border-radius: 6px; font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; cursor: pointer; transition: all 0.12s; }
+  .filter-btn:hover { background: var(--surface-2); color: var(--text-primary); border-color: var(--border-standard); }
+
+  /* ═══ Results grid ═══ */
+  .results-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .result-tile { position: relative; border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid var(--border-standard); background: var(--surface-1); transition: transform 0.15s, border-color 0.15s; }
+  .result-tile:hover { transform: translateY(-1px); border-color: rgba(113, 112, 255, 0.4); }
+  .result-tile.selected { border-color: var(--brand-accent); box-shadow: 0 0 0 1px var(--brand-accent); }
+
+  .tile-image { aspect-ratio: 1 / 1; width: 100%; display: flex; align-items: flex-end; justify-content: flex-start; padding: 12px; position: relative; overflow: hidden; }
+  .tile-gradient-1 { background: url('images/1.jpg') center/cover; }
+  .tile-gradient-2 { background: url('images/2.jpg') center/cover; }
+  .tile-gradient-3 { background: url('images/3.jpg') center/cover; }
+  .tile-gradient-4 { background: url('images/4.jpg') center/cover; }
+  .tile-gradient-5 { background: url('images/5.jpg') center/cover; }
+  .tile-gradient-6 { background: url('images/6.jpg') center/cover; }
+  .tile-gradient-7 { background: url('images/7.jpg') center/cover; }
+  .tile-gradient-8 { background: url('images/8.jpg') center/cover; }
+  .tile-gradient-9 { background: url('images/9.jpg') center/cover; }
+  .tile-gradient-10 { background: url('images/10.jpg') center/cover; }
+  .tile-gradient-11 { background: url('images/11.jpg') center/cover; }
+  .tile-gradient-12 { background: url('images/12.jpg') center/cover; }
+  .tile-gradient-13 { background: url('images/13.jpg') center/cover; }
+  .tile-gradient-14 { background: url('images/14.jpg') center/cover; }
+  .tile-gradient-15 { background: url('images/15.jpg') center/cover; }
+  .tile-gradient-16 { background: url('images/16.jpg') center/cover; }
+  .tile-gradient-17 { background: url('images/17.jpg') center/cover; }
+  .tile-gradient-18 { background: url('images/18.jpg') center/cover; }
+  .tile-gradient-19 { background: url('images/19.jpg') center/cover; }
+  .tile-gradient-20 { background: url('images/20.jpg') center/cover; }
+  .tile-pattern::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.04) 0, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.03) 0, transparent 40%); }
+  .tile-label { position: relative; z-index: 1; font-size: 11px; font-weight: 510; color: rgba(255,255,255,0.9); letter-spacing: -0.13px; max-width: 80%; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+  .tile-score { position: absolute; top: 8px; right: 8px; padding: 2px 7px; background: rgba(16, 185, 129, 0.2); color: var(--status-green); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 9999px; font-size: 10px; font-weight: 590; letter-spacing: -0.13px; backdrop-filter: blur(8px); z-index: 2; }
+  .tile-score.mid { background: rgba(113, 112, 255, 0.18); color: var(--brand-accent); border-color: rgba(113, 112, 255, 0.35); }
+  .tile-score.low { background: rgba(138, 143, 152, 0.15); color: var(--text-tertiary); border-color: rgba(138, 143, 152, 0.3); }
+
+  /* Checkbox: hidden by default (standalone), visible in embedded mode */
+  .tile-checkbox {
+    position: absolute; top: 8px; left: 8px;
+    width: 20px; height: 20px; border-radius: 5px;
+    background: rgba(0,0,0,0.55);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    backdrop-filter: blur(8px);
+    cursor: pointer; z-index: 3;
+    display: none;
+    align-items: center; justify-content: center;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  body.embedded .tile-checkbox { display: flex; }
+  .tile-checkbox.checked {
+    background: var(--brand); border-color: var(--brand);
+  }
+  .tile-checkbox.checked::after {
+    content: '';
+    width: 10px; height: 6px;
+    border-left: 1.5px solid white;
+    border-bottom: 1.5px solid white;
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+
+  .tile-meta { padding: 8px 10px; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 6px; background: var(--bg-panel); }
+  .tile-meta-source { display: inline-flex; align-items: center; color: var(--text-tertiary); flex-shrink: 0; }
+  .tile-meta-text { font-size: 11px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ═══ Detail drawer (standalone mode) ═══ */
+  .drawer-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 90;
+  }
+  .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  .drawer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 480px; max-width: 100vw;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border-standard);
+    box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+    z-index: 100;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+
+  .drawer-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+  }
+  .drawer-title-wrap { flex: 1; min-width: 0; }
+  .drawer-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+  .drawer-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drawer-close { width: 26px; height: 26px; background: transparent; border: none; border-radius: 6px; color: var(--text-tertiary); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .drawer-close:hover { background: var(--surface-2); color: var(--text-primary); }
+
+  .drawer-body { flex: 1; overflow-y: auto; padding: 18px; }
+
+  .drawer-hero {
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 18px;
+    border: 1px solid var(--border-standard);
+  }
+  .drawer-hero-inner { width: 100%; height: 100%; display: flex; align-items: flex-end; padding: 16px; }
+  .drawer-hero-label { font-size: 13px; font-weight: 510; color: rgba(255,255,255,0.95); text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+
+  .drawer-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+    margin-bottom: 20px;
+  }
+  .meta-row { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.4px; text-transform: uppercase; }
+  .meta-value { font-size: 13px; font-weight: 400; color: var(--text-secondary); letter-spacing: -0.13px; }
+  .meta-value.mono { font-family: 'Berkeley Mono', ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; color: var(--text-primary); }
+
+  .drawer-section { margin-bottom: 20px; }
+  .drawer-section-label {
+    font-size: 10px; font-weight: 510;
+    color: var(--text-quaternary);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
+  /* Alignment breakdown */
+  .align-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0;
+    font-size: 12px;
+    letter-spacing: -0.13px;
+  }
+  .align-key { color: var(--text-tertiary); width: 110px; flex-shrink: 0; font-weight: 400; }
+  .align-bar { flex: 1; height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .align-fill { height: 100%; background: var(--status-green); border-radius: 999px; }
+  .align-fill.mid { background: var(--brand-accent); }
+  .align-val { color: var(--text-primary); font-weight: 510; width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Tag chips */
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 9999px;
+    font-size: 11px; font-weight: 510;
+    color: var(--text-secondary);
+    letter-spacing: -0.13px;
+  }
+
+  /* Related thumbnails */
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .related-thumb {
+    aspect-ratio: 1;
+    border-radius: 5px;
+    border: 1px solid var(--border-standard);
+    cursor: pointer;
+    transition: border-color 0.12s;
+  }
+  .related-thumb:hover { border-color: rgba(113, 112, 255, 0.45); }
+
+  /* Drawer footer actions */
+  .drawer-footer {
+    border-top: 1px solid var(--border-subtle);
+    padding: 14px 18px;
+    display: flex; flex-direction: column; gap: 8px;
+    flex-shrink: 0;
+    background: var(--bg-surface);
+  }
+  .drawer-action-row { display: flex; gap: 6px; }
+  .drawer-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    transition: background 0.12s;
+  }
+  .drawer-btn.primary {
+    background: var(--brand);
+    border: 1px solid var(--brand);
+    color: white;
+  }
+  .drawer-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .drawer-btn.secondary {
+    background: var(--surface-2);
+    border: 1px solid var(--border-standard);
+    color: var(--text-primary);
+  }
+  .drawer-btn.secondary:hover { background: var(--surface-3); }
+
+  /* ═══ Embedded mode action bar ═══ */
+  .action-bar {
+    position: fixed;
+    bottom: 20px;
+    left: calc(50% + 120px);
+    transform: translateX(-50%) translateY(120px);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-standard);
+    border-radius: 10px;
+    padding: 8px 8px 8px 16px;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+    z-index: 95;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+  }
+  .action-bar.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+  .ab-count { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; margin-right: 4px; white-space: nowrap; }
+  .ab-count strong { color: var(--brand-accent); }
+  .ab-context { font-size: 12px; color: var(--text-tertiary); letter-spacing: -0.13px; white-space: nowrap; }
+  .ab-divider { width: 1px; height: 20px; background: var(--border-standard); }
+  .ab-btn { padding: 6px 12px; background: transparent; border: 1px solid transparent; border-radius: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.12s; white-space: nowrap; }
+  .ab-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+  .ab-btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .ab-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .ab-close { width: 24px; height: 24px; background: transparent; border: none; border-radius: 6px; color: var(--text-tertiary); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; margin-left: 4px; }
+  .ab-close:hover { background: var(--surface-2); color: var(--text-primary); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-standard);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px; font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast-check { color: var(--status-green); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </div>
+    <a class="nav-item" href="trend_matching.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <a class="nav-item" href="brand_sandbox.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <a class="nav-item" href="clusters.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Briefs</span>
+    </a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Creator Studio</span>
+    </a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Asset Manager</span>
+    </a>
+    <a class="nav-item" href="reviews.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reviews</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">ROAS Dashboard</span>
+    </a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reports</span>
+    </a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Competitive Intel</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Team</span>
+    </a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Presets</span>
+    </a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Admin</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Inspiration</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">Visual Vault</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn demo-toggle" onclick="toggleMode()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2v8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span id="modeLabel">Simulate: from Brief</span>
+      </button>
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 5l3-3 3 3M2 10h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Collections
+      </button>
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2v8l3-2 3 2V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Save search
+      </button>
+    </div>
+  </div>
+
+  <!-- Embedded mode banner -->
+  <div class="embedded-banner">
+    <div class="banner-inner">
+      <div class="banner-icon">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 2h6l1 2v10H3V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 7h5M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </div>
+      <div class="banner-text">
+        <div class="banner-label">Adding references to brief</div>
+        <div class="banner-title">SS26 Shark Hoodie · Green Camo Campaign</div>
+      </div>
+      <button class="banner-back" onclick="toggleMode()">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M7.5 3L4.5 6l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to brief
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-inner">
+      <div class="content-max">
+        <div class="page-eyebrow">Inspiration · Visual Vault</div>
+        <h1 class="page-title">The BAPE visual vault</h1>
+        <p class="page-desc">Your marketing imagery — every campaign, product shot, editorial, and store photo your brand has ever shown the world. Search it by describing what you're looking for; results come back scored against your brand DNA.</p>
+
+        <div class="stat-strip">
+          <div class="stat-card">
+            <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4l6-2 6 2v8l-6 2-6-2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+            <div class="stat-meta"><div class="stat-value">8,576</div><div class="stat-label">Documents indexed</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" stroke="currentColor" stroke-width="1.2"/></svg></div>
+            <div class="stat-meta"><div class="stat-value">20</div><div class="stat-label">Visual clusters</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12M4 4l8 8M4 12l8-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="stat-meta"><div class="stat-value">SigLIP</div><div class="stat-label">Embedding model</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11.5" cy="4.5" r="0.8" fill="currentColor"/></svg></div>
+            <div class="stat-meta"><div class="stat-value">Instagram + Web</div><div class="stat-label">Source</div></div>
+          </div>
+        </div>
+
+        <div class="search-shell">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 12l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input class="search-input" placeholder='Describe what you are looking for… e.g., "shark hoodie green camo at night"'>
+          <span class="search-kbd">⏎</span>
+        </div>
+
+        <div class="try-these">
+          <span class="try-these-label">Try</span>
+          <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Camo patterns</button>
+          <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Shark hoodies</button>
+          <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Streetwear lookbook</button>
+          <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Store events</button>
+          <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Accessories</button>
+          <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Collaborations</button>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-label">Recent archive</span>
+          <span class="filter-count">20 of 8,576</span>
+          <div class="filter-spacer"></div>
+          <button class="filter-btn">All sources <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="filter-btn">Last 90 days <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="filter-btn">All types <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+
+        <div class="results-grid" id="results"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Detail drawer (standalone mode) -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title-wrap">
+      <div class="drawer-eyebrow" id="drawerEyebrow">Asset</div>
+      <div class="drawer-title" id="drawerTitle">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+
+  <div class="drawer-body">
+    <div class="drawer-hero" id="drawerHero">
+      <div class="drawer-hero-inner tile-pattern">
+        <div class="drawer-hero-label" id="drawerHeroLabel">—</div>
+      </div>
+    </div>
+
+    <div class="drawer-meta-grid">
+      <div class="meta-row"><div class="meta-label">Source</div><div class="meta-value" id="dmSource">—</div></div>
+      <div class="meta-row"><div class="meta-label">Captured</div><div class="meta-value" id="dmCaptured">—</div></div>
+      <div class="meta-row"><div class="meta-label">Format</div><div class="meta-value mono">JPG · 1080×1080</div></div>
+      <div class="meta-row"><div class="meta-label">Cluster</div><div class="meta-value" id="dmCluster">—</div></div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-label">Brand Alignment · <span id="dmScoreTotal">—</span></div>
+      <div class="align-row">
+        <span class="align-key">Color palette</span>
+        <div class="align-bar"><div class="align-fill" id="barColor" style="width:95%"></div></div>
+        <span class="align-val">95</span>
+      </div>
+      <div class="align-row">
+        <span class="align-key">Subject / motif</span>
+        <div class="align-bar"><div class="align-fill" id="barSubject" style="width:96%"></div></div>
+        <span class="align-val">96</span>
+      </div>
+      <div class="align-row">
+        <span class="align-key">Typography</span>
+        <div class="align-bar"><div class="align-fill mid" id="barType" style="width:88%"></div></div>
+        <span class="align-val">88</span>
+      </div>
+      <div class="align-row">
+        <span class="align-key">Composition</span>
+        <div class="align-bar"><div class="align-fill" id="barComp" style="width:93%"></div></div>
+        <span class="align-val">93</span>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-label">Tags</div>
+      <div class="tag-list">
+        <span class="tag">green camo</span>
+        <span class="tag">storefront</span>
+        <span class="tag">night shoot</span>
+        <span class="tag">heritage</span>
+        <span class="tag">SS24</span>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-label">Used in Campaigns</div>
+      <div class="tag-list">
+        <span class="tag" style="color: var(--brand-accent); border-color: rgba(113,112,255,0.3);">SS24 Shark Campaign</span>
+        <span class="tag" style="color: var(--brand-accent); border-color: rgba(113,112,255,0.3);">Tokyo Flagship Launch</span>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-label">Visually similar</div>
+      <div class="related-grid" id="relatedGrid"></div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <div class="drawer-action-row">
+      <button class="drawer-btn primary">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 2h5l2 2v7H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4.5 6.5h4M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Start brief from this
+      </button>
+      <button class="drawer-btn secondary">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 2v9M2 6.5h9M3.5 3.5l6 6M3.5 9.5l6-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Generate variants
+      </button>
+    </div>
+    <div class="drawer-action-row">
+      <button class="drawer-btn secondary" onclick="showToast('Saved to Collection: Green Camo Refs')">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 2v9l3.5-2.5L10 11V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        Save to collection
+      </button>
+      <button class="drawer-btn secondary">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 7V2h5M11 6v5H6M2 2l4 4M11 11L7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        View in campaign
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- Embedded mode: contextual action bar -->
+<div class="action-bar" id="actionBar">
+  <div class="ab-count"><strong id="abCount">0</strong> selected</div>
+  <div class="ab-context">· to SS26 Shark Hoodie brief</div>
+  <div class="ab-divider"></div>
+  <button class="ab-btn primary">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Add to brief
+  </button>
+  <button class="ab-btn" onclick="clearSelection()">Cancel</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg class="toast-check" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span id="toastText">Saved</span>
+</div>
+
+<script>
+  const tiles = [
+    { grad: 1, label: 'Tokyo Flagship · Green Camo Night', score: 94, source: 'ig', meta: '@bape_us · 2d ago', cluster: 'Green Camo Shark & Sweatwear', captured: '2 days ago', sourceFull: 'Instagram @bape_us' },
+    { grad: 2, label: 'SS24 Shark Hoodie · Red Colorway', score: 91, source: 'web', meta: 'us.bape.com · Lookbook', cluster: 'Dark Apparel & Classic Logos', captured: 'Apr 2026 · Lookbook', sourceFull: 'us.bape.com' },
+    { grad: 3, label: 'Blue ABC Camo · Editorial', score: 88, source: 'ig', meta: '@bape_us · 5d ago', cluster: 'Blue ABC Camo', captured: '5 days ago', sourceFull: 'Instagram @bape_us' },
+    { grad: 7, label: '"A BATHING APE" Gold Type', score: 86, source: 'web', meta: 'us.bape.com · Campaign', cluster: 'Gold Luxury & Neon Brights', captured: 'Mar 2026 · Campaign', sourceFull: 'us.bape.com' },
+    { grad: 5, label: 'Sakura Pink Camo · Pattern Detail', score: 84, source: 'ig', meta: '@bape_jp · 1w ago', cluster: 'Pink/Red Camo & Sakura Prints', captured: '1 week ago', sourceFull: 'Instagram @bape_jp' },
+    { grad: 6, label: 'Monochrome Lookbook · B&W Portrait', score: 79, source: 'web', meta: 'us.bape.com · FW23', cluster: 'Monochrome & Sneaker Close-ups', captured: 'Oct 2023 · FW23', sourceFull: 'us.bape.com' },
+    { grad: 8, label: 'Futura Collab · Gold Foil Print', score: 76, source: 'ig', meta: '@bape_us · 3w ago', cluster: 'Gold Luxury & Neon Brights', captured: '3 weeks ago', sourceFull: 'Instagram @bape_us' },
+    { grad: 4, label: 'Milo Character · Archival Tee', score: 72, source: 'web', meta: 'us.bape.com · Heritage', cluster: 'Small Logo & Milo Details', captured: 'Heritage · Archival', sourceFull: 'us.bape.com' },
+    { grad: 9, label: 'ABC Camo Jacket · Store Window', score: 69, source: 'ig', meta: '@bape_us · 1mo ago', cluster: 'Lifestyle & Street Photography', captured: '1 month ago', sourceFull: 'Instagram @bape_us' },
+    { grad: 10, label: 'Sneaker Close-up · Bape Sta', score: 64, source: 'web', meta: 'us.bape.com · Product', cluster: 'Sneaker Details & Close-ups', captured: 'Product page', sourceFull: 'us.bape.com' },
+    { grad: 11, label: 'Camo Hoodie · Store Display', score: 62, source: 'ig', meta: '@bape_us · 2w ago', cluster: 'Green Camo Shark & Sweatwear', captured: '2 weeks ago', sourceFull: 'Instagram @bape_us' },
+    { grad: 12, label: 'Shark Full-zip · Campaign Hero', score: 58, source: 'web', meta: 'us.bape.com · SS26', cluster: 'ABC Camo Shark Hoodies & Campaign', captured: 'SS26 Campaign', sourceFull: 'us.bape.com' },
+    { grad: 13, label: 'ABC Camo Jacket · Detail', score: 55, source: 'ig', meta: '@bape_us · 3w ago', cluster: 'Digital Camo & Patterned Textiles', captured: '3 weeks ago', sourceFull: 'Instagram @bape_us' },
+    { grad: 14, label: 'Streetwear Editorial · Tokyo', score: 52, source: 'ig', meta: '@bape_us · 1mo ago', cluster: 'Lifestyle & Street Photography', captured: '1 month ago', sourceFull: 'Instagram @bape_us' },
+    { grad: 15, label: 'Heritage Logo Tee · Archive', score: 48, source: 'web', meta: 'us.bape.com · Heritage', cluster: 'White College Logo Tees & Basics', captured: 'Archive', sourceFull: 'us.bape.com' },
+    { grad: 16, label: 'Collab Lookbook · adidas', score: 45, source: 'ig', meta: '@bape_us · 1mo ago', cluster: 'Dark Apparel & Classic Logos', captured: '1 month ago', sourceFull: 'Instagram @bape_us' },
+    { grad: 17, label: 'Monochrome Product · Studio', score: 42, source: 'web', meta: 'us.bape.com · Product', cluster: 'Monochrome & Sneaker Close-ups', captured: 'Product page', sourceFull: 'us.bape.com' },
+    { grad: 18, label: 'Premium Knit · Grey Tonal', score: 40, source: 'ig', meta: '@bape_us · 5w ago', cluster: 'Grey Tonal & Premium Knits', captured: '5 weeks ago', sourceFull: 'Instagram @bape_us' },
+    { grad: 19, label: 'Accessories Drop · Cap Detail', score: 38, source: 'ig', meta: '@bape_jp · 6w ago', cluster: 'Minimal Basics & Accessories', captured: '6 weeks ago', sourceFull: 'Instagram @bape_jp' },
+    { grad: 20, label: 'Colorful Sneaker · Collectible', score: 35, source: 'web', meta: 'us.bape.com · Drop', cluster: 'Colorful Sneakers & Collectibles', captured: 'Limited drop', sourceFull: 'us.bape.com' },
+  ];
+
+  const iconIg = '<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/><circle cx="11.5" cy="4.5" r="0.8" fill="currentColor"/></svg>';
+  const iconWeb = '<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M2 8h12M8 2c2 2 3 4 3 6s-1 4-3 6M8 2c-2 2-3 4-3 6s1 4 3 6" stroke="currentColor" stroke-width="1.3"/></svg>';
+
+  function scoreBand(s) {
+    if (s >= 80) return '';
+    if (s >= 70) return 'mid';
+    return 'low';
+  }
+
+  function renderTiles() {
+    const grid = document.getElementById('results');
+    grid.innerHTML = tiles.map((t, i) => `
+      <div class="result-tile" data-i="${i}" onclick="onTileClick(${i}, event)">
+        <div class="tile-image tile-gradient-${t.grad} tile-pattern">
+          <div class="tile-checkbox" id="cb-${i}" onclick="onCheckboxClick(${i}, event)"></div>
+          <div class="tile-score ${scoreBand(t.score)}">${t.score}%</div>
+          <div class="tile-label">${t.label}</div>
+        </div>
+        <div class="tile-meta">
+          <span class="tile-meta-source">${t.source === 'ig' ? iconIg : iconWeb}</span>
+          <span class="tile-meta-text">${t.meta}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderTiles();
+
+  /* ═══ Mode handling ═══ */
+  let embedded = false;
+  // Check URL param on load: ?target=brief:42
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('target')) {
+    embedded = true;
+    document.body.classList.add('embedded');
+    document.getElementById('modeLabel').textContent = 'Back to standalone';
+  }
+
+  function toggleMode() {
+    embedded = !embedded;
+    document.body.classList.toggle('embedded');
+    document.getElementById('modeLabel').textContent = embedded ? 'Back to standalone' : 'Simulate: from Brief';
+    clearSelection();
+    closeDrawer();
+  }
+
+  /* ═══ Click handlers — mode-aware ═══ */
+  function onTileClick(i, ev) {
+    // In embedded mode, clicking anywhere on the tile toggles selection (except checkbox, which stops propagation)
+    if (embedded) {
+      toggleSelect(i);
+    } else {
+      openDrawer(i);
+    }
+  }
+
+  function onCheckboxClick(i, ev) {
+    ev.stopPropagation();
+    toggleSelect(i);
+  }
+
+  /* ═══ Selection (embedded mode only) ═══ */
+  const selected = new Set();
+  function toggleSelect(i) {
+    const tile = document.querySelector(`[data-i="${i}"]`);
+    const cb = document.getElementById(`cb-${i}`);
+    if (selected.has(i)) {
+      selected.delete(i);
+      tile.classList.remove('selected');
+      cb.classList.remove('checked');
+    } else {
+      selected.add(i);
+      tile.classList.add('selected');
+      cb.classList.add('checked');
+    }
+    updateActionBar();
+  }
+
+  function clearSelection() {
+    selected.clear();
+    document.querySelectorAll('.result-tile').forEach(t => t.classList.remove('selected'));
+    document.querySelectorAll('.tile-checkbox').forEach(c => c.classList.remove('checked'));
+    updateActionBar();
+  }
+
+  function updateActionBar() {
+    const bar = document.getElementById('actionBar');
+    document.getElementById('abCount').textContent = selected.size;
+    if (embedded && selected.size > 0) bar.classList.add('visible');
+    else bar.classList.remove('visible');
+  }
+
+  /* ═══ Drawer (standalone mode) ═══ */
+  function openDrawer(i) {
+    const t = tiles[i];
+    document.getElementById('drawerTitle').textContent = t.label;
+    document.getElementById('drawerHeroLabel').textContent = t.label;
+    document.getElementById('drawerHero').querySelector('.drawer-hero-inner').className = 'drawer-hero-inner tile-pattern';
+    document.getElementById('drawerHero').className = 'drawer-hero tile-gradient-' + t.grad;
+    document.getElementById('dmSource').textContent = t.sourceFull;
+    document.getElementById('dmCaptured').textContent = t.captured;
+    document.getElementById('dmCluster').textContent = t.cluster;
+    document.getElementById('dmScoreTotal').textContent = t.score + '% match';
+
+    // Render related thumbs (4 random other tiles)
+    const rel = tiles.filter((_, k) => k !== i).slice(0, 4);
+    document.getElementById('relatedGrid').innerHTML = rel.map(r => `
+      <div class="related-thumb tile-gradient-${r.grad}"></div>
+    `).join('');
+
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerBackdrop').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerBackdrop').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDrawer();
+  });
+
+  /* ═══ Toast ═══ */
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 2200);
+  }
+
+  function toggleSection(s) {
+    const sub = document.getElementById('sub-' + s);
+    const chev = document.getElementById('chev-' + s);
+    if (sub) sub.classList.toggle('open');
+    if (chev) chev.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>

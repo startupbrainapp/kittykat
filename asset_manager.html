@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Asset Manager</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a; --bg-panel: #0f1011; --bg-surface: #191a1b; --bg-elevated: #28282c;
+    --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+    --brand: #5e6ad2; --brand-accent: #7170ff; --brand-hover: #828fff;
+    --border-subtle: rgba(255,255,255,0.05); --border-standard: rgba(255,255,255,0.08); --border-solid: #23252a;
+    --surface-1: rgba(255,255,255,0.02); --surface-2: rgba(255,255,255,0.04); --surface-3: rgba(255,255,255,0.05);
+    --status-green: #10b981; --status-amber: #f59e0b; --status-red: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { background: var(--bg-canvas); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
+  button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* SIDEBAR */
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-family: inherit; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 720px; margin-bottom: 20px; }
+
+  /* Stat strip */
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .stat-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .stat-icon.green { color: var(--status-green); }
+  .stat-icon.amber { color: var(--status-amber); }
+  .stat-meta { display: flex; flex-direction: column; gap: 0; }
+  .stat-value { font-size: 14px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .stat-label { font-size: 11px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* Filter row */
+  .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 8px 0; flex-wrap: wrap; }
+  .filter-dropdown { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: all 0.12s; font-family: inherit; }
+  .filter-dropdown:hover { background: var(--surface-3); color: var(--text-primary); }
+  .filter-dropdown-label { font-size: 10px; color: var(--text-quaternary); font-weight: 510; text-transform: uppercase; letter-spacing: 0.4px; margin-right: 2px; }
+  .filter-chev { color: var(--text-tertiary); width: 10px; height: 10px; }
+  .filter-spacer { flex: 1; }
+  .filter-count { font-size: 12px; color: var(--text-tertiary); font-weight: 510; letter-spacing: -0.13px; }
+
+  /* Asset grid */
+  .asset-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .asset-tile {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: 1px solid var(--border-standard);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .asset-tile:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.14);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+  .asset-tile img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+
+  /* Status dot */
+  .asset-status-dot {
+    position: absolute; top: 8px; left: 8px;
+    width: 8px; height: 8px; border-radius: 50%; z-index: 2;
+  }
+  .asset-status-dot.approved { background: var(--status-green); box-shadow: 0 0 6px rgba(16,185,129,0.5); }
+  .asset-status-dot.review { background: var(--status-amber); }
+  .asset-status-dot.production { background: var(--brand-accent); }
+  .asset-status-dot.draft { background: var(--text-tertiary); }
+
+  /* Format badge */
+  .asset-format-badge {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 10px; font-weight: 510;
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    z-index: 2;
+    padding: 2px 6px;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(6px);
+    border-radius: 4px;
+    letter-spacing: -0.13px;
+  }
+
+  /* Bottom overlay */
+  .asset-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 24px 10px 8px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    z-index: 2;
+  }
+  .asset-overlay-name {
+    font-size: 11px; font-weight: 510; color: #fff;
+    letter-spacing: -0.13px; line-height: 1.3;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .asset-overlay-brief {
+    font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.6);
+    letter-spacing: -0.13px; line-height: 1.3;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* Status pills */
+  .status-pill {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 10px; font-weight: 510;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .status-pill.approved { background: rgba(16,185,129,0.1); color: var(--status-green); border: 1px solid rgba(16,185,129,0.3); }
+  .status-pill.review { background: rgba(245,158,11,0.1); color: var(--status-amber); border: 1px solid rgba(245,158,11,0.3); }
+  .status-pill.production { background: rgba(113,112,255,0.1); color: var(--brand-accent); border: 1px solid rgba(113,112,255,0.3); }
+  .status-pill.draft { background: var(--surface-3); color: var(--text-tertiary); border: 1px solid var(--border-standard); }
+
+  /* DRAWER */
+  .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 90; }
+  .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 640px; max-width: 100vw; background: var(--bg-surface); border-left: 1px solid var(--border-standard); box-shadow: -8px 0 32px rgba(0,0,0,0.5); z-index: 100; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+  .drawer-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+  .drawer-title-wrap { flex: 1; min-width: 0; }
+  .drawer-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drawer-close { width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--text-tertiary); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; }
+  .drawer-close:hover { background: var(--surface-2); color: var(--text-primary); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+  .drawer-footer { border-top: 1px solid var(--border-subtle); padding: 12px 16px; display: flex; gap: 6px; flex-shrink: 0; background: var(--bg-surface); }
+  .d-btn { flex: 1; padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.12s; font-family: inherit; }
+  .d-btn.primary { background: var(--brand); border: 1px solid var(--brand); color: white; }
+  .d-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .d-btn.secondary { background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-primary); }
+  .d-btn.secondary:hover { background: var(--surface-3); }
+
+  /* Drawer preview image */
+  .d-preview { width: 100%; border-radius: 8px; border: 1px solid var(--border-standard); overflow: hidden; margin-bottom: 16px; }
+  .d-preview img { width: 100%; display: block; }
+
+  /* Metadata grid */
+  .d-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 16px; border: 1px solid var(--border-standard); border-radius: 8px; overflow: hidden; }
+  .d-meta-cell { padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); }
+  .d-meta-cell:nth-child(2n) { border-right: none; }
+  .d-meta-cell:nth-last-child(-n+2) { border-bottom: none; }
+  .d-meta-key { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+  .d-meta-val { font-size: 12px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; }
+  .d-meta-val a { color: var(--brand-accent); text-decoration: none; }
+  .d-meta-val a:hover { color: var(--brand-hover); }
+
+  /* Brand alignment panel in drawer */
+  .d-alignment { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+  .d-alignment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .d-score-circle { width: 42px; height: 42px; border-radius: 50%; background: rgba(16,185,129,0.14); border: 1.5px solid rgba(16,185,129,0.4); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 590; color: var(--status-green); flex-shrink: 0; }
+  .d-alignment-label { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; }
+  .d-alignment-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+  .d-bars { display: flex; flex-direction: column; gap: 6px; }
+  .d-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: -0.13px; }
+  .d-bar-key { color: var(--text-tertiary); width: 55px; font-weight: 510; }
+  .d-bar { flex: 1; height: 4px; background: var(--surface-3); border-radius: 999px; overflow: hidden; }
+  .d-bar-fill { height: 100%; border-radius: 999px; }
+  .d-bar-fill.green { background: var(--status-green); }
+  .d-bar-fill.indigo { background: var(--brand-accent); }
+  .d-bar-val { color: var(--text-primary); font-weight: 510; width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Used-in section */
+  .d-section { margin-bottom: 14px; }
+  .d-section-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .d-usage-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; font-size: 12px; letter-spacing: -0.13px; border-bottom: 1px solid var(--border-subtle); }
+  .d-usage-row:last-child { border-bottom: none; }
+  .d-usage-icon { width: 24px; height: 24px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); flex-shrink: 0; }
+  .d-usage-name { flex: 1; color: var(--text-primary); font-weight: 510; }
+  .d-usage-date { color: var(--text-tertiary); }
+
+  /* Version rows */
+  .d-version-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; font-size: 11px; letter-spacing: -0.13px; border-bottom: 1px solid var(--border-subtle); cursor: pointer; }
+  .d-version-row:last-child { border-bottom: none; }
+  .d-version-row:hover { color: var(--text-primary); }
+  .d-version-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .d-version-dot.active { background: var(--status-green); }
+  .d-version-dot.past { background: var(--text-quaternary); }
+  .d-version-name { color: var(--text-primary); font-weight: 510; }
+  .d-version-meta { color: var(--text-tertiary); flex: 1; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <a class="nav-item" href="brand_sandbox.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <a class="nav-item" href="clusters.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Briefs</span></a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Creator Studio</span></a>
+    <div class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Asset Manager</span></div>
+    <a class="nav-item" href="reviews.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">ROAS Dashboard</span></a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reports</span></a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg><span class="nav-label">Competitive Intel</span></a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Team</span></a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Presets</span></a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Admin</span></a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Execution</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">Asset Manager</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Upload
+      </button>
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 8V2M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Download selected
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Execution &middot; Asset Manager</div>
+      <h1 class="page-title">Production assets for BAPE</h1>
+      <p class="page-desc">Every asset produced from briefs &mdash; organized by campaign, status, and format. Search by keyword or visual similarity. Assets flow here from Creator Studio and move to Reviews for approval.</p>
+
+      <!-- Stat strip -->
+      <div class="stat-strip">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-value">63</div>
+            <div class="stat-label">Total assets</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-value">24</div>
+            <div class="stat-label">Approved</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-value">18</div>
+            <div class="stat-label">In review</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-value">21</div>
+            <div class="stat-label">Draft / In production</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter row -->
+      <div class="filter-bar">
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Status</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Campaign</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Format</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="filter-spacer"></div>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Newest</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span class="filter-count">63 assets</span>
+      </div>
+
+      <!-- Asset grid -->
+      <div class="asset-grid" id="assetGrid"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title-wrap">
+      <div class="drawer-eyebrow">Asset</div>
+      <div class="drawer-title" id="drawerTitle">&mdash;</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer" id="drawerFooter"></div>
+</aside>
+
+<script>
+  const assets = [
+    { id: 1, img: 'images/1.jpg', name: 'Heritage \u00b7 Hero Film Still 1', brief: '30yr Retrospective \u00b7 Hero Film', campaign: 'Heritage Storytelling \u00b7 30yr', status: 'approved', statusLabel: 'Approved', format: '1080\u00d71080', created: 'Mar 2, 2026', creator: 'Kathy S.', score: 92, visual: 90, tonal: 88, cultural: 96, audience: 94, usedIn: 'Instagram @bape_us \u00b7 Posted Mar 5', usedIcon: 'ig' },
+    { id: 2, img: 'images/2.jpg', name: 'Heritage \u00b7 Hero Film Still 2', brief: '30yr Retrospective \u00b7 Hero Film', campaign: 'Heritage Storytelling \u00b7 30yr', status: 'approved', statusLabel: 'Approved', format: '1080\u00d71920', created: 'Mar 2, 2026', creator: 'Kathy S.', score: 90, visual: 88, tonal: 92, cultural: 91, audience: 89, usedIn: 'Instagram Story @bape_us \u00b7 Posted Mar 5', usedIcon: 'ig' },
+    { id: 3, img: 'images/3.jpg', name: 'Heritage \u00b7 Archival Montage', brief: 'Archive Reissue \u00b7 2003 Camo', campaign: 'Heritage Storytelling \u00b7 30yr', status: 'approved', statusLabel: 'Approved', format: '1920\u00d71080', created: 'Feb 28, 2026', creator: 'Kathy S.', score: 88, visual: 85, tonal: 90, cultural: 92, audience: 86, usedIn: 'YouTube @bapeofficial \u00b7 Posted Mar 1', usedIcon: 'yt' },
+    { id: 4, img: 'images/4.jpg', name: 'Heritage \u00b7 Web Banner', brief: 'Archive Reissue \u00b7 2003 Camo', campaign: 'Heritage Storytelling \u00b7 30yr', status: 'approved', statusLabel: 'Approved', format: '1920\u00d7600', created: 'Feb 27, 2026', creator: 'Kathy S.', score: 86, visual: 84, tonal: 88, cultural: 90, audience: 83, usedIn: 'bape.com Homepage \u00b7 Live since Mar 1', usedIcon: 'web' },
+    { id: 5, img: 'images/5.jpg', name: 'Green Camo \u00b7 Product Flat-lay', brief: 'Green Camo Shark \u00b7 Product Hero', campaign: 'Green Camo Shark \u00b7 Anniversary', status: 'approved', statusLabel: 'Approved', format: '2400\u00d72400', created: 'Mar 12, 2026', creator: 'Kathy S.', score: 91, visual: 93, tonal: 86, cultural: 92, audience: 90, usedIn: 'Instagram @bape_us \u00b7 Posted Mar 15', usedIcon: 'ig' },
+    { id: 6, img: 'images/6.jpg', name: 'Green Camo \u00b7 On-Model Studio', brief: 'Green Camo Shark \u00b7 Product Hero', campaign: 'Green Camo Shark \u00b7 Anniversary', status: 'approved', statusLabel: 'Approved', format: '1080\u00d71080', created: 'Mar 12, 2026', creator: 'Kathy S.', score: 89, visual: 91, tonal: 84, cultural: 90, audience: 88, usedIn: 'Instagram Carousel @bape_us \u00b7 Posted Mar 15', usedIcon: 'ig' },
+    { id: 7, img: 'images/7.jpg', name: 'Green Camo \u00b7 Web Hero', brief: 'Green Camo Shark \u00b7 Product Hero', campaign: 'Green Camo Shark \u00b7 Anniversary', status: 'approved', statusLabel: 'Approved', format: '1920\u00d7800', created: 'Mar 13, 2026', creator: 'Kathy S.', score: 87, visual: 88, tonal: 82, cultural: 89, audience: 87, usedIn: 'bape.com Product Page \u00b7 Live since Mar 14', usedIcon: 'web' },
+    { id: 8, img: 'images/8.jpg', name: 'adidas Drop 3 \u00b7 Track Hero', brief: 'adidas Drop 3 \u00b7 Track Suit', campaign: 'Sport Luxe \u00b7 adidas Drop 3', status: 'approved', statusLabel: 'Approved', format: '1080\u00d71080', created: 'Mar 20, 2026', creator: 'Kathy S.', score: 85, visual: 87, tonal: 80, cultural: 88, audience: 84, usedIn: 'Instagram @bape_us \u00b7 Posted Mar 22', usedIcon: 'ig' },
+    { id: 9, img: 'images/9.jpg', name: 'Tokyo \u00b7 Neon Camo Hero', brief: 'Neon ABC Camo \u00b7 Hero Product', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '1080\u00d71080', created: 'Apr 8, 2026', creator: 'Regional Lead', score: 82, visual: 78, tonal: 84, cultural: 88, audience: 80, usedIn: null },
+    { id: 10, img: 'images/10.jpg', name: 'Tokyo \u00b7 Neon Story Frame', brief: 'Neon ABC Camo \u00b7 Hero Product', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '1080\u00d71920', created: 'Apr 8, 2026', creator: 'Regional Lead', score: 80, visual: 76, tonal: 82, cultural: 86, audience: 78, usedIn: null },
+    { id: 11, img: 'images/11.jpg', name: 'Shibuya 3am \u00b7 Crossing Shot', brief: 'Shibuya 3am Street Shoot', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '1080\u00d71080', created: 'Apr 10, 2026', creator: 'Regional Lead', score: 84, visual: 86, tonal: 78, cultural: 90, audience: 82, usedIn: null },
+    { id: 12, img: 'images/12.jpg', name: 'Shibuya 3am \u00b7 Neon Reflection', brief: 'Shibuya 3am Street Shoot', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '2480\u00d73508', created: 'Apr 10, 2026', creator: 'Regional Lead', score: 86, visual: 88, tonal: 80, cultural: 92, audience: 84, usedIn: null },
+    { id: 13, img: 'images/13.jpg', name: 'Neo-Max \u00b7 Store Entrance Render', brief: 'Neo-Max Retail Concept \u00b7 Interior', campaign: 'Neo-Max Store \u00b7 Shibuya', status: 'review', statusLabel: 'In Review', format: '3840\u00d72160', created: 'Apr 12, 2026', creator: 'Kathy S.', score: 79, visual: 82, tonal: 74, cultural: 80, audience: 78, usedIn: null },
+    { id: 14, img: 'images/14.jpg', name: 'Neo-Max \u00b7 Interior Concept', brief: 'Neo-Max Retail Concept \u00b7 Interior', campaign: 'Neo-Max Store \u00b7 Shibuya', status: 'review', statusLabel: 'In Review', format: '3840\u00d72160', created: 'Apr 12, 2026', creator: 'Kathy S.', score: 77, visual: 80, tonal: 72, cultural: 78, audience: 76, usedIn: null },
+    { id: 15, img: 'images/15.jpg', name: 'Sakura \u00b7 Pattern Tile Draft', brief: 'Sakura Camo Hero Pattern', campaign: 'SS26 \u00b7 Hana Matsuri', status: 'production', statusLabel: 'In Production', format: '4000\u00d74000', created: 'Apr 14, 2026', creator: 'Kathy S.', score: 75, visual: 72, tonal: 78, cultural: 80, audience: 70, usedIn: null },
+    { id: 16, img: 'images/16.jpg', name: 'Sakura \u00b7 Hoodie Mockup', brief: 'Sakura Camo Hero Pattern', campaign: 'SS26 \u00b7 Hana Matsuri', status: 'production', statusLabel: 'In Production', format: '2400\u00d72400', created: 'Apr 14, 2026', creator: 'Kathy S.', score: 74, visual: 70, tonal: 76, cultural: 78, audience: 72, usedIn: null },
+    { id: 17, img: 'images/17.jpg', name: 'Sakura \u00b7 Tee Mockup', brief: 'Sakura Camo Hero Pattern', campaign: 'SS26 \u00b7 Hana Matsuri', status: 'production', statusLabel: 'In Production', format: '2400\u00d72400', created: 'Apr 15, 2026', creator: 'Kathy S.', score: 73, visual: 68, tonal: 76, cultural: 78, audience: 70, usedIn: null },
+    { id: 18, img: 'images/18.jpg', name: 'Sakura \u00b7 Instagram Reveal', brief: 'Sakura Camo Hero Pattern', campaign: 'SS26 \u00b7 Hana Matsuri', status: 'production', statusLabel: 'In Production', format: '1080\u00d71080', created: 'Apr 15, 2026', creator: 'Kathy S.', score: 76, visual: 74, tonal: 78, cultural: 80, audience: 72, usedIn: null },
+    { id: 19, img: 'images/19.jpg', name: 'ABC SS26 \u00b7 Colorway Exploration', brief: 'ABC Camo SS26 \u00b7 New Colorways', campaign: 'ABC Camo Drop SS26', status: 'draft', statusLabel: 'Draft', format: '2400\u00d72400', created: 'Apr 16, 2026', creator: 'Kathy S.', score: 68, visual: 65, tonal: 70, cultural: 72, audience: 64, usedIn: null },
+    { id: 20, img: 'images/20.jpg', name: 'Chrome Milo \u00b7 Y2K Concept', brief: 'Chrome Milo Reissue \u00b7 Archive', campaign: 'Y2K Revival Capsule', status: 'draft', statusLabel: 'Draft', format: '2400\u00d72400', created: 'Apr 16, 2026', creator: 'Kathy S.', score: 65, visual: 62, tonal: 68, cultural: 70, audience: 60, usedIn: null }
+  ];
+
+  // Render grid
+  function renderGrid() {
+    const grid = document.getElementById('assetGrid');
+    grid.innerHTML = assets.map(a => `
+      <div class="asset-tile" onclick="openDrawer(${a.id})">
+        <img src="${a.img}" alt="${a.name}">
+        <div class="asset-status-dot ${a.status}"></div>
+        <div class="asset-format-badge">${a.format}</div>
+        <div class="asset-overlay">
+          <div class="asset-overlay-name">${a.name}</div>
+          <div class="asset-overlay-brief">${a.brief}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderGrid();
+
+  /* Drawer */
+  function openDrawer(id) {
+    const a = assets.find(x => x.id === id);
+    if (!a) return;
+
+    document.getElementById('drawerTitle').textContent = a.name;
+
+    const statusPill = '<span class="status-pill ' + a.status + '">' + a.statusLabel + '</span>';
+
+    // Score bar color helper
+    function barColor(val) { return val >= 80 ? 'green' : 'indigo'; }
+
+    // Used-in section
+    let usedInHtml = '';
+    if (a.usedIn) {
+      const iconSvg = a.usedIcon === 'ig'
+        ? '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="4" r="1" fill="currentColor"/></svg>'
+        : a.usedIcon === 'yt'
+        ? '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 6.5l4 2-4 2z" fill="currentColor"/></svg>'
+        : '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
+      usedInHtml = `
+        <div class="d-section">
+          <div class="d-section-label">Used in</div>
+          <div class="d-usage-row">
+            <div class="d-usage-icon">${iconSvg}</div>
+            <span class="d-usage-name">${a.usedIn}</span>
+          </div>
+        </div>`;
+    } else {
+      usedInHtml = `
+        <div class="d-section">
+          <div class="d-section-label">Used in</div>
+          <div style="font-size: 12px; color: var(--text-quaternary); letter-spacing: -0.13px; padding: 4px 0;">Not yet published</div>
+        </div>`;
+    }
+
+    document.getElementById('drawerBody').innerHTML = `
+      <div class="d-preview"><img src="${a.img}" alt="${a.name}"></div>
+
+      <div class="d-meta-grid">
+        <div class="d-meta-cell">
+          <div class="d-meta-key">Format</div>
+          <div class="d-meta-val">${a.format}</div>
+        </div>
+        <div class="d-meta-cell">
+          <div class="d-meta-key">Status</div>
+          <div class="d-meta-val">${statusPill}</div>
+        </div>
+        <div class="d-meta-cell">
+          <div class="d-meta-key">Brief</div>
+          <div class="d-meta-val"><a href="briefs.html">${a.brief}</a></div>
+        </div>
+        <div class="d-meta-cell">
+          <div class="d-meta-key">Campaign</div>
+          <div class="d-meta-val">${a.campaign}</div>
+        </div>
+        <div class="d-meta-cell">
+          <div class="d-meta-key">Created</div>
+          <div class="d-meta-val">${a.created}</div>
+        </div>
+        <div class="d-meta-cell">
+          <div class="d-meta-key">Creator</div>
+          <div class="d-meta-val">${a.creator}</div>
+        </div>
+      </div>
+
+      <div class="d-alignment">
+        <div class="d-alignment-header">
+          <div class="d-score-circle">${a.score}%</div>
+          <div>
+            <div class="d-alignment-label">Brand alignment score</div>
+            <div class="d-alignment-sub">Scored against BAPE Brand DNA</div>
+          </div>
+        </div>
+        <div class="d-bars">
+          <div class="d-bar-row"><span class="d-bar-key">Visual</span><div class="d-bar"><div class="d-bar-fill ${barColor(a.visual)}" style="width:${a.visual}%"></div></div><span class="d-bar-val">${a.visual}</span></div>
+          <div class="d-bar-row"><span class="d-bar-key">Tonal</span><div class="d-bar"><div class="d-bar-fill ${barColor(a.tonal)}" style="width:${a.tonal}%"></div></div><span class="d-bar-val">${a.tonal}</span></div>
+          <div class="d-bar-row"><span class="d-bar-key">Cultural</span><div class="d-bar"><div class="d-bar-fill ${barColor(a.cultural)}" style="width:${a.cultural}%"></div></div><span class="d-bar-val">${a.cultural}</span></div>
+          <div class="d-bar-row"><span class="d-bar-key">Audience</span><div class="d-bar"><div class="d-bar-fill ${barColor(a.audience)}" style="width:${a.audience}%"></div></div><span class="d-bar-val">${a.audience}</span></div>
+        </div>
+      </div>
+
+      ${usedInHtml}
+
+      <div class="d-section">
+        <div class="d-section-label">Version history</div>
+        <div class="d-version-row">
+          <div class="d-version-dot active"></div>
+          <span class="d-version-name">v2</span>
+          <span class="d-version-meta">&middot; Current</span>
+        </div>
+        <div class="d-version-row">
+          <div class="d-version-dot past"></div>
+          <span class="d-version-name">v1</span>
+          <span class="d-version-meta">&middot; Original</span>
+        </div>
+      </div>
+    `;
+
+    // Footer actions by status
+    let footer = '';
+    if (a.status === 'approved') {
+      footer = `
+        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Publish</button>
+        <button class="d-btn secondary">Edit in Creator Studio</button>
+        <button class="d-btn secondary">Download</button>`;
+    } else if (a.status === 'review') {
+      footer = `
+        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve</button>
+        <button class="d-btn secondary">Request changes</button>
+        <button class="d-btn secondary">View in Reviews</button>`;
+    } else if (a.status === 'production') {
+      footer = `
+        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3 8l2-2 1.5 1.5L9 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Open in Creator Studio</button>
+        <button class="d-btn secondary">Submit to Review</button>`;
+    } else if (a.status === 'draft') {
+      footer = `
+        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3 8l2-2 1.5 1.5L9 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Open in Creator Studio</button>`;
+    }
+    document.getElementById('drawerFooter').innerHTML = footer;
+
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerBackdrop').classList.add('open');
+    document.getElementById('drawerBody').scrollTop = 0;
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerBackdrop').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+
+</body>
+</html>

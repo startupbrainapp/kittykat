@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Reviews</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a; --bg-panel: #0f1011; --bg-surface: #191a1b; --bg-elevated: #28282c;
+    --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+    --brand: #5e6ad2; --brand-accent: #7170ff; --brand-hover: #828fff;
+    --border-subtle: rgba(255,255,255,0.05); --border-standard: rgba(255,255,255,0.08); --border-solid: #23252a;
+    --surface-1: rgba(255,255,255,0.02); --surface-2: rgba(255,255,255,0.04); --surface-3: rgba(255,255,255,0.05);
+    --status-green: #10b981; --status-amber: #f59e0b; --status-red: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { background: var(--bg-canvas); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
+  button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* SIDEBAR */
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-family: inherit; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 720px; margin-bottom: 20px; }
+
+  /* Stat strip */
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .stat-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .stat-icon.green { color: var(--status-green); }
+  .stat-icon.amber { color: var(--status-amber); }
+  .stat-icon.red { color: var(--status-red); }
+  .stat-meta { display: flex; flex-direction: column; gap: 0; }
+  .stat-value { font-size: 14px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .stat-label { font-size: 11px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* Filter row */
+  .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 8px 0; flex-wrap: wrap; }
+  .filter-dropdown { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: all 0.12s; font-family: inherit; }
+  .filter-dropdown:hover { background: var(--surface-3); color: var(--text-primary); }
+  .filter-dropdown-label { font-size: 10px; color: var(--text-quaternary); font-weight: 510; text-transform: uppercase; letter-spacing: 0.4px; margin-right: 2px; }
+  .filter-chev { color: var(--text-tertiary); width: 10px; height: 10px; }
+  .filter-spacer { flex: 1; }
+  .filter-count { font-size: 12px; color: var(--text-tertiary); font-weight: 510; letter-spacing: -0.13px; }
+
+  /* Review queue */
+  .review-list { display: flex; flex-direction: column; gap: 4px; }
+  .review-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .review-item:hover { background: var(--surface-2); border-color: rgba(255,255,255,0.12); }
+  .review-thumb { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--bg-elevated); }
+  .review-details { flex: 1; min-width: 0; }
+  .review-asset-name { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .review-brief { font-size: 12px; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; margin-bottom: 5px; }
+  .review-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .review-score { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; }
+  .score-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .score-dot.green { background: var(--status-green); }
+  .score-dot.indigo { background: var(--brand-accent); }
+  .score-dot.amber { background: var(--status-amber); }
+  .review-submitter { font-size: 12px; color: var(--text-quaternary); letter-spacing: -0.13px; }
+  .review-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .btn-approve { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; background: rgba(16,185,129,0.12); color: var(--status-green); border: 1px solid rgba(16,185,129,0.3); transition: background 0.12s; font-family: inherit; }
+  .btn-approve:hover { background: rgba(16,185,129,0.22); }
+  .btn-changes { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; background: var(--surface-1); color: var(--text-secondary); border: 1px solid var(--border-standard); transition: background 0.12s; font-family: inherit; }
+  .btn-changes:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-chevron { width: 28px; height: 28px; border-radius: 6px; background: transparent; border: none; color: var(--text-quaternary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s; font-family: inherit; }
+  .btn-chevron:hover { background: var(--surface-2); color: var(--text-tertiary); }
+
+  /* DRAWER */
+  .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 90; }
+  .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 640px; max-width: 100vw; background: var(--bg-surface); border-left: 1px solid var(--border-standard); box-shadow: -8px 0 32px rgba(0,0,0,0.5); z-index: 100; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+  .drawer-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+  .drawer-title-wrap { flex: 1; min-width: 0; }
+  .drawer-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drawer-close { width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--text-tertiary); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; }
+  .drawer-close:hover { background: var(--surface-2); color: var(--text-primary); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+  .drawer-footer { border-top: 1px solid var(--border-subtle); padding: 12px 16px; display: flex; gap: 6px; flex-shrink: 0; background: var(--bg-surface); }
+  .d-btn { flex: 1; padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.12s; font-family: inherit; }
+  .d-btn.green { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--status-green); }
+  .d-btn.green:hover { background: rgba(16,185,129,0.25); }
+  .d-btn.secondary { background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-primary); }
+  .d-btn.secondary:hover { background: var(--surface-3); }
+  .d-btn.danger { background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-primary); }
+  .d-btn.danger:hover { background: rgba(239,68,68,0.12); color: var(--status-red); border-color: rgba(239,68,68,0.3); }
+
+  /* Drawer internals */
+  .d-preview { width: 100%; border-radius: 10px; margin-bottom: 14px; object-fit: cover; max-height: 320px; background: var(--bg-elevated); }
+  .d-status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .status-pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 510; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
+  .status-pill.pending { background: rgba(245,158,11,0.1); color: var(--status-amber); border: 1px solid rgba(245,158,11,0.3); }
+
+  .d-alignment { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  .d-alignment-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .d-score-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 590; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .d-score-circle.green { background: rgba(16,185,129,0.14); border: 2px solid rgba(16,185,129,0.4); color: var(--status-green); }
+  .d-score-circle.indigo { background: rgba(113,112,255,0.14); border: 2px solid rgba(113,112,255,0.4); color: var(--brand-accent); }
+  .d-score-circle.amber { background: rgba(245,158,11,0.14); border: 2px solid rgba(245,158,11,0.4); color: var(--status-amber); }
+  .d-score-label { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; }
+  .d-score-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+  .d-breakdown { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .d-breakdown-item { text-align: center; }
+  .d-breakdown-bar { height: 4px; border-radius: 2px; background: var(--surface-3); margin-bottom: 6px; overflow: hidden; }
+  .d-breakdown-fill { height: 100%; border-radius: 2px; }
+  .d-breakdown-fill.green { background: var(--status-green); }
+  .d-breakdown-fill.indigo { background: var(--brand-accent); }
+  .d-breakdown-fill.amber { background: var(--status-amber); }
+  .d-breakdown-val { font-size: 12px; font-weight: 590; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .d-breakdown-label { font-size: 9px; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+
+  .panel { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+  .panel-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .panel-label-count { background: var(--surface-3); color: var(--text-tertiary); padding: 1px 6px; border-radius: 9999px; font-size: 10px; font-weight: 510; text-transform: none; letter-spacing: -0.13px; }
+
+  .d-brief-ctx { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .d-brief-row { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border-subtle); font-size: 12px; letter-spacing: -0.13px; }
+  .d-brief-row:last-child { border-bottom: none; }
+  .d-brief-row-label { font-weight: 510; color: var(--text-quaternary); min-width: 75px; flex-shrink: 0; }
+  .d-brief-row-value { color: var(--text-secondary); }
+  .d-brief-row-value a { color: var(--brand-accent); text-decoration: none; }
+  .d-brief-row-value a:hover { text-decoration: underline; }
+
+  .d-comparison { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .d-comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .d-comparison-col-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+  .d-comparison-text { font-size: 12px; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.55; }
+  .d-comparison-thumb { width: 100%; border-radius: 6px; object-fit: cover; aspect-ratio: 1; background: var(--bg-elevated); }
+
+  .d-comment { background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; }
+  .d-comment-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .d-comment-avatar { width: 20px; height: 20px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 590; flex-shrink: 0; }
+  .d-comment-name { font-size: 12px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; }
+  .d-comment-role { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; }
+  .d-comment-time { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; margin-left: auto; }
+  .d-comment-text { font-size: 12px; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.5; }
+  .d-comment-input { display: flex; gap: 8px; margin-top: 8px; }
+  .d-comment-input input { flex: 1; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; padding: 7px 10px; font-size: 12px; color: var(--text-primary); letter-spacing: -0.13px; outline: none; font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+  .d-comment-input input::placeholder { color: var(--text-quaternary); }
+  .d-comment-input button { padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 510; cursor: pointer; background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-secondary); font-family: inherit; transition: background 0.12s; }
+  .d-comment-input button:hover { background: var(--surface-3); color: var(--text-primary); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <a class="nav-item" href="brand_sandbox.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <a class="nav-item" href="clusters.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Briefs</span></a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Creator Studio</span></a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Asset Manager</span></a>
+    <a class="nav-item active" href="reviews.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">ROAS Dashboard</span></a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reports</span></a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg><span class="nav-label">Competitive Intel</span></a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Team</span></a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Presets</span></a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Admin</span></a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Execution</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">Reviews</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Mark all read
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Execution &middot; Reviews</div>
+      <h1 class="page-title">Review queue for BAPE</h1>
+      <p class="page-desc">Approve or request changes on assets before they ship. Each asset shows its brand alignment score and the brief it came from &mdash; so you review with full context.</p>
+
+      <!-- Stat strip -->
+      <div class="stat-strip">
+        <div class="stat-card">
+          <div class="stat-icon amber">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-value">22</div>
+            <div class="stat-label">Pending review</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-value">8</div>
+            <div class="stat-label">Approved today</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M6 6l4 4M10 6l-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Changes requested</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-meta">
+            <div class="stat-value">91%</div>
+            <div class="stat-label">Avg alignment score</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter row -->
+      <div class="filter-bar">
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Status</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Brief</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Reviewer</span><span>Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="filter-spacer"></div>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Newest</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span class="filter-count">22 items</span>
+      </div>
+
+      <!-- Review list -->
+      <div class="review-list" id="reviewList"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title-wrap">
+      <div class="drawer-eyebrow">Review</div>
+      <div class="drawer-title" id="drawerTitle">&mdash;</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer" id="drawerFooter"></div>
+</aside>
+
+<script>
+  const items = [
+    { id: 0, name: 'Neon ABC Camo \u00b7 Hero Shot 1', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', score: 88, submitter: 'Maya T.', time: '2h ago', img: 'images/v1.jpg', briefDesc: 'Neon-lit product hero for the Tokyo After Dark ABC Camo variant. Cyber-purple and electric-green palette. Studio shot with LED strip lighting.', spec: 'Instagram Post 1080\u00d71080', visual: 85, tonal: 90, cultural: 92, audience: 86 },
+    { id: 1, name: 'Neon ABC Camo \u00b7 Hero Shot 2', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', score: 85, submitter: 'Maya T.', time: '2h ago', img: 'images/v2.jpg', briefDesc: 'Neon-lit product hero for the Tokyo After Dark ABC Camo variant. Cyber-purple and electric-green palette. Studio shot with LED strip lighting.', spec: 'Instagram Story 1080\u00d71920', visual: 82, tonal: 87, cultural: 89, audience: 83 },
+    { id: 2, name: 'Shibuya 3am \u00b7 Street Scene 1', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', score: 92, submitter: 'Maya T.', time: '3h ago', img: 'images/v3.jpg', briefDesc: 'Guerrilla-style street photography at 3am in Shibuya. Neon reflections on wet pavement, convenience-store fluorescence, crossing lights.', spec: 'Instagram Post 1080\u00d71080', visual: 94, tonal: 91, cultural: 95, audience: 88 },
+    { id: 3, name: 'Shibuya 3am \u00b7 Street Scene 2', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', score: 78, submitter: 'Maya T.', time: '3h ago', img: 'images/v4.jpg', briefDesc: 'Guerrilla-style street photography at 3am in Shibuya. Neon reflections on wet pavement, convenience-store fluorescence, crossing lights.', spec: 'Editorial Spread 2480\u00d73508', visual: 75, tonal: 80, cultural: 82, audience: 74 },
+    { id: 4, name: 'Neo-Max Interior \u00b7 Wide', brief: 'Neo-Max Store', campaign: 'Neo-Max Store \u00b7 Shibuya', score: 91, submitter: 'Kathy S.', time: '5h ago', img: 'images/1.jpg', briefDesc: 'Interior design renders + visual merchandising concepts for the Neo-Maximalist pop-up in Shibuya. Print-on-print walls, camo-tile floors, LED canopy ceiling.', spec: '3D Render 3840\u00d72160', visual: 93, tonal: 88, cultural: 91, audience: 90 },
+    { id: 5, name: 'Neo-Max Interior \u00b7 Detail', brief: 'Neo-Max Store', campaign: 'Neo-Max Store \u00b7 Shibuya', score: 86, submitter: 'Kathy S.', time: '5h ago', img: 'images/2.jpg', briefDesc: 'Interior design renders + visual merchandising concepts for the Neo-Maximalist pop-up in Shibuya. Print-on-print walls, camo-tile floors, LED canopy ceiling.', spec: '3D Render 3840\u00d72160', visual: 88, tonal: 84, cultural: 86, audience: 85 },
+    { id: 6, name: 'Neo-Max Interior \u00b7 Entrance', brief: 'Neo-Max Store', campaign: 'Neo-Max Store \u00b7 Shibuya', score: 82, submitter: 'Kathy S.', time: '6h ago', img: 'images/3.jpg', briefDesc: 'Interior design renders + visual merchandising concepts for the Neo-Maximalist pop-up in Shibuya. Print-on-print walls, camo-tile floors, LED canopy ceiling.', spec: '3D Render 3840\u00d72160', visual: 80, tonal: 83, cultural: 85, audience: 79 },
+    { id: 7, name: 'Sakura Camo \u00b7 Pattern Tile', brief: 'SS26 Hana Matsuri', campaign: 'SS26 \u00b7 Hana Matsuri', score: 94, submitter: 'Maya T.', time: '1d ago', img: 'images/5.jpg', briefDesc: 'Hero pattern design for the Sakura Camo colorway. Cherry-blossom pink over classic ABC Camo. Seamless repeat tile + product mockups.', spec: 'Pattern Tile 4000\u00d74000', visual: 96, tonal: 92, cultural: 95, audience: 93 },
+    { id: 8, name: 'Sakura Camo \u00b7 Product Flat', brief: 'SS26 Hana Matsuri', campaign: 'SS26 \u00b7 Hana Matsuri', score: 89, submitter: 'Maya T.', time: '1d ago', img: 'images/9.jpg', briefDesc: 'Hero pattern design for the Sakura Camo colorway. Cherry-blossom pink over classic ABC Camo. Seamless repeat tile + product mockups.', spec: 'Product Mockup 2400\u00d72400', visual: 91, tonal: 87, cultural: 90, audience: 88 },
+    { id: 9, name: 'Sakura Camo \u00b7 Lifestyle', brief: 'SS26 Hana Matsuri', campaign: 'SS26 \u00b7 Hana Matsuri', score: 74, submitter: 'Maya T.', time: '1d ago', img: 'images/7.jpg', briefDesc: 'Hero pattern design for the Sakura Camo colorway. Cherry-blossom pink over classic ABC Camo. Seamless repeat tile + product mockups.', spec: 'Instagram Post 1080\u00d71080', visual: 70, tonal: 76, cultural: 78, audience: 72 }
+  ];
+
+  function scoreTier(s) { return s >= 80 ? 'green' : s >= 60 ? 'indigo' : 'amber'; }
+
+  function renderList() {
+    const list = document.getElementById('reviewList');
+    list.innerHTML = items.map(it => {
+      const tier = scoreTier(it.score);
+      return `
+        <div class="review-item" onclick="openDrawer(${it.id})">
+          <img class="review-thumb" src="${it.img}" alt="${it.name}">
+          <div class="review-details">
+            <div class="review-asset-name">${it.name}</div>
+            <div class="review-brief">${it.brief} &middot; ${it.campaign}</div>
+            <div class="review-meta">
+              <span class="review-score"><span class="score-dot ${tier}"></span>Brand fit: ${it.score}%</span>
+              <span class="review-submitter">${it.submitter} &middot; ${it.time}</span>
+            </div>
+          </div>
+          <div class="review-actions" onclick="event.stopPropagation()">
+            <button class="btn-approve" onclick="event.stopPropagation()">Approve</button>
+            <button class="btn-changes" onclick="event.stopPropagation()">Changes</button>
+            <button class="btn-chevron" onclick="event.stopPropagation(); openDrawer(${it.id})">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+  renderList();
+
+  function openDrawer(id) {
+    const it = items.find(x => x.id === id);
+    if (!it) return;
+
+    document.getElementById('drawerTitle').textContent = it.name;
+
+    const tier = scoreTier(it.score);
+    const vTier = scoreTier(it.visual);
+    const tTier = scoreTier(it.tonal);
+    const cTier = scoreTier(it.cultural);
+    const aTier = scoreTier(it.audience);
+
+    document.getElementById('drawerBody').innerHTML = `
+      <img class="d-preview" src="${it.img}" alt="${it.name}">
+
+      <div class="d-status-row">
+        <span class="status-pill pending">Pending Review</span>
+        <span style="font-size: 12px; color: var(--text-tertiary); letter-spacing: -0.13px;">Submitted by ${it.submitter} &middot; ${it.time}</span>
+      </div>
+
+      <!-- Brand Alignment -->
+      <div class="d-alignment">
+        <div class="d-alignment-header">
+          <div class="d-score-circle ${tier}">${it.score}%</div>
+          <div>
+            <div class="d-score-label">Brand Alignment</div>
+            <div class="d-score-sub">How well this asset matches BAPE brand DNA</div>
+          </div>
+        </div>
+        <div class="d-breakdown">
+          <div class="d-breakdown-item">
+            <div class="d-breakdown-bar"><div class="d-breakdown-fill ${vTier}" style="width: ${it.visual}%"></div></div>
+            <div class="d-breakdown-val">${it.visual}</div>
+            <div class="d-breakdown-label">Visual</div>
+          </div>
+          <div class="d-breakdown-item">
+            <div class="d-breakdown-bar"><div class="d-breakdown-fill ${tTier}" style="width: ${it.tonal}%"></div></div>
+            <div class="d-breakdown-val">${it.tonal}</div>
+            <div class="d-breakdown-label">Tonal</div>
+          </div>
+          <div class="d-breakdown-item">
+            <div class="d-breakdown-bar"><div class="d-breakdown-fill ${cTier}" style="width: ${it.cultural}%"></div></div>
+            <div class="d-breakdown-val">${it.cultural}</div>
+            <div class="d-breakdown-label">Cultural</div>
+          </div>
+          <div class="d-breakdown-item">
+            <div class="d-breakdown-bar"><div class="d-breakdown-fill ${aTier}" style="width: ${it.audience}%"></div></div>
+            <div class="d-breakdown-val">${it.audience}</div>
+            <div class="d-breakdown-label">Audience</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brief Context -->
+      <div class="d-brief-ctx">
+        <div class="panel-label">From Brief</div>
+        <div class="d-brief-row">
+          <div class="d-brief-row-label">Brief</div>
+          <div class="d-brief-row-value"><a href="briefs.html">${it.brief}</a></div>
+        </div>
+        <div class="d-brief-row">
+          <div class="d-brief-row-label">Campaign</div>
+          <div class="d-brief-row-value">${it.campaign}</div>
+        </div>
+        <div class="d-brief-row">
+          <div class="d-brief-row-label">Deliverable</div>
+          <div class="d-brief-row-value">${it.spec}</div>
+        </div>
+      </div>
+
+      <!-- Brief vs Asset comparison -->
+      <div class="d-comparison">
+        <div class="panel-label">Brief vs Asset</div>
+        <div class="d-comparison-grid">
+          <div>
+            <div class="d-comparison-col-label">Brief Description</div>
+            <div class="d-comparison-text">${it.briefDesc}</div>
+          </div>
+          <div>
+            <div class="d-comparison-col-label">Generated Asset</div>
+            <img class="d-comparison-thumb" src="${it.img}" alt="${it.name}">
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div class="panel" style="margin-bottom: 0;">
+        <div class="panel-label">Comments <span class="panel-label-count">2</span></div>
+        <div class="d-comment">
+          <div class="d-comment-header">
+            <div class="d-comment-avatar">K</div>
+            <span class="d-comment-name">Kathy S.</span>
+            <span class="d-comment-role">&middot; CMO</span>
+            <span class="d-comment-time">1h ago</span>
+          </div>
+          <div class="d-comment-text">Make the shark-head more prominent in the top-left</div>
+        </div>
+        <div class="d-comment">
+          <div class="d-comment-header">
+            <div class="d-comment-avatar" style="background: #e8425c;">M</div>
+            <span class="d-comment-name">Maya T.</span>
+            <span class="d-comment-role">&middot; Creative</span>
+            <span class="d-comment-time">45m ago</span>
+          </div>
+          <div class="d-comment-text">Updated &mdash; see v2 attached</div>
+        </div>
+        <div class="d-comment-input">
+          <input type="text" placeholder="Add a comment...">
+          <button>Send</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('drawerFooter').innerHTML = `
+      <button class="d-btn green">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Approve
+      </button>
+      <button class="d-btn secondary">Request changes</button>
+      <button class="d-btn danger">Reject</button>
+    `;
+
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerBackdrop').classList.add('open');
+    document.getElementById('drawerBody').scrollTop = 0;
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerBackdrop').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+
+</body>
+</html>

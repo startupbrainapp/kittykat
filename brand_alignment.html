@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Inspiration / Brand Alignment</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a;
+    --bg-panel: #0f1011;
+    --bg-surface: #191a1b;
+    --bg-elevated: #28282c;
+
+    --text-primary: #f7f8f8;
+    --text-secondary: #d0d6e0;
+    --text-tertiary: #8a8f98;
+    --text-quaternary: #62666d;
+
+    --brand: #5e6ad2;
+    --brand-accent: #7170ff;
+    --brand-hover: #828fff;
+
+    --border-subtle: rgba(255,255,255,0.05);
+    --border-standard: rgba(255,255,255,0.08);
+    --border-solid: #23252a;
+
+    --surface-1: rgba(255,255,255,0.02);
+    --surface-2: rgba(255,255,255,0.04);
+    --surface-3: rgba(255,255,255,0.05);
+
+    --status-green: #10b981;
+    --status-amber: #f59e0b;
+    --status-red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -0.165px;
+  }
+
+  button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* ═══ SIDEBAR (shared) ═══ */
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .nav-chevron { width: 10px; height: 10px; opacity: 0.5; transition: transform 0.15s; flex-shrink: 0; }
+  .nav-chevron.open { transform: rotate(90deg); }
+  .sub-nav { overflow: hidden; max-height: 0; transition: max-height 0.2s ease; }
+  .sub-nav.open { max-height: 240px; }
+  .sub-nav-item { padding: 4px 10px 4px 32px; margin: 0 8px; border-radius: 5px; color: var(--text-quaternary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: all 0.1s; text-decoration: none; display: block; }
+  .sub-nav-item:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
+  .sub-nav-item.active { color: var(--text-primary); background: var(--surface-2); }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* ═══ MAIN ═══ */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-root:hover { color: var(--text-secondary); }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 680px; margin-bottom: 28px; }
+
+  /* ═══ Concept input ═══ */
+  .concept-shell {
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .concept-shell:focus-within {
+    border-color: rgba(113, 112, 255, 0.45);
+    background: var(--surface-2);
+  }
+  .concept-textarea {
+    background: transparent;
+    border: none; outline: none;
+    color: var(--text-primary);
+    font-size: 15px; font-weight: 400;
+    letter-spacing: -0.165px;
+    line-height: 1.55;
+    resize: none;
+    padding: 14px 14px 6px;
+    min-height: 76px;
+  }
+  .concept-textarea::placeholder { color: var(--text-quaternary); }
+  .concept-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px 8px 12px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .concept-tool {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 9px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 12px; font-weight: 510;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .concept-tool:hover { background: var(--surface-2); color: var(--text-primary); }
+  .concept-bar-spacer { flex: 1; }
+  .concept-score-btn {
+    padding: 6px 12px;
+    background: var(--brand);
+    border: 1px solid var(--brand);
+    border-radius: 6px;
+    color: white;
+    font-size: 13px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: background 0.12s;
+  }
+  .concept-score-btn:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  /* Chips */
+  .try-these { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 36px; }
+  .try-these-label { font-size: 11px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.4px; text-transform: uppercase; margin-right: 4px; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 5px; background: transparent; border: 1px solid var(--border-solid); border-radius: 9999px; font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; cursor: pointer; transition: all 0.12s; }
+  .chip:hover { background: var(--surface-2); color: var(--text-primary); border-color: var(--border-standard); }
+  .chip.active { background: rgba(113, 112, 255, 0.14); border-color: rgba(113, 112, 255, 0.4); color: var(--brand-accent); }
+  .chip-arrow { color: var(--text-tertiary); width: 12px; height: 12px; flex-shrink: 0; }
+  .chip:hover .chip-arrow { color: var(--brand-accent); }
+  .chip.active .chip-arrow { color: var(--brand-accent); }
+
+  /* ═══ Analysis hero ═══ */
+  .analysis-hero { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 12px; padding: 24px 28px; margin-bottom: 16px; position: relative; overflow: hidden; }
+  .analysis-hero::before { content: ''; position: absolute; top: 0; right: 0; width: 240px; height: 240px; background: radial-gradient(circle at center, rgba(113, 112, 255, 0.08), transparent 70%); pointer-events: none; }
+  .hero-eyebrow { display: flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .hero-tag { padding: 2px 8px; background: var(--surface-2); border: 1px solid var(--border-standard); border-radius: 9999px; color: var(--text-secondary); text-transform: none; letter-spacing: -0.13px; font-weight: 510; }
+  .hero-title { font-size: 24px; font-weight: 400; letter-spacing: -0.288px; line-height: 1.33; color: var(--text-primary); margin-bottom: 8px; }
+  .hero-desc { font-size: 15px; color: var(--text-tertiary); letter-spacing: -0.165px; line-height: 1.5; max-width: 720px; margin-bottom: 20px; }
+  .hero-row { display: flex; align-items: center; gap: 20px; padding-top: 16px; border-top: 1px solid var(--border-subtle); }
+  .score-block { display: flex; align-items: center; gap: 14px; }
+  .score-badge {
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.08));
+    border: 1px solid rgba(245,158,11,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 590;
+    color: var(--status-amber);
+    letter-spacing: -0.3px;
+  }
+  .score-info { display: flex; flex-direction: column; gap: 2px; }
+  .score-verdict { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; }
+  .score-verdict.mixed { color: var(--status-amber); }
+  .score-verdict.strong { color: var(--status-green); }
+  .score-verdict.weak { color: var(--status-red); }
+  .score-note { font-size: 12px; color: var(--text-tertiary); letter-spacing: -0.13px; }
+  .hero-divider { width: 1px; align-self: stretch; background: var(--border-subtle); }
+  .signal-block { display: flex; flex-direction: column; gap: 4px; }
+  .signal-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .signal-value { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; }
+
+  /* ═══ Grid ═══ */
+  .grid-2 { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 12px; margin-bottom: 16px; }
+  .panel { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 18px 20px; }
+  .panel-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+
+  /* Breakdown */
+  .breakdown-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; font-size: 13px; letter-spacing: -0.13px; }
+  .bd-key { color: var(--text-secondary); width: 130px; flex-shrink: 0; font-weight: 510; }
+  .bd-bar { flex: 1; height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .bd-fill { height: 100%; border-radius: 999px; }
+  .bd-fill.strong { background: var(--status-green); }
+  .bd-fill.mid { background: var(--brand-accent); }
+  .bd-fill.amber { background: var(--status-amber); }
+  .bd-fill.weak { background: var(--status-red); }
+  .bd-val { color: var(--text-primary); font-weight: 510; width: 42px; text-align: right; font-variant-numeric: tabular-nums; }
+  .bd-note { font-size: 11px; color: var(--text-quaternary); margin-top: 4px; margin-left: 142px; letter-spacing: -0.13px; }
+
+  /* ═══ Brand Genome panel ═══ */
+  .genome-section { margin-bottom: 16px; }
+  .genome-section:last-child { margin-bottom: 0; }
+  .genome-key {
+    font-size: 11px; font-weight: 510;
+    color: var(--text-secondary);
+    letter-spacing: -0.13px;
+    margin-bottom: 8px;
+  }
+
+  .color-row { display: flex; align-items: center; gap: 6px; }
+  .color-dot {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.12);
+    position: relative;
+    cursor: default;
+  }
+  .color-dot::after {
+    content: attr(data-name);
+    position: absolute;
+    bottom: -22px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px; font-weight: 510;
+    color: var(--text-quaternary);
+    white-space: nowrap;
+    opacity: 0; transition: opacity 0.15s;
+    pointer-events: none;
+    letter-spacing: -0.13px;
+  }
+  .color-dot:hover::after { opacity: 1; }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 3px 9px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-standard);
+    border-radius: 9999px;
+    font-size: 11px; font-weight: 510;
+    color: var(--text-secondary);
+    letter-spacing: -0.13px;
+  }
+  .tag.primary { color: var(--brand-accent); border-color: rgba(113,112,255,0.3); background: rgba(113,112,255,0.08); }
+
+  .signature-list { display: flex; flex-direction: column; gap: 6px; }
+  .sig-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    font-size: 12px;
+    letter-spacing: -0.13px;
+  }
+  .sig-icon {
+    width: 18px; height: 18px; border-radius: 4px;
+    background: var(--surface-3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-accent);
+    flex-shrink: 0;
+  }
+  .sig-text { flex: 1; color: var(--text-primary); font-weight: 510; }
+  .sig-meta { color: var(--text-tertiary); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+  /* Recommendation */
+  .reco { background: linear-gradient(to bottom right, rgba(113,112,255,0.1), rgba(113,112,255,0.02)); border: 1px solid rgba(113,112,255,0.28); border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+  .reco-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .reco-icon { width: 24px; height: 24px; background: rgba(113,112,255,0.18); border: 1px solid rgba(113,112,255,0.35); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--brand-accent); }
+  .reco-label { font-size: 10px; font-weight: 510; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 0.5px; }
+  .reco-title { font-size: 18px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.24px; line-height: 1.3; margin-bottom: 8px; }
+  .reco-body { font-size: 14px; font-weight: 400; color: var(--text-secondary); letter-spacing: -0.182px; line-height: 1.6; }
+  .reco-body strong { color: var(--text-primary); font-weight: 510; }
+
+  /* Archive matches grid */
+  .evidence-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px; }
+  .ev-tile { aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--border-standard); position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.12s, transform 0.12s; }
+  .ev-tile:hover { border-color: rgba(113,112,255,0.45); transform: translateY(-1px); }
+  .ev-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 8px; background: linear-gradient(to top, rgba(0,0,0,0.75), transparent); font-size: 10px; font-weight: 510; color: rgba(255,255,255,0.95); letter-spacing: -0.13px; line-height: 1.3; }
+  .ev-score { position: absolute; top: 6px; right: 6px; padding: 1px 6px; background: rgba(16, 185, 129, 0.25); color: var(--status-green); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 9999px; font-size: 9px; font-weight: 590; letter-spacing: -0.13px; }
+  .ev-score.mid { background: rgba(113, 112, 255, 0.2); color: var(--brand-accent); border-color: rgba(113, 112, 255, 0.4); }
+  .tile-gradient-1 { background: radial-gradient(circle at 30% 20%, #2d4a2a, #0c1a0a); }
+  .tile-gradient-2 { background: radial-gradient(circle at 70% 30%, #8b1a1a, #1a0808); }
+  .tile-gradient-5 { background: radial-gradient(circle at 40% 70%, #e5b4b0, #3a1a1a); }
+  .tile-gradient-6 { background: linear-gradient(180deg, #1a1a1a, #0a0a0a); }
+  .tile-gradient-7 { background: radial-gradient(circle at 50% 50%, #b8a568, #3a3020); }
+
+  /* Adjustments */
+  .adjust-list { display: flex; flex-direction: column; gap: 8px; }
+  .adjust-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-standard);
+  }
+  .adjust-row.keep { background: rgba(16,185,129,0.04); border-color: rgba(16,185,129,0.2); }
+  .adjust-row.change { background: rgba(245,158,11,0.04); border-color: rgba(245,158,11,0.2); }
+  .adjust-row.preserve { background: rgba(113,112,255,0.04); border-color: rgba(113,112,255,0.2); }
+
+  .adjust-icon {
+    width: 22px; height: 22px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 11px; font-weight: 590;
+  }
+  .adjust-row.keep .adjust-icon { background: rgba(16,185,129,0.15); color: var(--status-green); }
+  .adjust-row.change .adjust-icon { background: rgba(245,158,11,0.15); color: var(--status-amber); }
+  .adjust-row.preserve .adjust-icon { background: rgba(113,112,255,0.18); color: var(--brand-accent); }
+
+  .adjust-body { flex: 1; font-size: 13px; letter-spacing: -0.13px; color: var(--text-secondary); line-height: 1.5; }
+  .adjust-body strong { color: var(--text-primary); font-weight: 510; }
+  .adjust-type {
+    font-size: 9px; font-weight: 510;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 2px; display: block;
+  }
+  .adjust-row.keep .adjust-type { color: var(--status-green); }
+  .adjust-row.change .adjust-type { color: var(--status-amber); }
+  .adjust-row.preserve .adjust-type { color: var(--brand-accent); }
+
+  /* Action row */
+  .action-row { display: flex; align-items: center; gap: 8px; padding: 18px 20px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; margin-top: 4px; }
+  .action-row-label { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; margin-right: 4px; }
+  .action-row .spacer { flex: 1; }
+  .btn-lg { padding: 7px 14px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </div>
+    <a class="nav-item" href="clusters.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Briefs</span>
+    </a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Creator Studio</span>
+    </a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Asset Manager</span>
+    </a>
+    <a class="nav-item" href="reviews.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reviews</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">ROAS Dashboard</span>
+    </a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reports</span>
+    </a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Competitive Intel</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Team</span>
+    </a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Presets</span>
+    </a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Admin</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Inspiration</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">Brand Alignment</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        View Brand Genome
+      </button>
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2v8l3-2 3 2V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Export PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Inspiration · Brand Alignment</div>
+      <h1 class="page-title">Score a concept against BAPE's brand genome</h1>
+      <p class="page-desc">Score a new concept against what you've already made. Describe the concept, upload reference images, or paste from a deck — we score it across visual / tonal / cultural / audience dimensions and suggest adjustments to preserve your brand DNA.</p>
+
+      <!-- Concept input -->
+      <div class="concept-shell">
+        <textarea class="concept-textarea" placeholder='Describe your concept… e.g., "SS26 cherry blossom moment — soft pastels, flowing botanicals, Japanese typography, romantic lighting, youth subculture vibe"'>SS26 · Hana Matsuri · Cherry Blossom Streetwear. A Tokyo-native seasonal moment celebrating sakura. Soft pastel palette — blush pink and pale gold. Flowing botanical patterns replacing ABC camo. Romantic lighting. Japanese typography prominence. Youth subculture vibe. Launch tied to Shibuya flagship reopening, April 2026.</textarea>
+        <div class="concept-bar">
+          <button class="concept-tool">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 9l3-3 3 3M6 6V2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Upload reference
+          </button>
+          <button class="concept-tool">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M4 5l1.5 1.5L8 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Link a brief
+          </button>
+          <div class="concept-bar-spacer"></div>
+          <button class="concept-score-btn">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M6 4v2.5l1.5 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Score concept
+          </button>
+        </div>
+      </div>
+
+      <div class="try-these">
+        <span class="try-these-label">Try</span>
+        <button class="chip active"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Hana Matsuri</button>
+        <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Shark Hoodie Campaign</button>
+        <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Minimalist Luxury</button>
+        <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Camo Heritage</button>
+        <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Pop Art Colorful</button>
+        <button class="chip"><svg class="chip-arrow" viewBox="0 0 12 12" fill="none"><path d="M3 6h6M6 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Off-brand Test</button>
+      </div>
+
+      <!-- Analysis hero -->
+      <div class="analysis-hero">
+        <div class="hero-eyebrow">
+          <span>Concept Analysis</span>
+          <span class="hero-tag">Seasonal Campaign</span>
+          <span class="hero-tag">SS26</span>
+          <span class="hero-tag">Japan Market</span>
+        </div>
+        <div class="hero-title">SS26 · Hana Matsuri</div>
+        <div class="hero-desc">Cherry blossom streetwear moment for Shibuya flagship reopening. Pastel palette, botanical patterns, Japanese typography, youth-subculture framing.</div>
+
+        <div class="hero-row">
+          <div class="score-block">
+            <div class="score-badge">64%</div>
+            <div class="score-info">
+              <div class="score-verdict mixed">Directionally on-brand</div>
+              <div class="score-note">Strong cultural fit · palette &amp; pattern need work</div>
+            </div>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="signal-block">
+            <div class="signal-label">Closest Archive Match</div>
+            <div class="signal-value">Sakura Pink Camo · 84%</div>
+            <div class="score-note" style="margin-top: 4px;">+ 11 related assets at 60%+</div>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="signal-block">
+            <div class="signal-label">Confidence</div>
+            <div class="signal-value">High · 127 training samples</div>
+            <div class="score-note" style="margin-top: 4px;">Strong archive coverage for this region</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommendation -->
+      <div class="reco">
+        <div class="reco-header">
+          <div class="reco-icon">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.2"/></svg>
+          </div>
+          <div class="reco-label">Recommended Adjustment</div>
+        </div>
+        <div class="reco-title">"Sakura-Dyed ABC Camo" — don't invent new botanicals, re-run your own playbook</div>
+        <div class="reco-body">
+          The cultural moment is spot-on (92% fit) and your audience lives here. But <strong>abandoning ABC camo for generic botanicals reads as off-brand</strong>. You've already solved this: your <strong>Sakura Pink Camo</strong> assets (2024) scored 84% in our archive — they keep the camo DNA but dye it for the season. Reinterpret that playbook. Preserve the abstract camo geometry, swap the color story to sakura pink and pale gold, and lean harder on Japanese typography and shark-head integration. Keep logo prominence — soft palette doesn't mean quiet branding. This becomes a <em>heritage-meets-now</em> story, not a pastel-revival story.
+        </div>
+      </div>
+
+      <!-- Breakdown + Brand Genome -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-label">Fit Breakdown</div>
+          <div class="breakdown-row">
+            <span class="bd-key">Visual identity</span>
+            <div class="bd-bar"><div class="bd-fill amber" style="width: 48%"></div></div>
+            <span class="bd-val">48</span>
+          </div>
+          <div class="bd-note">Pastel palette + botanicals diverge from ABC camo + bold colors</div>
+
+          <div class="breakdown-row">
+            <span class="bd-key">Tonal alignment</span>
+            <div class="bd-bar"><div class="bd-fill mid" style="width: 72%"></div></div>
+            <span class="bd-val">72</span>
+          </div>
+          <div class="bd-note">Romantic/soft tone contrasts your bold voice — but seasonal pivots precedented</div>
+
+          <div class="breakdown-row">
+            <span class="bd-key">Cultural fit</span>
+            <div class="bd-bar"><div class="bd-fill strong" style="width: 92%"></div></div>
+            <span class="bd-val">92</span>
+          </div>
+          <div class="bd-note">Japanese heritage + Shibuya flagship + seasonal moment = core brand territory</div>
+
+          <div class="breakdown-row">
+            <span class="bd-key">Audience</span>
+            <div class="bd-bar"><div class="bd-fill strong" style="width: 91%"></div></div>
+            <span class="bd-val">91</span>
+          </div>
+          <div class="bd-note">Your Gen-Z Japan/APAC segment expects and rewards seasonal moments</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-label">BAPE Brand Genome</div>
+
+          <div class="genome-section">
+            <div class="genome-key">Core palette</div>
+            <div class="color-row">
+              <div class="color-dot" style="background: #2d6b2a;" data-name="Camo Green"></div>
+              <div class="color-dot" style="background: #8b1a1a;" data-name="Signature Red"></div>
+              <div class="color-dot" style="background: #e8c464;" data-name="Gold"></div>
+              <div class="color-dot" style="background: #e5b4b0;" data-name="Sakura Pink"></div>
+              <div class="color-dot" style="background: #1a1a1a;" data-name="Shark Black"></div>
+              <div class="color-dot" style="background: #f0ede8;" data-name="Off White"></div>
+            </div>
+          </div>
+
+          <div class="genome-section" style="margin-top: 32px;">
+            <div class="genome-key">Descriptors</div>
+            <div class="tag-list">
+              <span class="tag primary">Loud</span>
+              <span class="tag primary">Heritage</span>
+              <span class="tag primary">Pop-maximalist</span>
+              <span class="tag">Playful</span>
+              <span class="tag">Japanese</span>
+              <span class="tag">Streetwear-native</span>
+              <span class="tag">Logo-forward</span>
+              <span class="tag">Pattern-heavy</span>
+            </div>
+          </div>
+
+          <div class="genome-section">
+            <div class="genome-key">Signature elements</div>
+            <div class="signature-list">
+              <div class="sig-row">
+                <div class="sig-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="1" width="3" height="3" fill="currentColor"/><rect x="6" y="1" width="3" height="3" fill="currentColor"/><rect x="1" y="6" width="3" height="3" fill="currentColor"/><rect x="6" y="6" width="3" height="3" fill="currentColor"/></svg></div>
+                <span class="sig-text">ABC Camo pattern</span>
+                <span class="sig-meta">in 61% of archive</span>
+              </div>
+              <div class="sig-row">
+                <div class="sig-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1l2 3h3l-2.5 2.5L9 10 5 8 1 10l1.5-3.5L0 4h3z" fill="currentColor"/></svg></div>
+                <span class="sig-text">Shark/Milo mascots</span>
+                <span class="sig-meta">in 48% of archive</span>
+              </div>
+              <div class="sig-row">
+                <div class="sig-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 3h8M1 5h6M1 7h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+                <span class="sig-text">Bold logo placement</span>
+                <span class="sig-meta">in 79% of archive</span>
+              </div>
+              <div class="sig-row">
+                <div class="sig-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3h6M3 5h4M2 7h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+                <span class="sig-text">Japanese typography</span>
+                <span class="sig-meta">in 34% of archive</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Archive matches + adjustments -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-label">Closest Archive Matches · 4 of 127</div>
+          <div class="evidence-grid">
+            <div class="ev-tile tile-gradient-5">
+              <span class="ev-score">84%</span>
+              <div class="ev-label">Sakura Pink Camo · 2024</div>
+            </div>
+            <div class="ev-tile tile-gradient-7">
+              <span class="ev-score">72%</span>
+              <div class="ev-label">Gold Foil · JP Type</div>
+            </div>
+            <div class="ev-tile tile-gradient-1">
+              <span class="ev-score mid">68%</span>
+              <div class="ev-label">Spring Editorial 2025</div>
+            </div>
+            <div class="ev-tile tile-gradient-2">
+              <span class="ev-score mid">61%</span>
+              <div class="ev-label">Shibuya Store · Petals</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-label">Suggested Adjustments</div>
+          <div class="adjust-list">
+            <div class="adjust-row keep">
+              <div class="adjust-icon"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 6l2.5 2.5L9 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="adjust-body">
+                <span class="adjust-type">Keep</span>
+                <strong>Sakura moment and pastel color story.</strong> Seasonal and market fit are your strongest signals — don't dilute them.
+              </div>
+            </div>
+            <div class="adjust-row change">
+              <div class="adjust-icon"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5h5M5 2.5l3 3-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="adjust-body">
+                <span class="adjust-type">Change</span>
+                <strong>Botanicals → sakura-dyed ABC camo.</strong> Keep the geometric camo pattern but re-color it in blush pink and pale gold. Preserves DNA, delivers seasonal pivot.
+              </div>
+            </div>
+            <div class="adjust-row preserve">
+              <div class="adjust-icon"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 2l5 2v4c0 2-2 3-5 4-3-1-5-2-5-4V4l5-2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+              <div class="adjust-body">
+                <span class="adjust-type">Preserve</span>
+                <strong>Logo prominence + shark integration.</strong> Soft palette doesn't mean quiet branding. Keep the shark-head embroidery and large logo placement — this is what makes it read as BAPE.
+              </div>
+            </div>
+            <div class="adjust-row preserve">
+              <div class="adjust-icon"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 2l5 2v4c0 2-2 3-5 4-3-1-5-2-5-4V4l5-2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+              <div class="adjust-body">
+                <span class="adjust-type">Preserve</span>
+                <strong>Japanese typography prominence.</strong> Already in your DNA (34% of archive) and critical for this cultural moment. Lean harder, not lighter.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action row -->
+      <div class="action-row">
+        <span class="action-row-label">Act on this concept</span>
+        <div class="spacer"></div>
+        <button class="btn btn-ghost btn-lg">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l4 4 4-8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Re-score after edits
+        </button>
+        <a class="btn btn-ghost btn-lg" href="visual_search.html" style="text-decoration: none;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 8l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Explore archive matches
+        </a>
+        <button class="btn btn-ghost btn-lg">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2v8l3-2 3 2V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          Save as preset
+        </button>
+        <button class="btn btn-primary btn-lg">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2h5l2 2v7H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4.5 6.5h4M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Start brief with adjustments
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  function toggleSection(s) {
+    const sub = document.getElementById('sub-' + s);
+    const chev = document.getElementById('chev-' + s);
+    if (sub) sub.classList.toggle('open');
+    if (chev) chev.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>

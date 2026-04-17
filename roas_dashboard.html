@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — ROAS Dashboard</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a; --bg-panel: #0f1011; --bg-surface: #191a1b; --bg-elevated: #28282c;
+    --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+    --brand: #5e6ad2; --brand-accent: #7170ff; --brand-hover: #828fff;
+    --border-subtle: rgba(255,255,255,0.05); --border-standard: rgba(255,255,255,0.08); --border-solid: #23252a;
+    --surface-1: rgba(255,255,255,0.02); --surface-2: rgba(255,255,255,0.04); --surface-3: rgba(255,255,255,0.05);
+    --status-green: #10b981; --status-amber: #f59e0b; --status-red: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { background: var(--bg-canvas); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
+  button, input, textarea, select { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* SIDEBAR */
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-family: inherit; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .icon-btn { width: 32px; height: 32px; border-radius: 6px; background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-tertiary); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.12s; }
+  .icon-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 720px; margin-bottom: 20px; }
+
+  /* KPI STRIP */
+  .kpi-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 24px; }
+  .kpi-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 14px 16px; }
+  .kpi-label { font-size: 11px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.288px; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .kpi-change { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 510; letter-spacing: -0.13px; margin-top: 4px; }
+  .kpi-change.up { color: var(--status-green); }
+  .kpi-change.down { color: var(--status-red); }
+  .kpi-change.flat { color: var(--text-quaternary); }
+
+  /* FILTER BAR */
+  .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-dropdown { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: all 0.12s; font-family: inherit; }
+  .filter-dropdown:hover { background: var(--surface-3); color: var(--text-primary); }
+  .filter-dropdown-label { font-size: 10px; color: var(--text-quaternary); font-weight: 510; text-transform: uppercase; letter-spacing: 0.4px; margin-right: 2px; }
+  .filter-chev { color: var(--text-tertiary); width: 10px; height: 10px; }
+  .filter-spacer { flex: 1; }
+
+  /* CHART CONTAINERS */
+  .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .chart-box { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 20px; }
+  .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .chart-title { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; }
+  .chart-subtitle { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; }
+  .chart-toggle { display: inline-flex; background: var(--bg-elevated); border-radius: 5px; padding: 2px; }
+  .chart-toggle-btn { padding: 3px 8px; border: none; background: transparent; color: var(--text-tertiary); font-size: 11px; font-weight: 510; cursor: pointer; border-radius: 3px; font-family: inherit; letter-spacing: -0.13px; }
+  .chart-toggle-btn.active { background: var(--surface-3); color: var(--text-primary); }
+
+  /* SVG CHART */
+  .chart-area { width: 100%; height: 220px; position: relative; }
+  .chart-area svg { width: 100%; height: 100%; }
+
+  /* CHANNEL BREAKDOWN */
+  .channel-list { display: flex; flex-direction: column; gap: 6px; }
+  .channel-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 8px; }
+  .channel-color { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .channel-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; flex: 1; }
+  .channel-spend { font-size: 12px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; font-variant-numeric: tabular-nums; min-width: 60px; text-align: right; }
+  .channel-roas { font-size: 12px; font-weight: 590; letter-spacing: -0.13px; font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+  .channel-roas.green { color: var(--status-green); }
+  .channel-roas.amber { color: var(--status-amber); }
+  .channel-roas.red { color: var(--status-red); }
+
+  /* CAMPAIGN TABLE */
+  .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; margin-top: 28px; }
+  .section-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .section-badge { font-size: 10px; font-weight: 510; padding: 1px 6px; border-radius: 9999px; background: var(--surface-3); color: var(--text-tertiary); }
+
+  .table-wrap { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { font-size: 11px; font-weight: 510; color: var(--text-quaternary); letter-spacing: -0.13px; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border-subtle); background: var(--surface-1); }
+  thead th.right { text-align: right; }
+  tbody td { font-size: 13px; font-weight: 400; color: var(--text-secondary); letter-spacing: -0.13px; padding: 12px 14px; border-bottom: 1px solid var(--border-subtle); font-variant-numeric: tabular-nums; }
+  tbody td.right { text-align: right; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-2); }
+  tbody tr { cursor: pointer; transition: background 0.1s; }
+  .campaign-name-cell { font-weight: 510; color: var(--text-primary); }
+  .status-pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 510; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
+  .status-pill.live { background: rgba(16,185,129,0.1); color: var(--status-green); border: 1px solid rgba(16,185,129,0.3); }
+  .status-pill.paused { background: rgba(245,158,11,0.1); color: var(--status-amber); border: 1px solid rgba(245,158,11,0.3); }
+  .status-pill.ended { background: var(--surface-2); color: var(--text-quaternary); border: 1px solid var(--border-standard); }
+  .roas-val { font-weight: 590; }
+  .roas-val.green { color: var(--status-green); }
+  .roas-val.amber { color: var(--status-amber); }
+  .roas-val.red { color: var(--status-red); }
+  .sparkline { width: 64px; height: 20px; flex-shrink: 0; }
+
+  /* HALF ROW */
+  .half-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <a class="nav-item" href="brand_sandbox.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <a class="nav-item" href="clusters.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Briefs</span></a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Creator Studio</span></a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Asset Manager</span></a>
+    <a class="nav-item" href="reviews.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item active" href="roas_dashboard.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">ROAS Dashboard</span></a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reports</span></a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg><span class="nav-label">Competitive Intel</span></a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Team</span></a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Presets</span></a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Admin</span></a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Performance</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">ROAS Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10V12H4L10.5 5.5L8.5 3.5L2 10Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Performance &middot; ROAS Dashboard</div>
+      <div class="page-title">Return on ad spend</div>
+      <div class="page-desc">Track spend efficiency across every campaign and channel. Spot what's working, cut what isn't, and reallocate budget with confidence.</div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <button class="filter-dropdown">
+          <span class="filter-dropdown-label">Period</span> Last 30 days
+          <svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="filter-dropdown">
+          <span class="filter-dropdown-label">Channel</span> All
+          <svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="filter-dropdown">
+          <span class="filter-dropdown-label">Region</span> Global
+          <svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- KPI STRIP -->
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <div class="kpi-label">Blended ROAS</div>
+          <div class="kpi-value">3.8x</div>
+          <div class="kpi-change up">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2.5 4.5L5 2l2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            +0.4x vs prev
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total spend</div>
+          <div class="kpi-value">$284K</div>
+          <div class="kpi-change up">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2.5 4.5L5 2l2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            +12% vs prev
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Revenue attributed</div>
+          <div class="kpi-value">$1.08M</div>
+          <div class="kpi-change up">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2.5 4.5L5 2l2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            +18% vs prev
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">CPA</div>
+          <div class="kpi-value">$26.40</div>
+          <div class="kpi-change down">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2.5 5.5L5 8l2.5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            -8% vs prev
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">CTR</div>
+          <div class="kpi-value">2.4%</div>
+          <div class="kpi-change up">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2.5 4.5L5 2l2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            +0.3pp vs prev
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="chart-row">
+        <!-- ROAS OVER TIME -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">ROAS over time</div>
+              <div class="chart-subtitle">Blended return across all channels</div>
+            </div>
+            <div class="chart-toggle">
+              <button class="chart-toggle-btn active">30d</button>
+              <button class="chart-toggle-btn">90d</button>
+              <button class="chart-toggle-btn">12m</button>
+            </div>
+          </div>
+          <div class="chart-area">
+            <svg viewBox="0 0 700 200" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="roasGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#7170ff" stop-opacity="0.18"/>
+                  <stop offset="100%" stop-color="#7170ff" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- grid lines -->
+              <line x1="0" y1="40" x2="700" y2="40" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="0" y1="80" x2="700" y2="80" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="0" y1="120" x2="700" y2="120" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="0" y1="160" x2="700" y2="160" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <!-- axis labels -->
+              <text x="0" y="38" fill="#62666d" font-size="10" font-family="Inter">5.0x</text>
+              <text x="0" y="78" fill="#62666d" font-size="10" font-family="Inter">4.0x</text>
+              <text x="0" y="118" fill="#62666d" font-size="10" font-family="Inter">3.0x</text>
+              <text x="0" y="158" fill="#62666d" font-size="10" font-family="Inter">2.0x</text>
+              <!-- fill area -->
+              <path d="M30,130 L55,125 L80,118 L105,122 L130,110 L155,105 L180,95 L205,100 L230,88 L255,92 L280,85 L305,78 L330,82 L355,75 L380,70 L405,72 L430,65 L455,60 L480,68 L505,55 L530,50 L555,52 L580,48 L605,42 L630,45 L655,40 L680,35 L680,200 L30,200 Z" fill="url(#roasGrad)"/>
+              <!-- line -->
+              <polyline points="30,130 55,125 80,118 105,122 130,110 155,105 180,95 205,100 230,88 255,92 280,85 305,78 330,82 355,75 380,70 405,72 430,65 455,60 480,68 505,55 530,50 555,52 580,48 605,42 630,45 655,40 680,35" fill="none" stroke="#7170ff" stroke-width="2" stroke-linejoin="round"/>
+              <!-- dot at end -->
+              <circle cx="680" cy="35" r="4" fill="#7170ff"/>
+              <circle cx="680" cy="35" r="6" fill="none" stroke="#7170ff" stroke-width="1" opacity="0.4"/>
+              <!-- date labels -->
+              <text x="30" y="196" fill="#62666d" font-size="9" font-family="Inter">Mar 17</text>
+              <text x="230" y="196" fill="#62666d" font-size="9" font-family="Inter">Mar 24</text>
+              <text x="430" y="196" fill="#62666d" font-size="9" font-family="Inter">Apr 1</text>
+              <text x="630" y="196" fill="#62666d" font-size="9" font-family="Inter">Apr 9</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- CHANNEL BREAKDOWN -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Channel breakdown</div>
+              <div class="chart-subtitle">ROAS by channel</div>
+            </div>
+          </div>
+          <div class="channel-list">
+            <div class="channel-row">
+              <div class="channel-color" style="background: #7170ff;"></div>
+              <div class="channel-name">Meta Ads</div>
+              <div class="channel-spend">$112K</div>
+              <div class="channel-roas green">4.2x</div>
+            </div>
+            <div class="channel-row">
+              <div class="channel-color" style="background: #10b981;"></div>
+              <div class="channel-name">Google Ads</div>
+              <div class="channel-spend">$78K</div>
+              <div class="channel-roas green">3.9x</div>
+            </div>
+            <div class="channel-row">
+              <div class="channel-color" style="background: #f59e0b;"></div>
+              <div class="channel-name">TikTok Ads</div>
+              <div class="channel-spend">$52K</div>
+              <div class="channel-roas green">3.6x</div>
+            </div>
+            <div class="channel-row">
+              <div class="channel-color" style="background: #ef4444;"></div>
+              <div class="channel-name">Pinterest</div>
+              <div class="channel-spend">$24K</div>
+              <div class="channel-roas amber">2.8x</div>
+            </div>
+            <div class="channel-row">
+              <div class="channel-color" style="background: #8a8f98;"></div>
+              <div class="channel-name">Programmatic</div>
+              <div class="channel-spend">$18K</div>
+              <div class="channel-roas amber">2.1x</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPEND vs REVENUE -->
+      <div class="half-row">
+        <div class="chart-box">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Spend vs. revenue</div>
+              <div class="chart-subtitle">Spend (bars) and revenue (line) over 30d</div>
+            </div>
+          </div>
+          <div class="chart-area" style="height: 180px;">
+            <svg viewBox="0 0 500 160" preserveAspectRatio="none">
+              <!-- bars (spend) -->
+              <rect x="20" y="100" width="22" height="50" rx="2" fill="rgba(113,112,255,0.2)"/>
+              <rect x="52" y="90" width="22" height="60" rx="2" fill="rgba(113,112,255,0.2)"/>
+              <rect x="84" y="85" width="22" height="65" rx="2" fill="rgba(113,112,255,0.2)"/>
+              <rect x="116" y="80" width="22" height="70" rx="2" fill="rgba(113,112,255,0.2)"/>
+              <rect x="148" y="75" width="22" height="75" rx="2" fill="rgba(113,112,255,0.25)"/>
+              <rect x="180" y="70" width="22" height="80" rx="2" fill="rgba(113,112,255,0.25)"/>
+              <rect x="212" y="72" width="22" height="78" rx="2" fill="rgba(113,112,255,0.25)"/>
+              <rect x="244" y="65" width="22" height="85" rx="2" fill="rgba(113,112,255,0.3)"/>
+              <rect x="276" y="68" width="22" height="82" rx="2" fill="rgba(113,112,255,0.3)"/>
+              <rect x="308" y="60" width="22" height="90" rx="2" fill="rgba(113,112,255,0.3)"/>
+              <rect x="340" y="58" width="22" height="92" rx="2" fill="rgba(113,112,255,0.3)"/>
+              <rect x="372" y="55" width="22" height="95" rx="2" fill="rgba(113,112,255,0.35)"/>
+              <rect x="404" y="50" width="22" height="100" rx="2" fill="rgba(113,112,255,0.35)"/>
+              <rect x="436" y="48" width="22" height="102" rx="2" fill="rgba(113,112,255,0.35)"/>
+              <rect x="468" y="45" width="22" height="105" rx="2" fill="rgba(113,112,255,0.4)"/>
+              <!-- revenue line -->
+              <polyline points="31,82 63,70 95,62 127,55 159,48 191,42 223,44 255,36 287,38 319,30 351,28 383,24 415,18 447,16 479,12" fill="none" stroke="#10b981" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="479" cy="12" r="3" fill="#10b981"/>
+              <!-- legend -->
+              <rect x="20" y="4" width="8" height="8" rx="2" fill="rgba(113,112,255,0.35)"/>
+              <text x="32" y="12" fill="#8a8f98" font-size="9" font-family="Inter">Spend</text>
+              <line x1="75" y1="8" x2="90" y2="8" stroke="#10b981" stroke-width="2"/>
+              <text x="95" y="12" fill="#8a8f98" font-size="9" font-family="Inter">Revenue</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="chart-box">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">CPA trend</div>
+              <div class="chart-subtitle">Cost per acquisition, 30d</div>
+            </div>
+          </div>
+          <div class="chart-area" style="height: 180px;">
+            <svg viewBox="0 0 500 160" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="cpaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10b981" stop-opacity="0.12"/>
+                  <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="40" x2="500" y2="40" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="0" y1="80" x2="500" y2="80" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="0" y1="120" x2="500" y2="120" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <text x="0" y="38" fill="#62666d" font-size="9" font-family="Inter">$35</text>
+              <text x="0" y="78" fill="#62666d" font-size="9" font-family="Inter">$28</text>
+              <text x="0" y="118" fill="#62666d" font-size="9" font-family="Inter">$22</text>
+              <path d="M30,35 L60,40 L90,38 L120,50 L150,55 L180,52 L210,60 L240,65 L270,70 L300,68 L330,75 L360,80 L390,85 L420,90 L450,95 L480,100 L480,150 L30,150 Z" fill="url(#cpaGrad)"/>
+              <polyline points="30,35 60,40 90,38 120,50 150,55 180,52 210,60 240,65 270,70 300,68 330,75 360,80 390,85 420,90 450,95 480,100" fill="none" stroke="#10b981" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="480" cy="100" r="3" fill="#10b981"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPAIGNS TABLE -->
+      <div class="section-header" style="margin-top: 32px;">
+        <div class="section-label">Campaign performance</div>
+        <div class="section-badge">12</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Status</th>
+              <th>Channel</th>
+              <th class="right">Spend</th>
+              <th class="right">Revenue</th>
+              <th class="right">ROAS</th>
+              <th class="right">CPA</th>
+              <th class="right">CTR</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="campaign-name-cell">Hana Matsuri — SS26 Launch</td>
+              <td><span class="status-pill live">Live</span></td>
+              <td>Meta</td>
+              <td class="right">$42,800</td>
+              <td class="right">$198,400</td>
+              <td class="right"><span class="roas-val green">4.6x</span></td>
+              <td class="right">$18.20</td>
+              <td class="right">3.1%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,16 10,14 18,10 26,12 34,8 42,6 50,4 58,2" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">Sakura Camo — Hero Pattern</td>
+              <td><span class="status-pill live">Live</span></td>
+              <td>Meta</td>
+              <td class="right">$38,200</td>
+              <td class="right">$168,000</td>
+              <td class="right"><span class="roas-val green">4.4x</span></td>
+              <td class="right">$21.50</td>
+              <td class="right">2.8%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,14 10,12 18,10 26,9 34,8 42,6 50,5 58,3" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">Baby Milo — Back to School</td>
+              <td><span class="status-pill live">Live</span></td>
+              <td>Google</td>
+              <td class="right">$31,400</td>
+              <td class="right">$125,600</td>
+              <td class="right"><span class="roas-val green">4.0x</span></td>
+              <td class="right">$24.80</td>
+              <td class="right">2.6%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,12 10,11 18,10 26,10 34,9 42,8 50,7 58,6" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">Shark Hoodie — Retarget</td>
+              <td><span class="status-pill live">Live</span></td>
+              <td>TikTok</td>
+              <td class="right">$28,600</td>
+              <td class="right">$108,700</td>
+              <td class="right"><span class="roas-val green">3.8x</span></td>
+              <td class="right">$26.40</td>
+              <td class="right">2.4%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,10 10,10 18,11 26,10 34,9 42,10 50,9 58,8" fill="none" stroke="#7170ff" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">Nigo Archive — Lookbook</td>
+              <td><span class="status-pill live">Live</span></td>
+              <td>Meta</td>
+              <td class="right">$22,100</td>
+              <td class="right">$77,400</td>
+              <td class="right"><span class="roas-val green">3.5x</span></td>
+              <td class="right">$28.90</td>
+              <td class="right">2.2%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,14 10,12 18,14 26,10 34,12 42,10 50,8 58,8" fill="none" stroke="#7170ff" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">Color Camo — Summer Drop</td>
+              <td><span class="status-pill live">Live</span></td>
+              <td>Google</td>
+              <td class="right">$19,800</td>
+              <td class="right">$65,300</td>
+              <td class="right"><span class="roas-val green">3.3x</span></td>
+              <td class="right">$30.10</td>
+              <td class="right">2.0%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,12 10,14 18,12 26,10 34,11 42,10 50,10 58,9" fill="none" stroke="#7170ff" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">1st Camo — Brand Awareness</td>
+              <td><span class="status-pill live">Live</span></td>
+              <td>TikTok</td>
+              <td class="right">$18,200</td>
+              <td class="right">$56,400</td>
+              <td class="right"><span class="roas-val green">3.1x</span></td>
+              <td class="right">$32.60</td>
+              <td class="right">1.9%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,10 10,12 18,10 26,12 34,10 42,10 50,10 58,10" fill="none" stroke="#8a8f98" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">Tiger Camo — Catalog Sales</td>
+              <td><span class="status-pill paused">Paused</span></td>
+              <td>Pinterest</td>
+              <td class="right">$14,600</td>
+              <td class="right">$40,900</td>
+              <td class="right"><span class="roas-val amber">2.8x</span></td>
+              <td class="right">$35.20</td>
+              <td class="right">1.6%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,8 10,10 18,10 26,12 34,12 42,14 50,14 58,14" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">Bapesta Sneaker — Retarget</td>
+              <td><span class="status-pill live">Live</span></td>
+              <td>Programmatic</td>
+              <td class="right">$12,400</td>
+              <td class="right">$31,000</td>
+              <td class="right"><span class="roas-val amber">2.5x</span></td>
+              <td class="right">$38.40</td>
+              <td class="right">1.4%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,8 10,10 18,10 26,12 34,14 42,12 50,14 58,14" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">Bape x Coca-Cola — Collab</td>
+              <td><span class="status-pill ended">Ended</span></td>
+              <td>Meta</td>
+              <td class="right">$24,600</td>
+              <td class="right">$93,500</td>
+              <td class="right"><span class="roas-val green">3.8x</span></td>
+              <td class="right">$22.80</td>
+              <td class="right">2.5%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,4 10,4 18,6 26,8 34,10 42,12 50,14 58,16" fill="none" stroke="#8a8f98" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">ABC Camo — Prospecting</td>
+              <td><span class="status-pill ended">Ended</span></td>
+              <td>Google</td>
+              <td class="right">$18,900</td>
+              <td class="right">$60,500</td>
+              <td class="right"><span class="roas-val green">3.2x</span></td>
+              <td class="right">$29.40</td>
+              <td class="right">1.8%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,6 10,6 18,8 26,8 34,10 42,12 50,14 58,14" fill="none" stroke="#8a8f98" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+            <tr>
+              <td class="campaign-name-cell">Shark Hoodie — Broad UK</td>
+              <td><span class="status-pill ended">Ended</span></td>
+              <td>TikTok</td>
+              <td class="right">$12,200</td>
+              <td class="right">$25,600</td>
+              <td class="right"><span class="roas-val amber">2.1x</span></td>
+              <td class="right">$41.20</td>
+              <td class="right">1.2%</td>
+              <td><svg class="sparkline" viewBox="0 0 64 20"><polyline points="2,6 10,8 18,10 26,10 34,12 42,14 50,16 58,16" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CAMPAIGN DETAIL DRAWER -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="drawer" id="campaignDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title-wrap">
+      <div class="drawer-eyebrow">Campaign Detail</div>
+      <div class="drawer-title" id="drawerTitle">—</div>
+    </div>
+    <span id="drawerStatus"></span>
+    <button class="drawer-close" id="drawerClose">&times;</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<style>
+  .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 90; }
+  .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 640px; max-width: 100vw; background: var(--bg-surface); border-left: 1px solid var(--border-standard); box-shadow: -8px 0 32px rgba(0,0,0,0.5); z-index: 100; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1); display: flex; flex-direction: column; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+  .drawer-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+  .drawer-title-wrap { flex: 1; min-width: 0; }
+  .drawer-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drawer-close { width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--text-tertiary); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .drawer-close:hover { background: var(--surface-2); color: var(--text-primary); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+  .d-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+  .d-kpi { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; }
+  .d-kpi-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+  .d-kpi-value { font-size: 18px; font-weight: 590; color: var(--text-primary); font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .d-kpi-change { font-size: 10px; font-weight: 510; margin-top: 3px; }
+  .d-kpi-change.up { color: var(--status-green); }
+  .d-kpi-change.down { color: var(--status-red); }
+
+  .d-section-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; margin-top: 20px; }
+  .d-chart-box { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .d-chart-title { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; margin-bottom: 10px; }
+
+  .d-breakdown { display: flex; flex-direction: column; gap: 4px; }
+  .d-breakdown-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 6px; }
+  .d-breakdown-label { font-size: 12px; font-weight: 400; color: var(--text-secondary); flex: 1; letter-spacing: -0.13px; }
+  .d-breakdown-bar-wrap { width: 100px; height: 4px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+  .d-breakdown-bar { height: 100%; border-radius: 2px; background: var(--brand-accent); }
+  .d-breakdown-val { font-size: 12px; font-weight: 510; color: var(--text-primary); font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; letter-spacing: -0.13px; }
+
+  .d-ad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .d-ad-card { background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; }
+  .d-ad-thumb { width: 100%; aspect-ratio: 1; background: var(--bg-elevated); overflow: hidden; }
+  .d-ad-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .d-ad-meta { padding: 8px 10px; }
+  .d-ad-name { font-size: 11px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .d-ad-stat { font-size: 10px; color: var(--text-quaternary); letter-spacing: -0.13px; margin-top: 2px; }
+
+  .d-archive-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .d-archive-card { background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; }
+  .d-archive-thumb { width: 100%; aspect-ratio: 1; overflow: hidden; background: var(--bg-elevated); }
+  .d-archive-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .d-archive-label { padding: 6px 8px; font-size: 10px; font-weight: 510; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
+
+<script>
+const campaigns = [
+  { name:'Hana Matsuri — SS26 Launch', status:'Live', channel:'Meta', spend:'$42,800', revenue:'$198,400', roas:'4.6x', cpa:'$18.20', ctr:'3.1%', roasClass:'green',
+    impressions:'2.35M', clicks:'72.8K', conversions:'2,352', frequency:'3.2',
+    ageBreakdown:[{label:'18–24',pct:34},{label:'25–34',pct:42},{label:'35–44',pct:16},{label:'45+',pct:8}],
+    geoBreakdown:[{label:'US',pct:38},{label:'Japan',pct:28},{label:'UK',pct:18},{label:'EU',pct:16}],
+    ads:[{name:'Cherry Blossom Tee',img:'images/1.jpg'},{name:'Sakura Jacket',img:'images/c1.jpg'},{name:'Matsuri Hoodie',img:'images/2.jpg'}],
+    archive:[{name:'Milo Archive 2004',img:'images/c2.jpg'},{name:'1st Camo Green',img:'images/3.jpg'},{name:'30yr Retrospective',img:'images/c3.jpg'},{name:'FW23 Lookbook',img:'images/4.jpg'}] },
+  { name:'Sakura Camo — Hero Pattern', status:'Live', channel:'Meta', spend:'$38,200', revenue:'$168,000', roas:'4.4x', cpa:'$21.50', ctr:'2.8%', roasClass:'green',
+    impressions:'1.98M', clicks:'55.4K', conversions:'1,777', frequency:'2.8',
+    ageBreakdown:[{label:'18–24',pct:38},{label:'25–34',pct:36},{label:'35–44',pct:18},{label:'45+',pct:8}],
+    geoBreakdown:[{label:'US',pct:42},{label:'Japan',pct:24},{label:'UK',pct:20},{label:'EU',pct:14}],
+    ads:[{name:'Camo Hero Shot',img:'images/5.jpg'},{name:'Pattern Detail',img:'images/c4.jpg'},{name:'Lifestyle Street',img:'images/6.jpg'}],
+    archive:[{name:'SS24 Sakura Drop',img:'images/c5.jpg'},{name:'Camo Archival',img:'images/7.jpg'},{name:'Pink Camo OG',img:'images/c6.jpg'},{name:'Harajuku Editorial',img:'images/8.jpg'}] },
+  { name:'Baby Milo — Back to School', status:'Live', channel:'Google', spend:'$31,400', revenue:'$125,600', roas:'4.0x', cpa:'$24.80', ctr:'2.6%', roasClass:'green',
+    impressions:'1.62M', clicks:'42.1K', conversions:'1,266', frequency:'2.4',
+    ageBreakdown:[{label:'18–24',pct:48},{label:'25–34',pct:30},{label:'35–44',pct:14},{label:'45+',pct:8}],
+    geoBreakdown:[{label:'US',pct:52},{label:'Japan',pct:18},{label:'UK',pct:16},{label:'EU',pct:14}],
+    ads:[{name:'Milo Backpack',img:'images/9.jpg'},{name:'School Set',img:'images/c7.jpg'},{name:'Milo Pencil Case',img:'images/10.jpg'}],
+    archive:[{name:'Milo Summer 2022',img:'images/c8.jpg'},{name:'Milo x Disney',img:'images/11.jpg'},{name:'Kids Collection',img:'images/c9.jpg'},{name:'Milo Plush Set',img:'images/12.jpg'}] },
+  { name:'Shark Hoodie — Retarget', status:'Live', channel:'TikTok', spend:'$28,600', revenue:'$108,700', roas:'3.8x', cpa:'$26.40', ctr:'2.4%', roasClass:'green',
+    impressions:'1.44M', clicks:'34.6K', conversions:'1,083', frequency:'3.6',
+    ageBreakdown:[{label:'18–24',pct:44},{label:'25–34',pct:32},{label:'35–44',pct:16},{label:'45+',pct:8}],
+    geoBreakdown:[{label:'US',pct:46},{label:'Japan',pct:22},{label:'UK',pct:18},{label:'EU',pct:14}],
+    ads:[{name:'Shark Zip Detail',img:'images/c10.jpg'},{name:'Full Hoodie',img:'images/13.jpg'},{name:'On-Body TikTok',img:'images/14.jpg'}],
+    archive:[{name:'OG Shark 2005',img:'images/c1.jpg'},{name:'Shark x Undefeated',img:'images/15.jpg'},{name:'Shark Neon',img:'images/c2.jpg'},{name:'Shark Archive',img:'images/16.jpg'}] },
+  { name:'Nigo Archive — Lookbook', status:'Live', channel:'Meta', spend:'$22,100', revenue:'$77,400', roas:'3.5x', cpa:'$28.90', ctr:'2.2%', roasClass:'green',
+    impressions:'1.12M', clicks:'24.6K', conversions:'765', frequency:'2.6',
+    ageBreakdown:[{label:'18–24',pct:28},{label:'25–34',pct:40},{label:'35–44',pct:22},{label:'45+',pct:10}],
+    geoBreakdown:[{label:'US',pct:35},{label:'Japan',pct:32},{label:'UK',pct:18},{label:'EU',pct:15}],
+    ads:[{name:'Archive Lookbook',img:'images/17.jpg'},{name:'Nigo Portrait',img:'images/c3.jpg'},{name:'Vintage Camo',img:'images/18.jpg'}],
+    archive:[{name:'Nigo Era 2003',img:'images/c4.jpg'},{name:'Shibuya Store',img:'images/19.jpg'},{name:'First Collection',img:'images/c5.jpg'},{name:'Nigo x Pharrell',img:'images/20.jpg'}] },
+  { name:'Color Camo — Summer Drop', status:'Live', channel:'Google', spend:'$19,800', revenue:'$65,300', roas:'3.3x', cpa:'$30.10', ctr:'2.0%', roasClass:'green',
+    impressions:'980K', clicks:'19.6K', conversions:'658', frequency:'2.2',
+    ageBreakdown:[{label:'18–24',pct:36},{label:'25–34',pct:38},{label:'35–44',pct:18},{label:'45+',pct:8}],
+    geoBreakdown:[{label:'US',pct:44},{label:'Japan',pct:20},{label:'UK',pct:22},{label:'EU',pct:14}],
+    ads:[{name:'Summer Shorts',img:'images/c6.jpg'},{name:'Camo Tank',img:'images/1.jpg'},{name:'Beach Set',img:'images/c7.jpg'}],
+    archive:[{name:'Color Camo SS23',img:'images/2.jpg'},{name:'Rainbow Pack',img:'images/c8.jpg'},{name:'Tie-Dye Camo',img:'images/3.jpg'},{name:'Resort 2024',img:'images/c9.jpg'}] },
+  { name:'1st Camo — Brand Awareness', status:'Live', channel:'TikTok', spend:'$18,200', revenue:'$56,400', roas:'3.1x', cpa:'$32.60', ctr:'1.9%', roasClass:'green',
+    impressions:'860K', clicks:'16.3K', conversions:'558', frequency:'2.8',
+    ageBreakdown:[{label:'18–24',pct:52},{label:'25–34',pct:28},{label:'35–44',pct:14},{label:'45+',pct:6}],
+    geoBreakdown:[{label:'US',pct:50},{label:'Japan',pct:18},{label:'UK',pct:18},{label:'EU',pct:14}],
+    ads:[{name:'1st Camo OG',img:'images/c10.jpg'},{name:'Pattern Close-up',img:'images/4.jpg'},{name:'Street Style',img:'images/5.jpg'}],
+    archive:[{name:'1st Camo 1996',img:'images/6.jpg'},{name:'OG Green Camo',img:'images/c1.jpg'},{name:'90s Archive',img:'images/7.jpg'},{name:'Ape Head Camo',img:'images/c2.jpg'}] },
+  { name:'Tiger Camo — Catalog Sales', status:'Paused', channel:'Pinterest', spend:'$14,600', revenue:'$40,900', roas:'2.8x', cpa:'$35.20', ctr:'1.6%', roasClass:'amber',
+    impressions:'620K', clicks:'9.9K', conversions:'415', frequency:'3.0',
+    ageBreakdown:[{label:'18–24',pct:22},{label:'25–34',pct:40},{label:'35–44',pct:26},{label:'45+',pct:12}],
+    geoBreakdown:[{label:'US',pct:56},{label:'Japan',pct:12},{label:'UK',pct:18},{label:'EU',pct:14}],
+    ads:[{name:'Tiger Print Jacket',img:'images/8.jpg'},{name:'Catalog Spread',img:'images/c3.jpg'},{name:'Detail Shot',img:'images/9.jpg'}],
+    archive:[{name:'Tiger Camo 2008',img:'images/c4.jpg'},{name:'Tiger x Kaws',img:'images/10.jpg'},{name:'Wild Print OG',img:'images/c5.jpg'},{name:'Tiger Hoodie',img:'images/11.jpg'}] },
+  { name:'Bapesta Sneaker — Retarget', status:'Live', channel:'Programmatic', spend:'$12,400', revenue:'$31,000', roas:'2.5x', cpa:'$38.40', ctr:'1.4%', roasClass:'amber',
+    impressions:'480K', clicks:'6.7K', conversions:'323', frequency:'4.2',
+    ageBreakdown:[{label:'18–24',pct:40},{label:'25–34',pct:34},{label:'35–44',pct:18},{label:'45+',pct:8}],
+    geoBreakdown:[{label:'US',pct:48},{label:'Japan',pct:22},{label:'UK',pct:16},{label:'EU',pct:14}],
+    ads:[{name:'Bapesta Side',img:'images/c6.jpg'},{name:'On-Foot Shot',img:'images/12.jpg'},{name:'Colorway Grid',img:'images/c7.jpg'}],
+    archive:[{name:'Bapesta OG 2002',img:'images/13.jpg'},{name:'Patent Leather',img:'images/c8.jpg'},{name:'Kanye Bapesta',img:'images/14.jpg'},{name:'Gold Star',img:'images/c9.jpg'}] },
+  { name:'Bape x Coca-Cola — Collab', status:'Ended', channel:'Meta', spend:'$24,600', revenue:'$93,500', roas:'3.8x', cpa:'$22.80', ctr:'2.5%', roasClass:'green',
+    impressions:'1.56M', clicks:'39.0K', conversions:'1,079', frequency:'2.4',
+    ageBreakdown:[{label:'18–24',pct:36},{label:'25–34',pct:38},{label:'35–44',pct:18},{label:'45+',pct:8}],
+    geoBreakdown:[{label:'US',pct:40},{label:'Japan',pct:26},{label:'UK',pct:20},{label:'EU',pct:14}],
+    ads:[{name:'Collab Reveal',img:'images/c10.jpg'},{name:'Can Design',img:'images/15.jpg'},{name:'Lifestyle Flat',img:'images/16.jpg'}],
+    archive:[{name:'Pepsi Collab 2018',img:'images/17.jpg'},{name:'Coke x Bape Tee',img:'images/c1.jpg'},{name:'Beverage Series',img:'images/18.jpg'},{name:'Pop Art Camo',img:'images/c2.jpg'}] },
+  { name:'ABC Camo — Prospecting', status:'Ended', channel:'Google', spend:'$18,900', revenue:'$60,500', roas:'3.2x', cpa:'$29.40', ctr:'1.8%', roasClass:'green',
+    impressions:'920K', clicks:'16.6K', conversions:'643', frequency:'2.6',
+    ageBreakdown:[{label:'18–24',pct:32},{label:'25–34',pct:36},{label:'35–44',pct:22},{label:'45+',pct:10}],
+    geoBreakdown:[{label:'US',pct:44},{label:'Japan',pct:22},{label:'UK',pct:20},{label:'EU',pct:14}],
+    ads:[{name:'ABC Pattern',img:'images/19.jpg'},{name:'Full Outfit',img:'images/c3.jpg'},{name:'Close-Up Camo',img:'images/20.jpg'}],
+    archive:[{name:'ABC Camo OG',img:'images/c4.jpg'},{name:'Letter Camo 2006',img:'images/1.jpg'},{name:'ABC Full Zip',img:'images/c5.jpg'},{name:'Alphabet Series',img:'images/2.jpg'}] },
+  { name:'Shark Hoodie — Broad UK', status:'Ended', channel:'TikTok', spend:'$12,200', revenue:'$25,600', roas:'2.1x', cpa:'$41.20', ctr:'1.2%', roasClass:'amber',
+    impressions:'380K', clicks:'4.6K', conversions:'296', frequency:'3.8',
+    ageBreakdown:[{label:'18–24',pct:44},{label:'25–34',pct:30},{label:'35–44',pct:18},{label:'45+',pct:8}],
+    geoBreakdown:[{label:'UK',pct:82},{label:'EU',pct:12},{label:'US',pct:4},{label:'Japan',pct:2}],
+    ads:[{name:'UK Street',img:'images/c6.jpg'},{name:'London Fit',img:'images/3.jpg'},{name:'Shark Detail',img:'images/c7.jpg'}],
+    archive:[{name:'London Pop-Up',img:'images/4.jpg'},{name:'UK Exclusive',img:'images/c8.jpg'},{name:'Selfridges Drop',img:'images/5.jpg'},{name:'Dover St Mkt',img:'images/c9.jpg'}] },
+];
+
+const backdrop = document.getElementById('drawerBackdrop');
+const drawer  = document.getElementById('campaignDrawer');
+const dTitle  = document.getElementById('drawerTitle');
+const dStatus = document.getElementById('drawerStatus');
+const dBody   = document.getElementById('drawerBody');
+const dClose  = document.getElementById('drawerClose');
+
+function openDrawer(idx) {
+  const c = campaigns[idx];
+  dTitle.textContent = c.name;
+
+  const statusClass = c.status === 'Live' ? 'live' : c.status === 'Paused' ? 'paused' : 'ended';
+  dStatus.innerHTML = '<span class="status-pill '+statusClass+'" style="font-size:10px;">'+c.status.toUpperCase()+'</span>';
+
+  const sparkPts = [];
+  for (let i = 0; i < 14; i++) {
+    const x = 4 + i * (592/13);
+    const y = 10 + Math.random()*60;
+    sparkPts.push(x.toFixed(0)+','+y.toFixed(0));
+  }
+  const revPts = [];
+  for (let i = 0; i < 14; i++) {
+    const x = 4 + i * (592/13);
+    const y = 5 + Math.random()*50;
+    revPts.push(x.toFixed(0)+','+y.toFixed(0));
+  }
+
+  dBody.innerHTML = `
+    <div class="d-kpi-grid">
+      <div class="d-kpi">
+        <div class="d-kpi-label">ROAS</div>
+        <div class="d-kpi-value" style="color: var(--status-${c.roasClass === 'green' ? 'green' : c.roasClass === 'amber' ? 'amber' : 'red'});">${c.roas}</div>
+        <div class="d-kpi-change up">&#9650; trending up</div>
+      </div>
+      <div class="d-kpi">
+        <div class="d-kpi-label">Spend</div>
+        <div class="d-kpi-value">${c.spend}</div>
+        <div class="d-kpi-change up">of budget</div>
+      </div>
+      <div class="d-kpi">
+        <div class="d-kpi-label">Revenue</div>
+        <div class="d-kpi-value">${c.revenue}</div>
+        <div class="d-kpi-change up">attributed</div>
+      </div>
+      <div class="d-kpi">
+        <div class="d-kpi-label">CPA</div>
+        <div class="d-kpi-value">${c.cpa}</div>
+      </div>
+      <div class="d-kpi">
+        <div class="d-kpi-label">CTR</div>
+        <div class="d-kpi-value">${c.ctr}</div>
+      </div>
+      <div class="d-kpi">
+        <div class="d-kpi-label">Impressions</div>
+        <div class="d-kpi-value">${c.impressions}</div>
+      </div>
+    </div>
+
+    <div class="d-section-label">Spend &amp; revenue trend</div>
+    <div class="d-chart-box">
+      <svg viewBox="0 0 600 80" style="width:100%;height:80px;">
+        <polyline points="${sparkPts.join(' ')}" fill="none" stroke="#7170ff" stroke-width="1.5" stroke-linejoin="round"/>
+        <polyline points="${revPts.join(' ')}" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="4" y="78" fill="#62666d" font-size="9" font-family="Inter">14d ago</text>
+        <text x="540" y="78" fill="#62666d" font-size="9" font-family="Inter">Today</text>
+        <rect x="460" y="2" width="6" height="6" rx="1" fill="#7170ff"/>
+        <text x="470" y="8" fill="#8a8f98" font-size="8" font-family="Inter">Spend</text>
+        <rect x="510" y="2" width="6" height="6" rx="1" fill="#10b981"/>
+        <text x="520" y="8" fill="#8a8f98" font-size="8" font-family="Inter">Rev</text>
+      </svg>
+    </div>
+
+    <div class="d-section-label">Audience — Age</div>
+    <div class="d-breakdown">
+      ${c.ageBreakdown.map(a => `
+        <div class="d-breakdown-row">
+          <div class="d-breakdown-label">${a.label}</div>
+          <div class="d-breakdown-bar-wrap"><div class="d-breakdown-bar" style="width:${a.pct}%;"></div></div>
+          <div class="d-breakdown-val">${a.pct}%</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="d-section-label">Audience — Region</div>
+    <div class="d-breakdown">
+      ${c.geoBreakdown.map(g => `
+        <div class="d-breakdown-row">
+          <div class="d-breakdown-label">${g.label}</div>
+          <div class="d-breakdown-bar-wrap"><div class="d-breakdown-bar" style="width:${g.pct}%;"></div></div>
+          <div class="d-breakdown-val">${g.pct}%</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="d-section-label">Top ads</div>
+    <div class="d-ad-grid">
+      ${c.ads.map(ad => `
+        <div class="d-ad-card">
+          <div class="d-ad-thumb"><img src="${ad.img}" alt="${ad.name}"></div>
+          <div class="d-ad-meta">
+            <div class="d-ad-name">${ad.name}</div>
+            <div class="d-ad-stat">CTR ${(1.2 + Math.random()*2.4).toFixed(1)}%</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="d-section-label">What we found in your archive &middot; ${c.archive.length} matches</div>
+    <div class="d-archive-grid">
+      ${c.archive.map(a => `
+        <div class="d-archive-card">
+          <div class="d-archive-thumb"><img src="${a.img}" alt="${a.name}"></div>
+          <div class="d-archive-label">${a.name}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div style="margin-top:20px; display:flex; gap:6px;">
+      <button style="flex:1; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:510; cursor:pointer; background:var(--surface-2); border:1px solid var(--border-standard); color:var(--text-primary); font-family:inherit; letter-spacing:-0.13px;">View in ${c.channel}</button>
+      <button style="flex:1; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:510; cursor:pointer; background:rgba(94,106,210,0.12); border:1px solid rgba(94,106,210,0.3); color:var(--brand-accent); font-family:inherit; letter-spacing:-0.13px;">Open brief</button>
+    </div>
+  `;
+
+  backdrop.classList.add('open');
+  drawer.classList.add('open');
+}
+
+function closeDrawer() {
+  backdrop.classList.remove('open');
+  drawer.classList.remove('open');
+}
+
+backdrop.addEventListener('click', closeDrawer);
+dClose.addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+document.querySelectorAll('tbody tr').forEach((row, i) => {
+  row.addEventListener('click', () => openDrawer(i));
+});
+</script>
+
+</body>
+</html>

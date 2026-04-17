@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Competitive Intel</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a; --bg-panel: #0f1011; --bg-surface: #191a1b; --bg-elevated: #28282c;
+    --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+    --brand: #5e6ad2; --brand-accent: #7170ff; --brand-hover: #828fff;
+    --border-subtle: rgba(255,255,255,0.05); --border-standard: rgba(255,255,255,0.08); --border-solid: #23252a;
+    --surface-1: rgba(255,255,255,0.02); --surface-2: rgba(255,255,255,0.04); --surface-3: rgba(255,255,255,0.05);
+    --status-green: #10b981; --status-amber: #f59e0b; --status-red: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { background: var(--bg-canvas); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
+  button, input, textarea, select { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-family: inherit; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.60; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 720px; margin-bottom: 20px; }
+
+  .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; margin-top: 28px; }
+  .section-header:first-child { margin-top: 0; }
+  .section-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .section-badge { font-size: 10px; font-weight: 510; padding: 1px 6px; border-radius: 9999px; background: var(--surface-3); color: var(--text-tertiary); }
+
+  /* SOV bar chart */
+  .sov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .sov-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 20px; }
+  .sov-title { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; margin-bottom: 4px; }
+  .sov-subtitle { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; margin-bottom: 16px; }
+  .sov-bars { display: flex; flex-direction: column; gap: 10px; }
+  .sov-row { display: flex; align-items: center; gap: 10px; }
+  .sov-brand-col { width: 80px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .sov-avatar { width: 22px; height: 22px; border-radius: 5px; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 590; color: var(--text-secondary); flex-shrink: 0; }
+  .sov-avatar.you { background: var(--brand); color: #fff; }
+  .sov-brand-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; }
+  .sov-bar-wrap { flex: 1; height: 20px; background: var(--surface-3); border-radius: 4px; overflow: hidden; position: relative; }
+  .sov-bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; }
+  .sov-bar-label { font-size: 10px; font-weight: 590; color: #fff; letter-spacing: -0.13px; white-space: nowrap; }
+  .sov-val { font-size: 12px; font-weight: 510; color: var(--text-tertiary); font-variant-numeric: tabular-nums; min-width: 36px; text-align: right; letter-spacing: -0.13px; }
+
+  /* Competitor cards */
+  .comp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+  .comp-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; }
+  .comp-card:hover { background: var(--surface-2); border-color: rgba(255,255,255,0.12); transform: translateY(-1px); }
+  .comp-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .comp-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 590; color: var(--text-secondary); flex-shrink: 0; }
+  .comp-name { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; }
+  .comp-category { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; }
+  .comp-stats { display: flex; flex-direction: column; gap: 8px; }
+  .comp-stat { display: flex; align-items: center; justify-content: space-between; }
+  .comp-stat-label { font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; }
+  .comp-stat-value { font-size: 12px; font-weight: 590; color: var(--text-primary); font-variant-numeric: tabular-nums; letter-spacing: -0.13px; }
+  .comp-stat-change { font-size: 10px; font-weight: 510; margin-left: 4px; }
+  .comp-stat-change.up { color: var(--status-red); }
+  .comp-stat-change.down { color: var(--status-green); }
+  .comp-stat-change.neutral { color: var(--text-quaternary); }
+
+  /* Activity feed */
+  .activity-list { display: flex; flex-direction: column; gap: 4px; }
+  .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; cursor: pointer; transition: background 0.12s; }
+  .activity-item:hover { background: var(--surface-2); }
+  .activity-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .activity-icon.launch { background: rgba(16,185,129,0.1); color: var(--status-green); }
+  .activity-icon.spend { background: rgba(113,112,255,0.1); color: var(--brand-accent); }
+  .activity-icon.creative { background: rgba(245,158,11,0.1); color: var(--status-amber); }
+  .activity-icon.territory { background: rgba(239,68,68,0.1); color: var(--status-red); }
+  .activity-body { flex: 1; min-width: 0; }
+  .activity-headline { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.4; margin-bottom: 2px; }
+  .activity-detail { font-size: 12px; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.5; }
+  .activity-time { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; flex-shrink: 0; margin-top: 2px; }
+
+  /* Overlap chart */
+  .overlap-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 20px; }
+  .overlap-title { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; margin-bottom: 4px; }
+  .overlap-subtitle { font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px; margin-bottom: 16px; }
+  .overlap-rows { display: flex; flex-direction: column; gap: 8px; }
+  .overlap-row { display: flex; align-items: center; gap: 10px; }
+  .overlap-label { width: 80px; font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; flex-shrink: 0; }
+  .overlap-bar-wrap { flex: 1; height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; display: flex; }
+  .overlap-seg { height: 100%; }
+  .overlap-seg.yours { background: var(--brand-accent); }
+  .overlap-seg.shared { background: var(--status-amber); }
+  .overlap-seg.theirs { background: var(--bg-elevated); }
+  .overlap-pct { font-size: 11px; font-weight: 510; color: var(--status-amber); font-variant-numeric: tabular-nums; min-width: 36px; text-align: right; letter-spacing: -0.13px; }
+
+  /* Territory threat */
+  .threat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .threat-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 16px; }
+  .threat-territory { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; margin-bottom: 8px; }
+  .threat-brands { display: flex; flex-direction: column; gap: 6px; }
+  .threat-brand-row { display: flex; align-items: center; gap: 8px; }
+  .threat-brand-avatar { width: 18px; height: 18px; border-radius: 4px; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 590; color: var(--text-secondary); flex-shrink: 0; }
+  .threat-brand-name { font-size: 11px; color: var(--text-secondary); letter-spacing: -0.13px; flex: 1; }
+  .threat-brand-activity { font-size: 10px; font-weight: 510; letter-spacing: -0.13px; }
+  .threat-brand-activity.high { color: var(--status-red); }
+  .threat-brand-activity.med { color: var(--status-amber); }
+  .threat-brand-activity.low { color: var(--text-quaternary); }
+  .threat-your-position { font-size: 10px; color: var(--text-quaternary); letter-spacing: -0.13px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-subtle); }
+  .threat-your-position strong { color: var(--text-secondary); font-weight: 510; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="current_brand.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <a class="nav-item" href="brand_sandbox.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <a class="nav-item" href="clusters.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Briefs</span></a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Creator Studio</span></a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Asset Manager</span></a>
+    <a class="nav-item" href="reviews.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">ROAS Dashboard</span></a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reports</span></a>
+    <a class="nav-item active" href="competitive_intel.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg><span class="nav-label">Competitive Intel</span></a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Team</span></a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Presets</span></a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Admin</span></a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-root">Performance</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">Competitive Intel</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Add Competitor
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Performance &middot; Competitive Intel</div>
+      <div class="page-title">Competitive intelligence</div>
+      <div class="page-desc">Track competitor creative activity, share of voice, audience overlap, and territory threats. Stay ahead of what the market is doing.</div>
+
+      <!-- COMPETITOR CARDS -->
+      <div class="section-header">
+        <div class="section-label">Tracked competitors</div>
+        <div class="section-badge">4</div>
+      </div>
+      <div class="comp-grid">
+        <div class="comp-card">
+          <div class="comp-header">
+            <div class="comp-logo">S</div>
+            <div>
+              <div class="comp-name">Supreme</div>
+              <div class="comp-category">Streetwear</div>
+            </div>
+          </div>
+          <div class="comp-stats">
+            <div class="comp-stat">
+              <span class="comp-stat-label">Ad spend est.</span>
+              <span><span class="comp-stat-value">$380K</span><span class="comp-stat-change up">+22%</span></span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">New creatives</span>
+              <span><span class="comp-stat-value">34</span><span class="comp-stat-change up">+12</span></span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">Audience overlap</span>
+              <span class="comp-stat-value">42%</span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">SOV</span>
+              <span class="comp-stat-value">28%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="comp-card">
+          <div class="comp-header">
+            <div class="comp-logo">P</div>
+            <div>
+              <div class="comp-name">Palace</div>
+              <div class="comp-category">Streetwear</div>
+            </div>
+          </div>
+          <div class="comp-stats">
+            <div class="comp-stat">
+              <span class="comp-stat-label">Ad spend est.</span>
+              <span><span class="comp-stat-value">$210K</span><span class="comp-stat-change neutral">+3%</span></span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">New creatives</span>
+              <span><span class="comp-stat-value">18</span><span class="comp-stat-change neutral">+2</span></span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">Audience overlap</span>
+              <span class="comp-stat-value">38%</span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">SOV</span>
+              <span class="comp-stat-value">16%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="comp-card">
+          <div class="comp-header">
+            <div class="comp-logo">A</div>
+            <div>
+              <div class="comp-name">Aim&eacute; Leon Dore</div>
+              <div class="comp-category">Luxury Street</div>
+            </div>
+          </div>
+          <div class="comp-stats">
+            <div class="comp-stat">
+              <span class="comp-stat-label">Ad spend est.</span>
+              <span><span class="comp-stat-value">$165K</span><span class="comp-stat-change up">+45%</span></span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">New creatives</span>
+              <span><span class="comp-stat-value">26</span><span class="comp-stat-change up">+18</span></span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">Audience overlap</span>
+              <span class="comp-stat-value">34%</span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">SOV</span>
+              <span class="comp-stat-value">14%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="comp-card">
+          <div class="comp-header">
+            <div class="comp-logo">S</div>
+            <div>
+              <div class="comp-name">St&uuml;ssy</div>
+              <div class="comp-category">Surf / Street</div>
+            </div>
+          </div>
+          <div class="comp-stats">
+            <div class="comp-stat">
+              <span class="comp-stat-label">Ad spend est.</span>
+              <span><span class="comp-stat-value">$290K</span><span class="comp-stat-change up">+15%</span></span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">New creatives</span>
+              <span><span class="comp-stat-value">22</span><span class="comp-stat-change neutral">+4</span></span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">Audience overlap</span>
+              <span class="comp-stat-value">46%</span>
+            </div>
+            <div class="comp-stat">
+              <span class="comp-stat-label">SOV</span>
+              <span class="comp-stat-value">22%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SHARE OF VOICE -->
+      <div class="sov-grid">
+        <div class="sov-card">
+          <div class="sov-title">Share of voice — Paid</div>
+          <div class="sov-subtitle">Estimated paid media presence, last 30d</div>
+          <div class="sov-bars">
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar you">B</div><div class="sov-brand-name">BAPE</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:20%; background: var(--brand-accent);"><span class="sov-bar-label">20%</span></div></div>
+            </div>
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar">S</div><div class="sov-brand-name">Supreme</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:28%; background: var(--status-red);"><span class="sov-bar-label">28%</span></div></div>
+            </div>
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar">S</div><div class="sov-brand-name">St&uuml;ssy</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:22%; background: var(--status-amber);"><span class="sov-bar-label">22%</span></div></div>
+            </div>
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar">P</div><div class="sov-brand-name">Palace</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:16%; background: var(--text-quaternary);"><span class="sov-bar-label">16%</span></div></div>
+            </div>
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar">A</div><div class="sov-brand-name">ALD</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:14%; background: var(--status-green);"><span class="sov-bar-label">14%</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sov-card">
+          <div class="sov-title">Share of voice — Organic</div>
+          <div class="sov-subtitle">Social mentions, search interest, last 30d</div>
+          <div class="sov-bars">
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar you">B</div><div class="sov-brand-name">BAPE</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:26%; background: var(--brand-accent);"><span class="sov-bar-label">26%</span></div></div>
+            </div>
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar">S</div><div class="sov-brand-name">Supreme</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:32%; background: var(--status-red);"><span class="sov-bar-label">32%</span></div></div>
+            </div>
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar">S</div><div class="sov-brand-name">St&uuml;ssy</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:18%; background: var(--status-amber);"><span class="sov-bar-label">18%</span></div></div>
+            </div>
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar">P</div><div class="sov-brand-name">Palace</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:12%; background: var(--text-quaternary);"><span class="sov-bar-label">12%</span></div></div>
+            </div>
+            <div class="sov-row">
+              <div class="sov-brand-col"><div class="sov-avatar">A</div><div class="sov-brand-name">ALD</div></div>
+              <div class="sov-bar-wrap"><div class="sov-bar" style="width:12%; background: var(--status-green);"><span class="sov-bar-label">12%</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDIENCE OVERLAP -->
+      <div class="section-header">
+        <div class="section-label">Audience overlap</div>
+      </div>
+      <div class="overlap-card" style="margin-bottom: 12px;">
+        <div class="overlap-title">Shared audience segments</div>
+        <div class="overlap-subtitle">Percentage of your audience that also engages with competitor content</div>
+        <div class="overlap-rows">
+          <div class="overlap-row">
+            <div class="overlap-label">St&uuml;ssy</div>
+            <div class="overlap-bar-wrap">
+              <div class="overlap-seg yours" style="width: 54%;"></div>
+              <div class="overlap-seg shared" style="width: 46%;"></div>
+            </div>
+            <div class="overlap-pct">46%</div>
+          </div>
+          <div class="overlap-row">
+            <div class="overlap-label">Supreme</div>
+            <div class="overlap-bar-wrap">
+              <div class="overlap-seg yours" style="width: 58%;"></div>
+              <div class="overlap-seg shared" style="width: 42%;"></div>
+            </div>
+            <div class="overlap-pct">42%</div>
+          </div>
+          <div class="overlap-row">
+            <div class="overlap-label">Palace</div>
+            <div class="overlap-bar-wrap">
+              <div class="overlap-seg yours" style="width: 62%;"></div>
+              <div class="overlap-seg shared" style="width: 38%;"></div>
+            </div>
+            <div class="overlap-pct">38%</div>
+          </div>
+          <div class="overlap-row">
+            <div class="overlap-label">ALD</div>
+            <div class="overlap-bar-wrap">
+              <div class="overlap-seg yours" style="width: 66%;"></div>
+              <div class="overlap-seg shared" style="width: 34%;"></div>
+            </div>
+            <div class="overlap-pct">34%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TERRITORY THREATS -->
+      <div class="section-header">
+        <div class="section-label">Territory threats</div>
+      </div>
+      <div class="threat-grid" style="margin-bottom: 24px;">
+        <div class="threat-card">
+          <div class="threat-territory">Heritage Storytelling</div>
+          <div class="threat-brands">
+            <div class="threat-brand-row">
+              <div class="threat-brand-avatar">S</div>
+              <div class="threat-brand-name">Supreme</div>
+              <div class="threat-brand-activity high">12 ads</div>
+            </div>
+            <div class="threat-brand-row">
+              <div class="threat-brand-avatar">A</div>
+              <div class="threat-brand-name">ALD</div>
+              <div class="threat-brand-activity high">34 ads</div>
+            </div>
+            <div class="threat-brand-row">
+              <div class="threat-brand-avatar">S</div>
+              <div class="threat-brand-name">St&uuml;ssy</div>
+              <div class="threat-brand-activity med">28 ads</div>
+            </div>
+          </div>
+          <div class="threat-your-position">Your position: <strong>Strong</strong> — lead with decades</div>
+        </div>
+        <div class="threat-card">
+          <div class="threat-territory">Neo-Maximalism</div>
+          <div class="threat-brands">
+            <div class="threat-brand-row">
+              <div class="threat-brand-avatar">P</div>
+              <div class="threat-brand-name">Palace</div>
+              <div class="threat-brand-activity high">18 ads</div>
+            </div>
+            <div class="threat-brand-row">
+              <div class="threat-brand-avatar">S</div>
+              <div class="threat-brand-name">Supreme</div>
+              <div class="threat-brand-activity med">8 ads</div>
+            </div>
+            <div class="threat-brand-row">
+              <div class="threat-brand-avatar">S</div>
+              <div class="threat-brand-name">St&uuml;ssy</div>
+              <div class="threat-brand-activity low">3 ads</div>
+            </div>
+          </div>
+          <div class="threat-your-position">Your position: <strong>Dominant</strong> — own the space</div>
+        </div>
+        <div class="threat-card">
+          <div class="threat-territory">Y2K Revival</div>
+          <div class="threat-brands">
+            <div class="threat-brand-row">
+              <div class="threat-brand-avatar">S</div>
+              <div class="threat-brand-name">St&uuml;ssy</div>
+              <div class="threat-brand-activity high">22 ads</div>
+            </div>
+            <div class="threat-brand-row">
+              <div class="threat-brand-avatar">P</div>
+              <div class="threat-brand-name">Palace</div>
+              <div class="threat-brand-activity med">14 ads</div>
+            </div>
+            <div class="threat-brand-row">
+              <div class="threat-brand-avatar">A</div>
+              <div class="threat-brand-name">ALD</div>
+              <div class="threat-brand-activity low">5 ads</div>
+            </div>
+          </div>
+          <div class="threat-your-position">Your position: <strong>Emerging</strong> — peak signal now</div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY FEED -->
+      <div class="section-header">
+        <div class="section-label">Recent competitor activity</div>
+      </div>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-icon launch">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12L12 2M12 2H6M12 2v6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="activity-body">
+            <div class="activity-headline">Supreme launched 8 new Meta ads for SS26 drop</div>
+            <div class="activity-detail">Mostly video format, heritage angle. Estimated spend: $45K in first 48hrs. High engagement on 18–24 demo.</div>
+          </div>
+          <div class="activity-time">2h ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon spend">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M4 5h6M4 8h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <div class="activity-body">
+            <div class="activity-headline">ALD increased TikTok spend by 45% week-over-week</div>
+            <div class="activity-detail">Biggest jump in 6 months. Targeting heritage storytelling territory with archival content — direct overlap with your strongest territory.</div>
+          </div>
+          <div class="activity-time">6h ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon creative">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 9l2.5-2.5L8 8l2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="activity-body">
+            <div class="activity-headline">St&uuml;ssy testing new creative format — interactive carousel</div>
+            <div class="activity-detail">3 variants spotted on Instagram. Product-led with UGC overlay. Estimated CTR 2x their average based on early signals.</div>
+          </div>
+          <div class="activity-time">1d ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon territory">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2l4 2v3.5c0 2.5-1.5 4-4 5-2.5-1-4-2.5-4-5V4l4-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="activity-body">
+            <div class="activity-headline">Palace entering anime crossover territory</div>
+            <div class="activity-detail">New collaboration with Jujutsu Kaisen teased in Stories. Previously an uncrowded territory for BAPE — expect audience overlap to rise.</div>
+          </div>
+          <div class="activity-time">1d ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon launch">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12L12 2M12 2H6M12 2v6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="activity-body">
+            <div class="activity-headline">St&uuml;ssy launched Google Shopping campaign for summer essentials</div>
+            <div class="activity-detail">12 product ads detected, focused on basics and resort wear. CPA seems aggressive — estimated $18 range.</div>
+          </div>
+          <div class="activity-time">2d ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon spend">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M4 5h6M4 8h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <div class="activity-body">
+            <div class="activity-headline">Supreme paused Pinterest spend — reallocated to TikTok</div>
+            <div class="activity-detail">Pinterest ads went dark 3 days ago. TikTok spend up proportionally. Likely testing younger demo reach.</div>
+          </div>
+          <div class="activity-time">3d ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon creative">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 9l2.5-2.5L8 8l2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="activity-body">
+            <div class="activity-headline">ALD refreshed brand page creative across all channels</div>
+            <div class="activity-detail">Consistent new visual identity rollout — cleaner typography, muted tones. Moving further into quiet luxury positioning.</div>
+          </div>
+          <div class="activity-time">4d ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon territory">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2l4 2v3.5c0 2.5-1.5 4-4 5-2.5-1-4-2.5-4-5V4l4-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="activity-body">
+            <div class="activity-headline">Supreme spotted testing rave aesthetics in Japan market</div>
+            <div class="activity-detail">Neon-heavy creative in JP-only ads. Could signal upcoming global push into rave territory — currently low competition for BAPE.</div>
+          </div>
+          <div class="activity-time">5d ago</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

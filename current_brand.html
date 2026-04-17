@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Brand</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a;
+    --bg-panel: #0f1011;
+    --bg-surface: #191a1b;
+    --bg-elevated: #28282c;
+
+    --text-primary: #f7f8f8;
+    --text-secondary: #d0d6e0;
+    --text-tertiary: #8a8f98;
+    --text-quaternary: #62666d;
+
+    --brand: #5e6ad2;
+    --brand-accent: #7170ff;
+    --brand-hover: #828fff;
+
+    --border-subtle: rgba(255,255,255,0.05);
+    --border-standard: rgba(255,255,255,0.08);
+    --border-solid: #23252a;
+
+    --surface-1: rgba(255,255,255,0.02);
+    --surface-2: rgba(255,255,255,0.04);
+    --surface-3: rgba(255,255,255,0.05);
+
+    --status-green: #10b981;
+    --status-amber: #f59e0b;
+    --status-red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body { background: var(--bg-canvas); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
+  button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-panel); display: flex; flex-direction: column; height: 100%; overflow-y: auto; border-right: 1px solid var(--border-subtle); }
+  .workspace-switcher { margin: 10px 8px 4px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background 0.12s; }
+  .workspace-switcher:hover { background: var(--surface-2); }
+  .ws-logo { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-elevated); padding: 3px; object-fit: contain; flex-shrink: 0; }
+  .ws-info { flex: 1; min-width: 0; }
+  .ws-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+  .ws-name { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .ws-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label { padding: 12px 20px 4px; font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; margin: 0 8px; border-radius: 5px; cursor: pointer; color: var(--text-tertiary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; transition: background 0.1s, color 0.1s; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-secondary); }
+  .nav-item.active { background: var(--surface-2); color: var(--text-primary); }
+  .nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 11px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; letter-spacing: -0.13px; }
+  .nav-chevron { width: 10px; height: 10px; opacity: 0.5; transition: transform 0.15s; flex-shrink: 0; }
+  .nav-chevron.open { transform: rotate(90deg); }
+  .sub-nav { overflow: hidden; max-height: 0; transition: max-height 0.2s ease; }
+  .sub-nav.open { max-height: 260px; }
+  .sub-nav-item { padding: 4px 10px 4px 32px; margin: 0 8px; border-radius: 5px; color: var(--text-quaternary); font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: all 0.1s; text-decoration: none; display: block; }
+  .sub-nav-item:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
+  .sub-nav-item.active { color: var(--text-primary); background: var(--surface-2); }
+  .sidebar-bottom-spacer { flex: 1; }
+  .sidebar-bottom { padding: 8px 0 10px; border-top: 1px solid var(--border-subtle); }
+  .user-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 590; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.3; }
+  .user-role { font-size: 11px; font-weight: 400; color: var(--text-quaternary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* ═══ MAIN ═══ */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+  .topbar { height: 48px; padding: 0 24px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; }
+  .bc-root { color: var(--text-tertiary); cursor: pointer; }
+  .bc-root:hover { color: var(--text-secondary); }
+  .bc-sep { color: var(--text-quaternary); }
+  .bc-current { color: var(--text-primary); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+  .btn { padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+  .btn-ghost { background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+  .btn-primary { background: var(--brand); border: 1px solid var(--brand); color: #ffffff; }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  .content { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+  .content-max { max-width: 1200px; margin: 0 auto; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-size: 24px; font-weight: 400; line-height: 1.33; letter-spacing: -0.288px; color: var(--text-primary); margin-bottom: 6px; }
+  .page-desc { font-size: 15px; font-weight: 400; line-height: 1.6; letter-spacing: -0.165px; color: var(--text-tertiary); max-width: 700px; margin-bottom: 6px; }
+
+  .ref-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px;
+    background: rgba(113,112,255,0.1);
+    border: 1px solid rgba(113,112,255,0.3);
+    border-radius: 9999px;
+    font-size: 11px; font-weight: 510;
+    color: var(--brand-accent);
+    letter-spacing: -0.13px;
+    margin-bottom: 16px;
+  }
+
+  /* ═══ Provenance badges ═══ */
+  .prov { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 9999px; font-size: 10px; font-weight: 510; letter-spacing: -0.13px; white-space: nowrap; }
+  .prov.authored { background: rgba(113,112,255,0.1); color: var(--brand-accent); border: 1px solid rgba(113,112,255,0.28); }
+  .prov.observed { background: rgba(16,185,129,0.08); color: var(--status-green); border: 1px solid rgba(16,185,129,0.25); }
+  .prov-icon { width: 9px; height: 9px; flex-shrink: 0; }
+
+  .edit-btn { padding: 3px 8px; background: transparent; border: 1px solid var(--border-standard); border-radius: 5px; color: var(--text-tertiary); font-size: 11px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.12s; font-family: inherit; }
+  .edit-btn:hover { background: var(--surface-2); color: var(--text-primary); border-color: rgba(113,112,255,0.4); }
+
+  /* ═══ Ingestion Zone ═══ */
+  .ingest-section { margin-bottom: 24px; }
+  .ingest-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 12px;
+  }
+
+  .dropzone {
+    border: 1.5px dashed var(--border-standard);
+    border-radius: 12px;
+    background: linear-gradient(to bottom right, rgba(113,112,255,0.04), rgba(113,112,255,0.01));
+    padding: 28px 24px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    min-height: 220px;
+  }
+  .dropzone:hover {
+    border-color: rgba(113,112,255,0.5);
+    background: linear-gradient(to bottom right, rgba(113,112,255,0.08), rgba(113,112,255,0.02));
+  }
+  .dropzone-icon {
+    width: 44px; height: 44px;
+    background: rgba(113,112,255,0.15);
+    border: 1px solid rgba(113,112,255,0.35);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-accent);
+    margin-bottom: 14px;
+  }
+  .dropzone-title { font-size: 17px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.21px; margin-bottom: 6px; }
+  .dropzone-desc { font-size: 13px; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.5; max-width: 380px; margin-bottom: 14px; }
+  .dropzone-actions { display: flex; gap: 8px; align-items: center; }
+  .dz-btn {
+    padding: 6px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-standard);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 12px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+  }
+  .dz-btn:hover { background: var(--surface-3); }
+  .dz-btn.primary {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: white;
+  }
+  .dz-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .dz-or { font-size: 11px; color: var(--text-quaternary); }
+
+  .dz-formats {
+    display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+    margin-top: 14px;
+  }
+  .dz-format {
+    padding: 2px 8px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 9999px;
+    font-size: 10px; font-weight: 510;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+  }
+
+  /* Sources panel */
+  .sources-panel {
+    background: var(--surface-1);
+    border: 1px solid var(--border-standard);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex; flex-direction: column;
+    min-height: 220px;
+  }
+  .sources-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .sources-title { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; flex: 1; }
+  .sources-count { font-size: 11px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; letter-spacing: -0.13px; }
+
+  .source-list { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .source-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: 7px;
+  }
+  .source-icon {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-standard);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-accent);
+    flex-shrink: 0;
+    font-size: 10px; font-weight: 590;
+  }
+  .source-info { flex: 1; min-width: 0; }
+  .source-name {
+    font-size: 12px; font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .source-meta {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+    margin-top: 1px;
+  }
+  .source-status {
+    font-size: 10px; font-weight: 510;
+    padding: 1px 7px;
+    border-radius: 9999px;
+    letter-spacing: -0.13px;
+    display: inline-flex; align-items: center; gap: 4px;
+    flex-shrink: 0;
+  }
+  .source-status.ready {
+    background: rgba(16,185,129,0.1);
+    color: var(--status-green);
+    border: 1px solid rgba(16,185,129,0.28);
+  }
+  .source-status.processing {
+    background: rgba(245,158,11,0.08);
+    color: var(--status-amber);
+    border: 1px solid rgba(245,158,11,0.28);
+  }
+  .status-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+  .status-dot.pulse { animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .add-source-btn {
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px dashed var(--border-standard);
+    border-radius: 6px;
+    color: var(--text-tertiary);
+    font-size: 12px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex; align-items: center; gap: 5px;
+    justify-content: center;
+    transition: all 0.12s;
+  }
+  .add-source-btn:hover {
+    border-color: rgba(113,112,255,0.4);
+    color: var(--brand-accent);
+    background: rgba(113,112,255,0.03);
+  }
+
+  /* ═══ Completeness banner ═══ */
+  .completeness-panel {
+    background: linear-gradient(to right, rgba(16,185,129,0.06), rgba(16,185,129,0.01) 80%);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .completeness-panel:hover { border-color: rgba(16,185,129,0.4); }
+  .cp-top {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+  }
+  .cp-score-circle {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(16,185,129,0.14);
+    border: 1.5px solid rgba(16,185,129,0.4);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--status-green);
+    font-size: 11px; font-weight: 590;
+    letter-spacing: -0.13px;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .cp-meta { flex: 1; min-width: 0; }
+  .cp-title {
+    font-size: 13px; font-weight: 510;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+    line-height: 1.3;
+  }
+  .cp-subtitle {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: -0.13px;
+    margin-top: 1px;
+    line-height: 1.3;
+  }
+  .cp-chevron {
+    color: var(--text-tertiary);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .cp-chevron.open { transform: rotate(180deg); }
+
+  .cp-expand {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+  .cp-expand.open { max-height: 280px; }
+  .cp-expand-inner {
+    padding: 0 14px 14px;
+    border-top: 1px solid rgba(16,185,129,0.15);
+    padding-top: 14px;
+  }
+
+  .cp-bar {
+    height: 4px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .cp-fill {
+    height: 100%;
+    background: var(--status-green);
+    border-radius: 999px;
+    width: 78%;
+  }
+
+  .cp-checklist {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .cp-check {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    font-size: 12px;
+    letter-spacing: -0.13px;
+  }
+  .cp-check-icon { flex-shrink: 0; }
+  .cp-check.done .cp-check-icon { color: var(--status-green); }
+  .cp-check.warn .cp-check-icon { color: var(--status-amber); }
+  .cp-check.missing .cp-check-icon { color: var(--text-quaternary); }
+  .cp-check-text { flex: 1; color: var(--text-secondary); font-weight: 510; }
+  .cp-check.done .cp-check-text { color: var(--text-primary); }
+  .cp-check-action {
+    font-size: 11px; font-weight: 510;
+    color: var(--brand-accent);
+    letter-spacing: -0.13px;
+    cursor: pointer;
+  }
+  .cp-check-action:hover { text-decoration: underline; }
+
+  /* ═══ Brand Book divider ═══ */
+  .book-divider {
+    display: flex; align-items: center; gap: 14px;
+    margin: 32px 0 20px;
+  }
+  .book-divider-line { flex: 1; height: 1px; background: var(--border-subtle); }
+  .book-divider-label {
+    font-size: 10px; font-weight: 510;
+    color: var(--text-quaternary);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  /* ═══ Brand Hero ═══ */
+  .brand-hero { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 20px 22px; margin-bottom: 12px; position: relative; }
+  .hero-edit { position: absolute; top: 16px; right: 16px; padding: 4px 9px; background: transparent; border: 1px solid var(--border-standard); border-radius: 5px; color: var(--text-tertiary); font-size: 11px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.12s; font-family: inherit; }
+  .hero-edit:hover { background: var(--surface-2); color: var(--text-primary); border-color: rgba(113,112,255,0.4); }
+  .hero-mark { display: none; }
+  .brand-identity-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .brand-name { font-size: 18px; font-weight: 510; line-height: 1.3; letter-spacing: -0.24px; color: var(--text-primary); flex-shrink: 0; }
+  .brand-tagline { font-size: 13px; font-weight: 400; line-height: 1.4; letter-spacing: -0.13px; color: var(--text-tertiary); }
+  .brand-positioning { font-size: 14px; font-weight: 400; line-height: 1.6; letter-spacing: -0.165px; color: var(--text-secondary); max-width: 620px; }
+  .brand-positioning strong { color: var(--text-primary); font-weight: 510; }
+  .hero-prov-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 11px; font-weight: 510; color: var(--text-quaternary); letter-spacing: -0.13px; }
+  .brand-stats { display: flex; gap: 28px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-subtle); flex-wrap: wrap; }
+  .bs-item { display: flex; flex-direction: column; }
+  .bs-value { font-size: 14px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .bs-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.4px; text-transform: uppercase; margin-top: 2px; }
+
+  /* ═══ Section layout ═══ */
+  .section { margin-bottom: 14px; }
+  .section-header { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 14px; padding: 0 4px; }
+  .section-num { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.5px; font-family: 'Berkeley Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+  .section-title { font-size: 20px; font-weight: 400; color: var(--text-primary); letter-spacing: -0.24px; line-height: 1.3; }
+  .section-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .panel { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 20px 22px; }
+  .panel-prov-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle); }
+  .panel-prov-meta { font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; }
+  .panel-prov-spacer { flex: 1; }
+  .sub-section + .sub-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-subtle); }
+  .sub-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .sub-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .sub-meta { font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; }
+  .sub-spacer { flex: 1; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+  /* Visual Identity */
+  .palette { display: flex; align-items: center; gap: 8px; }
+  .swatch { flex: 1; aspect-ratio: 3 / 4; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 10px; }
+  .swatch::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent 50%); pointer-events: none; }
+  .swatch-meta { position: relative; z-index: 1; color: white; }
+  .swatch-name { font-size: 11px; font-weight: 510; letter-spacing: -0.13px; line-height: 1.25; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+  .swatch-hex { font-size: 10px; font-family: 'Berkeley Mono', ui-monospace, 'SF Mono', Menlo, monospace; opacity: 0.85; margin-top: 2px; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { padding: 3px 9px; background: var(--surface-2); border: 1px solid var(--border-standard); border-radius: 9999px; font-size: 11px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; }
+  .tag.primary { color: var(--brand-accent); border-color: rgba(113,112,255,0.3); background: rgba(113,112,255,0.08); }
+  .signature-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .sig-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 7px; font-size: 12px; letter-spacing: -0.13px; }
+  .sig-icon { width: 22px; height: 22px; border-radius: 5px; background: var(--surface-3); display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .sig-text { flex: 1; color: var(--text-primary); font-weight: 510; }
+  .sig-meta { color: var(--text-tertiary); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+  /* Voice */
+  .voice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .voice-col { padding: 12px 14px; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 8px; }
+  .voice-col.do { border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.03); }
+  .voice-col.avoid { border-color: rgba(245,158,11,0.2); background: rgba(245,158,11,0.03); }
+  .voice-label { font-size: 9px; font-weight: 510; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .voice-label.do { color: var(--status-green); }
+  .voice-label.avoid { color: var(--status-amber); }
+  .voice-example { font-size: 14px; font-weight: 400; color: var(--text-primary); letter-spacing: -0.165px; line-height: 1.5; font-style: italic; }
+  .voice-gloss { font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; margin-top: 4px; }
+
+  /* Audience */
+  .audience-card { padding: 16px 18px; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 10px; display: flex; flex-direction: column; gap: 10px; position: relative; }
+  .audience-header { display: flex; align-items: center; gap: 8px; }
+  .audience-badge { font-size: 9px; font-weight: 510; padding: 2px 7px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .audience-badge.primary { background: rgba(113,112,255,0.14); color: var(--brand-accent); border: 1px solid rgba(113,112,255,0.3); }
+  .audience-badge.secondary { background: var(--surface-3); color: var(--text-secondary); border: 1px solid var(--border-standard); }
+  .audience-badge.emerging { background: rgba(16,185,129,0.1); color: var(--status-green); border: 1px solid rgba(16,185,129,0.3); }
+  .audience-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; }
+  .audience-age { font-size: 12px; color: var(--text-tertiary); letter-spacing: -0.13px; }
+  .audience-desc { font-size: 13px; font-weight: 400; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.5; }
+  .audience-facts { display: flex; align-items: flex-end; gap: 16px; padding-top: 10px; border-top: 1px solid var(--border-subtle); }
+  .af-item { display: flex; flex-direction: column; }
+  .af-value { font-size: 14px; font-weight: 590; color: var(--text-primary); font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .af-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); letter-spacing: 0.4px; text-transform: uppercase; margin-top: 1px; }
+  .af-spacer { flex: 1; }
+  .af-source { font-size: 10px; color: var(--text-quaternary); letter-spacing: -0.13px; padding-bottom: 2px; }
+
+  /* Product universe */
+  .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .product-tile { aspect-ratio: 4 / 5; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid var(--border-standard); cursor: pointer; transition: border-color 0.12s, transform 0.12s; }
+  .product-tile:hover { border-color: rgba(113,112,255,0.35); transform: translateY(-1px); }
+  .product-gradient { width: 100%; height: 70%; position: relative; }
+  .tile-gradient-1 { background: radial-gradient(circle at 30% 20%, #2d4a2a, #0c1a0a); }
+  .tile-gradient-2 { background: radial-gradient(circle at 70% 30%, #8b1a1a, #1a0808); }
+  .tile-gradient-5 { background: radial-gradient(circle at 40% 70%, #e5b4b0, #3a1a1a); }
+  .tile-gradient-6 { background: linear-gradient(180deg, #1a1a1a, #0a0a0a); }
+  .tile-gradient-7 { background: radial-gradient(circle at 50% 50%, #b8a568, #3a3020); }
+  .tile-gradient-10 { background: linear-gradient(135deg, #5a3a1a, #1a0a0a); }
+  .tile-gradient-11 { background: radial-gradient(circle at 50% 50%, #f0eee8, #9a9690); }
+  .tile-gradient-13 { background: radial-gradient(circle at 40% 30%, #2d3a5a, #0a0f1a); }
+  .product-info { padding: 10px 12px; background: var(--bg-panel); height: 30%; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+  .product-name { font-size: 12px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; line-height: 1.3; }
+  .product-count { font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; line-height: 1.3; }
+
+  /* Competitive */
+  .comp-map { position: relative; height: 280px; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 10px; }
+  .comp-plot { position: absolute; inset: 28px 28px 28px 44px; overflow: visible; }
+  .comp-axis-label { position: absolute; color: var(--text-quaternary); font-size: 9px; font-weight: 510; text-transform: uppercase; letter-spacing: 0.6px; z-index: 2; pointer-events: none; }
+  .comp-axis-label.top-left { top: 10px; left: 14px; }
+  .comp-axis-label.bottom-left { bottom: 10px; left: 14px; }
+  .comp-axis-label.bottom-x-left { bottom: 10px; left: 48px; }
+  .comp-axis-label.bottom-x-right { bottom: 10px; right: 14px; }
+  .comp-grid-line { position: absolute; background: var(--border-subtle); }
+  .comp-grid-line.h { left: 0; right: 0; height: 1px; top: 50%; }
+  .comp-grid-line.v { top: 0; bottom: 0; width: 1px; left: 50%; }
+  .comp-node { position: absolute; display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 6px; background: var(--bg-surface); border: 1px solid var(--border-standard); border-radius: 9999px; font-size: 11px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; transform: translate(-50%, -50%); cursor: default; transition: border-color 0.12s; }
+  .comp-node:hover { border-color: rgba(113,112,255,0.45); }
+  .comp-node.self { background: var(--brand); color: white; border-color: var(--brand); font-weight: 590; }
+  .comp-node.self .comp-dot { background: rgba(255,255,255,0.9); }
+  .comp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary); flex-shrink: 0; }
+  .diff-list { display: flex; flex-direction: column; gap: 8px; }
+  .diff-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 8px; }
+  .diff-bullet { width: 18px; height: 18px; border-radius: 5px; background: rgba(113,112,255,0.15); color: var(--brand-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-size: 11px; font-weight: 590; font-family: 'Berkeley Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+  .diff-text { flex: 1; font-size: 13px; color: var(--text-secondary); letter-spacing: -0.13px; line-height: 1.5; }
+  .diff-text strong { color: var(--text-primary); font-weight: 510; }
+
+  /* Referenced In */
+  .refs-panel { margin-top: 32px; background: linear-gradient(to right, rgba(113,112,255,0.08), rgba(113,112,255,0.01) 80%); border: 1px solid rgba(113,112,255,0.25); border-radius: 12px; padding: 20px 24px; }
+  .refs-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .refs-icon-box { width: 32px; height: 32px; background: rgba(113,112,255,0.18); border: 1px solid rgba(113,112,255,0.35); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
+  .refs-meta { flex: 1; }
+  .refs-title { font-size: 14px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.182px; line-height: 1.3; }
+  .refs-subtitle { font-size: 12px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; margin-top: 2px; }
+  .refs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .ref-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; font-size: 12px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; text-decoration: none; transition: all 0.12s; }
+  .ref-item:hover { background: var(--surface-2); color: var(--text-primary); border-color: rgba(113,112,255,0.35); }
+  .ref-item-icon { color: var(--text-tertiary); flex-shrink: 0; }
+  .ref-item:hover .ref-item-icon { color: var(--brand-accent); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="workspace-switcher">
+    <img class="ws-logo" src="bape-logo.png" alt="BAPE">
+    <div class="ws-info">
+      <div class="ws-label">Brand</div>
+      <div class="ws-name">BAPE</div>
+    </div>
+    <svg class="ws-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <a class="nav-item" href="home.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+      <span class="nav-label">Brand</span>
+    </div>
+</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Inspiration</div>
+    <a class="nav-item" href="visual_search.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Visual Vault</span>
+    </a>
+    <a class="nav-item" href="trend_matching.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Opportunities</span>
+    </a>
+    <a class="nav-item" href="brand_sandbox.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10l-3 2 .5-3.5L3 6l3.5-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Brand Sandbox</span>
+    </a>
+    <a class="nav-item" href="clusters.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Thematic Intelligence</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Execution</div>
+    <a class="nav-item" href="briefs.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Briefs</span>
+    </a>
+    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Creator Studio</span>
+    </a>
+    <a class="nav-item" href="asset_manager.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Asset Manager</span>
+    </a>
+    <a class="nav-item" href="reviews.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reviews</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Performance</div>
+    <a class="nav-item" href="roas_dashboard.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><polyline points="2,12 6,7 9,10 14,4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">ROAS Dashboard</span>
+    </a>
+    <a class="nav-item" href="reports.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polyline points="5,11 7,9 9,10 11,7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Reports</span>
+    </a>
+    <a class="nav-item" href="competitive_intel.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Competitive Intel</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom-spacer"></div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Settings</div>
+    <a class="nav-item" href="brand_setup_v2.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v4c0 1 2 2 5 2s5-1 5-2V4M3 8v4c0 1 2 2 5 2s5-1 5-2V8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-label">Data Sources</span>
+    </a>
+    <a class="nav-item" href="team.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M2 13.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11.5" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 13.5c0-1.6 1-2.8 2-2.8s2 1 2 2.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Team</span>
+    </a>
+    <a class="nav-item" href="presets.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2.5L8 7 3 4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 8l5 2.5L13 8M3 11.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Presets</span>
+    </a>
+    <a class="nav-item" href="admin.html" style="text-decoration: none;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Admin</span>
+    </a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-item">
+      <div class="avatar">K</div>
+      <div class="user-info">
+        <div class="user-name">Kathy S.</div>
+        <div class="user-role">CMO</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-current">Brand</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2v8l3-2 3 2V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Export as PDF
+      </button>
+      <button class="btn btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Share with team
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="content-max">
+      <div class="page-eyebrow">Brand · Source of Truth</div>
+      <h1 class="page-title">Define BAPE — once. Use everywhere.</h1>
+      <p class="page-desc">Drop everything you have about your brand — guidelines, voice docs, websites, decks. We'll synthesize it into a single definition that every team, agency, and tool reads from. Update once, propagate everywhere.</p>
+      <span class="ref-pill">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8M3 3l6 6M3 9l6-6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Powers 8 surfaces across KittyKat
+      </span>
+
+      <!-- ═══ Completeness banner ═══ -->
+      <div class="completeness-panel">
+        <div class="cp-top" onclick="toggleCompleteness()">
+          <div class="cp-score-circle">78%</div>
+          <div class="cp-meta">
+            <div class="cp-title">Brand definition is 78% complete</div>
+            <div class="cp-subtitle">Strong enough to power downstream tools. Click to see what's left.</div>
+          </div>
+          <svg class="cp-chevron" id="cpChev" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3.5 5l3.5 3.5L10.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="cp-expand" id="cpExpand">
+          <div class="cp-expand-inner">
+            <div class="cp-bar"><div class="cp-fill"></div></div>
+            <div class="cp-checklist">
+              <div class="cp-check done">
+                <svg class="cp-check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.3"/><path d="M4 6l1.5 1.5L8.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="cp-check-text">Positioning</span>
+              </div>
+              <div class="cp-check done">
+                <svg class="cp-check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.3"/><path d="M4 6l1.5 1.5L8.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="cp-check-text">Visual Identity</span>
+              </div>
+              <div class="cp-check done">
+                <svg class="cp-check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.3"/><path d="M4 6l1.5 1.5L8.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="cp-check-text">Voice &amp; Tone</span>
+              </div>
+              <div class="cp-check warn">
+                <svg class="cp-check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" fill="currentColor" fill-opacity="0.12" stroke="currentColor" stroke-width="1.3"/><path d="M6 4v2M6 8h0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <span class="cp-check-text">Audience framing</span>
+                <span class="cp-check-action">Review</span>
+              </div>
+              <div class="cp-check done">
+                <svg class="cp-check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.3"/><path d="M4 6l1.5 1.5L8.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="cp-check-text">Competitive position</span>
+              </div>
+              <div class="cp-check missing">
+                <svg class="cp-check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.3"/></svg>
+                <span class="cp-check-text">Audience research upload</span>
+                <span class="cp-check-action">Upload</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Ingestion ═══ -->
+      <div class="ingest-section">
+        <div class="ingest-grid">
+          <!-- Drop zone -->
+          <div class="dropzone">
+            <div class="dropzone-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4l-4 4M12 4l4 4M4 20h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="dropzone-title">Drop your brand here</div>
+            <div class="dropzone-desc">Brand guidelines, voice &amp; tone docs, positioning decks, website URLs, Figma boards — whatever you have. We'll synthesize.</div>
+            <div class="dropzone-actions">
+              <button class="dz-btn primary">Browse files</button>
+              <span class="dz-or">or</span>
+              <button class="dz-btn">Paste URL</button>
+            </div>
+            <div class="dz-formats">
+              <span class="dz-format">PDF</span>
+              <span class="dz-format">DOCX</span>
+              <span class="dz-format">URL</span>
+              <span class="dz-format">Figma</span>
+              <span class="dz-format">Miro</span>
+              <span class="dz-format">Keynote</span>
+              <span class="dz-format">Notion</span>
+            </div>
+          </div>
+
+          <!-- Sources -->
+          <div class="sources-panel">
+            <div class="sources-header">
+              <span class="sources-title">Connected Sources</span>
+              <span class="sources-count">4 of 6 ready</span>
+            </div>
+            <div class="source-list">
+              <div class="source-item">
+                <div class="source-icon">PDF</div>
+                <div class="source-info">
+                  <div class="source-name">BAPE-Brand-Book-2024.pdf</div>
+                  <div class="source-meta">28 pages · 12.4 MB · uploaded Nov 15</div>
+                </div>
+                <span class="source-status ready"><span class="status-dot"></span>Ready</span>
+              </div>
+              <div class="source-item">
+                <div class="source-icon">DOC</div>
+                <div class="source-info">
+                  <div class="source-name">Voice-Guide-v3.docx</div>
+                  <div class="source-meta">2.1 MB · uploaded Nov 12</div>
+                </div>
+                <span class="source-status ready"><span class="status-dot"></span>Ready</span>
+              </div>
+              <div class="source-item">
+                <div class="source-icon">URL</div>
+                <div class="source-info">
+                  <div class="source-name">us.bape.com/about</div>
+                  <div class="source-meta">Crawled 127 pages · 2h ago</div>
+                </div>
+                <span class="source-status ready"><span class="status-dot"></span>Ready</span>
+              </div>
+              <div class="source-item">
+                <div class="source-icon">FIG</div>
+                <div class="source-info">
+                  <div class="source-name">Brand Board · Figma</div>
+                  <div class="source-meta">Syncing 6 frames</div>
+                </div>
+                <span class="source-status processing"><span class="status-dot pulse"></span>62%</span>
+              </div>
+            </div>
+            <button class="add-source-btn">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Add source
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Book divider ═══ -->
+      <div class="book-divider">
+        <div class="book-divider-line"></div>
+        <div class="book-divider-label">Generated Brand Book</div>
+        <div class="book-divider-line"></div>
+      </div>
+
+      <!-- Hero — AUTHORED -->
+      <div class="brand-hero">
+        <button class="hero-edit">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          Edit positioning
+        </button>
+        <div class="brand-identity-row">
+          <h2 class="brand-name">BAPE</h2>
+          <div class="brand-tagline">A Bathing Ape · Japanese streetwear, since 1993</div>
+        </div>
+        <p class="brand-positioning">
+          <strong>Originator of Japanese streetwear.</strong> Thirty years of logo-forward, pop-maximalist, camo-pattern heritage. Loud where luxury is quiet. Collectible where fashion is disposable. <strong>Unmistakably Tokyo, relentlessly global.</strong>
+        </p>
+        <div class="hero-prov-row">
+          <span class="prov authored">
+            <svg class="prov-icon" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            Authored
+          </span>
+          <span>Synthesized from BAPE-Brand-Book-2024.pdf · edited by Kathy Nov 15</span>
+        </div>
+        <div class="brand-stats">
+          <div class="bs-item"><div class="bs-value">1993</div><div class="bs-label">Founded · Harajuku</div></div>
+          <div class="bs-item"><div class="bs-value">12</div><div class="bs-label">Markets</div></div>
+          <div class="bs-item"><div class="bs-value">8,576</div><div class="bs-label">Assets in archive</div></div>
+          <div class="bs-item"><div class="bs-value">3.2M</div><div class="bs-label">Instagram @bape_us</div></div>
+        </div>
+      </div>
+
+      <!-- 01 · Visual Identity -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-num">01</span>
+          <span class="section-title">Visual Identity</span>
+        </div>
+        <div class="panel">
+          <div class="sub-section">
+            <div class="sub-header">
+              <span class="sub-label">Core Palette</span>
+              <span class="prov observed">
+                <svg class="prov-icon" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.3"/></svg>
+                Observed
+              </span>
+              <span class="sub-meta">Extracted from 8,576 assets · 2h ago</span>
+              <div class="sub-spacer"></div>
+            </div>
+            <div class="palette">
+              <div class="swatch" style="background: #2d6b2a;"><div class="swatch-meta"><div class="swatch-name">Camo Green</div><div class="swatch-hex">#2D6B2A</div></div></div>
+              <div class="swatch" style="background: #8b1a1a;"><div class="swatch-meta"><div class="swatch-name">Signature Red</div><div class="swatch-hex">#8B1A1A</div></div></div>
+              <div class="swatch" style="background: #e8c464;"><div class="swatch-meta" style="color: #1a1a1a;"><div class="swatch-name">Gold</div><div class="swatch-hex">#E8C464</div></div></div>
+              <div class="swatch" style="background: #e5b4b0;"><div class="swatch-meta" style="color: #1a1a1a;"><div class="swatch-name">Sakura Pink</div><div class="swatch-hex">#E5B4B0</div></div></div>
+              <div class="swatch" style="background: #1a1a1a;"><div class="swatch-meta"><div class="swatch-name">Shark Black</div><div class="swatch-hex">#1A1A1A</div></div></div>
+              <div class="swatch" style="background: #f0ede8;"><div class="swatch-meta" style="color: #1a1a1a;"><div class="swatch-name">Off White</div><div class="swatch-hex">#F0EDE8</div></div></div>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <div class="sub-header">
+              <span class="sub-label">Aesthetic Descriptors</span>
+              <span class="prov authored">
+                <svg class="prov-icon" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                Authored
+              </span>
+              <span class="sub-meta">From Brand Book 2024 · Kathy Nov 15</span>
+              <div class="sub-spacer"></div>
+              <button class="edit-btn">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                Edit
+              </button>
+            </div>
+            <div class="tag-list">
+              <span class="tag primary">Loud</span>
+              <span class="tag primary">Heritage</span>
+              <span class="tag primary">Pop-maximalist</span>
+              <span class="tag primary">Japanese</span>
+              <span class="tag">Playful</span>
+              <span class="tag">Streetwear-native</span>
+              <span class="tag">Logo-forward</span>
+              <span class="tag">Pattern-heavy</span>
+              <span class="tag">Collectible</span>
+              <span class="tag">Anti-quiet</span>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <div class="sub-header">
+              <span class="sub-label">Signature Elements</span>
+              <span class="prov observed">
+                <svg class="prov-icon" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.3"/></svg>
+                Observed
+              </span>
+              <span class="sub-meta">Counted across archive · 2h ago</span>
+              <div class="sub-spacer"></div>
+            </div>
+            <div class="signature-list">
+              <div class="sig-row"><div class="sig-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="3" height="3" fill="currentColor"/><rect x="7" y="1" width="3" height="3" fill="currentColor"/><rect x="1" y="7" width="3" height="3" fill="currentColor"/><rect x="7" y="7" width="3" height="3" fill="currentColor"/></svg></div><span class="sig-text">ABC Camo pattern</span><span class="sig-meta">61% of archive</span></div>
+              <div class="sig-row"><div class="sig-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l2 3.5h3.5L8.5 7l1 3.5L6 9l-3.5 1.5L3.5 7 .5 4.5H4z" fill="currentColor"/></svg></div><span class="sig-text">Shark &amp; Milo mascots</span><span class="sig-meta">48% of archive</span></div>
+              <div class="sig-row"><div class="sig-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 3h10M1 6h7M1 9h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><span class="sig-text">Bold logo placement</span><span class="sig-meta">79% of archive</span></div>
+              <div class="sig-row"><div class="sig-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M3 6h6M2 9h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><span class="sig-text">Japanese typography</span><span class="sig-meta">34% of archive</span></div>
+              <div class="sig-row"><div class="sig-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.4" fill="currentColor" fill-opacity="0.3"/></svg></div><span class="sig-text">Drop-shadow graphics</span><span class="sig-meta">29% of archive</span></div>
+              <div class="sig-row"><div class="sig-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4l3-2 3 2v4l-3 2-3-2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div><span class="sig-text">Collaboration co-branding</span><span class="sig-meta">22% of archive</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02 · Voice & Tone — AUTHORED -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-num">02</span>
+          <span class="section-title">Voice &amp; Tone</span>
+        </div>
+        <div class="panel">
+          <div class="panel-prov-header">
+            <span class="prov authored">
+              <svg class="prov-icon" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+              Authored
+            </span>
+            <span class="panel-prov-meta">From Voice-Guide-v3.docx · edited by Kathy Nov 15</span>
+            <div class="panel-prov-spacer"></div>
+            <button class="edit-btn">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              Edit
+            </button>
+          </div>
+          <div class="sub-section" style="border: none; padding-top: 0; margin-top: 0;">
+            <div class="sub-header"><span class="sub-label">Character</span></div>
+            <div class="tag-list">
+              <span class="tag primary">Confident, not cocky</span>
+              <span class="tag primary">Short &amp; declarative</span>
+              <span class="tag primary">Pop-culture fluent</span>
+              <span class="tag">Japanese words unexplained</span>
+              <span class="tag">No corporate hedging</span>
+              <span class="tag">Playful</span>
+            </div>
+          </div>
+          <div class="sub-section">
+            <div class="sub-header"><span class="sub-label">In Practice</span></div>
+            <div class="voice-row">
+              <div class="voice-col do">
+                <div class="voice-label do">Do</div>
+                <div class="voice-example">"New drop. Shark goes pink. Shibuya, 4/22."</div>
+                <div class="voice-gloss">Short. Specific. Assumes the reader knows the references.</div>
+              </div>
+              <div class="voice-col avoid">
+                <div class="voice-label avoid">Avoid</div>
+                <div class="voice-example">"We're thrilled to introduce our exciting new spring collection, featuring a bold new colorway…"</div>
+                <div class="voice-gloss">Hedging, over-explaining, corporate-exciting.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 · Audience — MIXED -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-num">03</span>
+          <span class="section-title">Audience</span>
+          <div class="section-right">
+            <span class="prov authored">
+              <svg class="prov-icon" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+              Framing: authored
+            </span>
+            <span class="prov observed">
+              <svg class="prov-icon" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.3"/></svg>
+              Numbers: observed
+            </span>
+            <button class="edit-btn">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              Edit framing
+            </button>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="audience-card">
+            <div class="audience-header"><span class="audience-badge primary">Core</span><span class="audience-age">16–28</span></div>
+            <div class="audience-title">Streetwear natives</div>
+            <div class="audience-desc">Gen Z who grew up on Instagram hypebeast culture. Live in APAC + US coastal cities. Trade pieces, know the drop calendar, treat BAPE as vocabulary.</div>
+            <div class="audience-facts">
+              <div class="af-item"><div class="af-value">61%</div><div class="af-label">of revenue</div></div>
+              <div class="af-item"><div class="af-value">4.2x</div><div class="af-label">avg ROAS</div></div>
+              <div class="af-spacer"></div>
+              <span class="af-source">Meta + TikTok</span>
+            </div>
+          </div>
+          <div class="audience-card">
+            <div class="audience-header"><span class="audience-badge secondary">Secondary</span><span class="audience-age">28–40</span></div>
+            <div class="audience-title">Heritage collectors</div>
+            <div class="audience-desc">Millennials who were there in the 2000s. Come back for archival drops, Milo pieces, first-camo green. High-ticket buyers. Brand-loyal.</div>
+            <div class="audience-facts">
+              <div class="af-item"><div class="af-value">26%</div><div class="af-label">of revenue</div></div>
+              <div class="af-item"><div class="af-value">3.1x</div><div class="af-label">avg ROAS</div></div>
+              <div class="af-spacer"></div>
+              <span class="af-source">Meta + TikTok</span>
+            </div>
+          </div>
+          <div class="audience-card">
+            <div class="audience-header"><span class="audience-badge emerging">Emerging</span><span class="audience-age">25–35</span></div>
+            <div class="audience-title">Luxury-adjacent women</div>
+            <div class="audience-desc">Discovered BAPE via Sakura Pink Camo and JP market moments. Mix with designer. Seasonal, not subcultural. Growth segment.</div>
+            <div class="audience-facts">
+              <div class="af-item"><div class="af-value">13%</div><div class="af-label">of revenue</div></div>
+              <div class="af-item" style="color: var(--status-green);"><div class="af-value" style="color: var(--status-green);">+48% YoY</div><div class="af-label">growth</div></div>
+              <div class="af-spacer"></div>
+              <span class="af-source">Meta + TikTok</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04 · Product Universe — OBSERVED -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-num">04</span>
+          <span class="section-title">Product Universe</span>
+          <div class="section-right">
+            <span class="prov observed">
+              <svg class="prov-icon" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.3"/></svg>
+              Observed
+            </span>
+            <span class="sub-meta">From 1,240 SKUs in catalog · updated daily</span>
+          </div>
+        </div>
+        <div class="product-grid">
+          <div class="product-tile"><div class="product-gradient tile-gradient-1"></div><div class="product-info"><div class="product-name">Hoodies</div><div class="product-count">284 SKUs · Shark, Graphic</div></div></div>
+          <div class="product-tile"><div class="product-gradient tile-gradient-11"></div><div class="product-info"><div class="product-name">Tees</div><div class="product-count">312 SKUs · Logo, Camo</div></div></div>
+          <div class="product-tile"><div class="product-gradient tile-gradient-6"></div><div class="product-info"><div class="product-name">Sneakers</div><div class="product-count">98 SKUs · Bape Sta</div></div></div>
+          <div class="product-tile"><div class="product-gradient tile-gradient-7"></div><div class="product-info"><div class="product-name">Accessories</div><div class="product-count">176 SKUs · Caps, Bags</div></div></div>
+          <div class="product-tile"><div class="product-gradient tile-gradient-2"></div><div class="product-info"><div class="product-name">Outerwear</div><div class="product-count">142 SKUs · Jackets</div></div></div>
+          <div class="product-tile"><div class="product-gradient tile-gradient-13"></div><div class="product-info"><div class="product-name">Bottoms</div><div class="product-count">118 SKUs · Shorts</div></div></div>
+          <div class="product-tile"><div class="product-gradient tile-gradient-5"></div><div class="product-info"><div class="product-name">Kids &amp; Baby</div><div class="product-count">82 SKUs · Baby Milo</div></div></div>
+          <div class="product-tile"><div class="product-gradient tile-gradient-10"></div><div class="product-info"><div class="product-name">Collaborations</div><div class="product-count">28 active · Futura, adidas</div></div></div>
+        </div>
+      </div>
+
+      <!-- 05 · Competitive — AUTHORED -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-num">05</span>
+          <span class="section-title">Competitive Position</span>
+          <div class="section-right">
+            <span class="prov authored">
+              <svg class="prov-icon" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+              Authored
+            </span>
+            <button class="edit-btn">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 8.5L8.5 2l1.5 1.5L3.5 10H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              Edit
+            </button>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="panel" style="padding: 14px;">
+            <div class="comp-map">
+              <span class="comp-axis-label top-left">Loud</span>
+              <span class="comp-axis-label bottom-left">Quiet</span>
+              <span class="comp-axis-label bottom-x-left">Niche</span>
+              <span class="comp-axis-label bottom-x-right">Mass</span>
+              <div class="comp-plot">
+                <div class="comp-grid-line h"></div>
+                <div class="comp-grid-line v"></div>
+                <div class="comp-node self" style="left: 35%; top: 22%;"><div class="comp-dot"></div>BAPE</div>
+                <div class="comp-node" style="left: 62%; top: 18%;"><div class="comp-dot" style="background: #ef4444;"></div>Supreme</div>
+                <div class="comp-node" style="left: 28%; top: 34%;"><div class="comp-dot" style="background: #f59e0b;"></div>Palace</div>
+                <div class="comp-node" style="left: 40%; top: 52%;"><div class="comp-dot" style="background: #10b981;"></div>Stüssy</div>
+                <div class="comp-node" style="left: 65%; top: 68%;"><div class="comp-dot" style="background: #7170ff;"></div>ALD</div>
+                <div class="comp-node" style="left: 75%; top: 80%;"><div class="comp-dot" style="background: #828fff;"></div>Loro Piana</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="sub-label" style="margin-bottom: 10px;">Differentiators</div>
+            <div class="diff-list">
+              <div class="diff-row"><div class="diff-bullet">01</div><div class="diff-text"><strong>Pattern-as-brand.</strong> ABC Camo is yours in a way Supreme's box logo isn't — you own a visual texture, not just a mark.</div></div>
+              <div class="diff-row"><div class="diff-bullet">02</div><div class="diff-text"><strong>Japanese origin authenticity.</strong> Not a US brand borrowing Japanese aesthetics. Harajuku-born, Tokyo-HQ'd. Irreproducible.</div></div>
+              <div class="diff-row"><div class="diff-bullet">03</div><div class="diff-text"><strong>Character IP.</strong> Shark hood + Milo are pop-art assets no competitor has. Translates to collabs, kids, collectibles, gaming.</div></div>
+              <div class="diff-row"><div class="diff-bullet">04</div><div class="diff-text"><strong>Loud in a quiet era.</strong> While peers drift toward ALD-style restraint, you're the remaining anchor for pop-maximalism. White space.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Referenced In -->
+      <div class="refs-panel">
+        <div class="refs-header">
+          <div class="refs-icon-box">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 9l4-4M5 11l-2-2M13 5l-2-2M10 2l4 4-2 2M2 12l4 4 2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="refs-meta">
+            <div class="refs-title">This definition is referenced by 8 surfaces across KittyKat</div>
+            <div class="refs-subtitle">Edit it here once — every downstream product inherits the change.</div>
+          </div>
+        </div>
+        <div class="refs-grid">
+          <a class="ref-item" href="visual_search.html"><svg class="ref-item-icon" width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M9 9l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Visual Vault</a>
+          <a class="ref-item" href="trend_matching.html"><svg class="ref-item-icon" width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 11l3-3 2 2 5-5M10 5h2v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Trends</a>
+          <a class="ref-item" href="brand_sandbox.html"><svg class="ref-item-icon" width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5L12 5l-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Brand Exploration</a>
+          <a class="ref-item" href="clusters.html"><svg class="ref-item-icon" width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="4" height="4" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="2" width="4" height="4" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="8" width="4" height="4" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="8" width="4" height="4" stroke="currentColor" stroke-width="1.3"/></svg>Thematic Intelligence</a>
+          <div class="ref-item" style="opacity: 0.6;"><svg class="ref-item-icon" width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12M3 3l8 8M3 11l8-8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Creator Studio</div>
+          <div class="ref-item" style="opacity: 0.6;"><svg class="ref-item-icon" width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M3 1h7l2 2v10H3V1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 6h5M5 8h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Briefs</div>
+          <div class="ref-item" style="opacity: 0.6;"><svg class="ref-item-icon" width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Reviews &amp; Approvals</div>
+          <div class="ref-item" style="opacity: 0.6;"><svg class="ref-item-icon" width="13" height="13" viewBox="0 0 14 14" fill="none"><polyline points="2,11 5,6 8,9 12,3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>ROAS Dashboard</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  function toggleSection(s) {
+    const sub = document.getElementById('sub-' + s);
+    const chev = document.getElementById('chev-' + s);
+    if (sub) sub.classList.toggle('open');
+    if (chev) chev.classList.toggle('open');
+  }
+
+  function toggleCompleteness() {
+    document.getElementById('cpExpand').classList.toggle('open');
+    document.getElementById('cpChev').classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
