@@ -64,6 +64,15 @@
   .ticon { width: 30px; height: 30px; border-radius: 7px; background: var(--surface-1); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; text-decoration: none; }
   .ticon:hover { background: var(--surface-3); color: var(--text-primary); }
 
+  /* references & moodboard dropdown in top bar */
+  .ref-dd { position: relative; }
+  .ref-dd-btn { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px; border-radius: 7px; background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; letter-spacing: -0.13px; }
+  .ref-dd-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+  .ref-dd-btn .chev { transition: transform 0.18s; }
+  .ref-dd.open .ref-dd-btn .chev { transform: rotate(180deg); }
+  .ref-dd-panel { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 340px; background: var(--bg-surface); border: 1px solid var(--border-standard); border-radius: 12px; padding: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); z-index: 20; }
+  .ref-dd.open .ref-dd-panel { display: block; }
+
   .modal-body { flex: 1; display: flex; min-height: 0; }
 
   /* LEFT — asset focus, no words */
@@ -203,39 +212,13 @@
         <button class="mode-btn" id="modeManual" onclick="openManual()">Manual</button>
       </div>
       <div class="top-actions">
-        <div class="ticon" title="Download"><svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 6l3 3 3-3M2 10h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="ticon" title="Save"><svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M3 2v8l3-2 3 2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
-        <a class="ticon" href="asset_manager.html" title="Close"><svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></a>
-      </div>
-    </div>
-
-    <div class="modal-body">
-      <!-- LEFT: asset focus -->
-      <div class="focus">
-        <div class="stage-row">
-          <div class="versions">
-            <div class="vthumb sel"><img src="images/v2.jpg"><span>v3</span></div>
-            <div class="vthumb"><img src="images/v3.jpg"><span>v2</span></div>
-            <div class="vthumb"><img src="images/v4.jpg"><span>v1</span></div>
-            <div class="vadd"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-          </div>
-          <div class="asset" id="asset" onclick="openManual()">
-            <img src="images/v2.jpg" alt="asset">
-            <span class="vtag">v3</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: references + chat / manual -->
-      <div class="panel">
-        <div class="tuck" id="tuck">
-          <button class="tuck-btn" onclick="document.getElementById('tuck').classList.toggle('open')">
+        <div class="ref-dd" id="refDd">
+          <button class="ref-dd-btn" onclick="document.getElementById('refDd').classList.toggle('open')">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="3" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3 11h10M3 13h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
             References &amp; moodboard
-            <span class="sp"></span>
-            <svg class="chev" width="11" height="11" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <div class="tuck-body">
+          <div class="ref-dd-panel">
             <div class="tuck-row">
               <div class="tuck-col">
                 <div class="tuck-label">References in play</div>
@@ -251,6 +234,31 @@
             </div>
           </div>
         </div>
+        <div class="ticon" title="Download"><svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 6l3 3 3-3M2 10h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="ticon" title="Save"><svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M3 2v8l3-2 3 2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+        <a class="ticon" href="asset_manager.html" title="Close"><svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></a>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <!-- LEFT: asset focus -->
+      <div class="focus">
+        <div class="stage-row">
+          <div class="versions">
+            <div class="vadd"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <div class="vthumb sel"><img src="images/v2.jpg"><span>v3</span></div>
+            <div class="vthumb"><img src="images/v3.jpg"><span>v2</span></div>
+            <div class="vthumb"><img src="images/v4.jpg"><span>v1</span></div>
+          </div>
+          <div class="asset" id="asset" onclick="openManual()">
+            <img src="images/v2.jpg" alt="asset">
+            <span class="vtag">v3</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: chat / manual -->
+      <div class="panel">
         <!-- chat -->
         <div class="chat-view" id="chatView">
           <div class="chat-msgs">
@@ -278,7 +286,6 @@
                 <button class="send-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 7l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
               </div>
             </div>
-            <div class="composer-hint">Model chosen automatically · tap the asset to take control</div>
           </div>
         </div>
 
