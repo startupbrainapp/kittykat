@@ -105,7 +105,13 @@
   .cand img { width: 100%; height: 100%; object-fit: cover; }
   .cand .fav { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%; background: rgba(8,9,10,0.55); backdrop-filter: blur(6px); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; z-index: 2; }
   .cand .fav.on { background: var(--pink); border-color: var(--pink); }
-  .cand .ovl { display: none; }
+  .cand .ovl { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; opacity: 0; background: rgba(8,9,10,0.55); transition: opacity 0.12s; }
+  .cand:hover .ovl { opacity: 1; }
+  .ovl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 108px; padding: 8px 14px; border-radius: 7px; font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; letter-spacing: -0.13px; }
+  .ovl-btn.edit { background: var(--brand); color: #fff; border: 1px solid var(--brand); }
+  .ovl-btn.edit:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .ovl-btn.view { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.28); }
+  .ovl-btn.view:hover { background: rgba(255,255,255,0.2); }
   .cand.selected { border-color: var(--brand-accent); box-shadow: 0 0 0 2px var(--brand-accent); }
   .ctx-chip { display: flex; align-items: center; gap: 9px; padding: 7px 10px; margin-bottom: 9px; background: rgba(113,112,255,0.1); border: 1px solid rgba(113,112,255,0.3); border-radius: 8px; font-size: 12px; font-weight: 510; color: #cdd2ff; letter-spacing: -0.13px; }
   .ctx-chip img { width: 24px; height: 30px; border-radius: 4px; object-fit: cover; }
@@ -118,7 +124,13 @@
   .gen-btn.primary:hover { background: var(--brand-hover); }
 
   /* focus mode */
-  .focus { flex: 1; overflow-y: auto; display: none; flex-direction: column; align-items: center; padding: 6px 24px 24px; }
+  .focus { flex: 1; overflow-y: auto; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 0; position: relative; }
+  .focus-back { position: absolute; left: 18px; top: 14px; z-index: 5; display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; background: #ffffff; border: 1px solid #08090a; border-radius: 7px; color: #08090a; font-size: 12px; font-weight: 590; cursor: pointer; font-family: inherit; letter-spacing: -0.13px; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+  .focus-back:hover { background: #ececee; }
+  .focus-nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 5; width: 40px; height: 40px; border-radius: 50%; background: #ffffff; border: 1px solid #08090a; color: #08090a; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+  .focus-nav:hover { background: #ececee; }
+  .focus-nav.prev { left: 18px; }
+  .focus-nav.next { right: 18px; }
   .focus.show { display: flex; }
   .branch-banner { display: none; width: 100%; max-width: 720px; align-items: center; gap: 9px; margin-bottom: 14px; padding: 10px 13px; background: rgba(113,112,255,0.08); border: 1px solid rgba(113,112,255,0.28); border-radius: 8px; font-size: 12px; color: #cdd2ff; letter-spacing: -0.13px; }
   .branch-banner.show { display: flex; }
@@ -130,8 +142,8 @@
   .vthumb.sel { border-color: var(--brand-accent); box-shadow: 0 0 0 1px var(--brand-accent); }
   .vthumb.branch { border-style: dashed; }
   .vthumb span { position: absolute; bottom: 2px; right: 3px; font-size: 9px; font-weight: 510; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.7); }
-  .asset { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-standard); box-shadow: 0 8px 32px rgba(0,0,0,0.45); }
-  .asset img { display: block; width: 440px; height: 550px; object-fit: cover; }
+  .asset { position: relative; overflow: hidden; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .asset img { display: block; max-height: calc(100vh - 52px); max-width: 100%; width: auto; height: auto; object-fit: contain; transition: transform 0.22s ease, opacity 0.22s ease; }
   .focus-actions { display: flex; flex-direction: column; gap: 8px; }
   .fa-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 7px; color: var(--text-secondary); font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; white-space: nowrap; }
   .fa-btn:hover { background: var(--surface-3); color: var(--text-primary); }
@@ -297,7 +309,7 @@
 
     <!-- CENTER: canvas (images only) -->
     <div class="canvas">
-      <div class="canvas-head">
+      <div class="canvas-head" id="canvasHead">
         <div class="asset-count"><b>8</b> assets produced</div>
         <div class="head-right">
           <div class="viewseg">
@@ -307,9 +319,6 @@
             <button class="vbtn" id="vTwo" onclick="setView('two')" title="2 × 2">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1"/><rect x="9" y="9" width="4.5" height="4.5" rx="1"/></svg>
             </button>
-            <button class="vbtn" id="vFocus" onclick="setView('focus')" title="Focus">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="3.5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
-            </button>
           </div>
           <button class="gen-btn primary"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Generate 8</button>
         </div>
@@ -317,37 +326,27 @@
 
       <div class="triage" id="triage">
         <div class="cand-grid">
-          <div class="cand" onclick="selectCand(this,'images/v2.jpg')"><img src="images/v2.jpg"><div class="fav on" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="selectCand(this,'images/v3.jpg')"><img src="images/v3.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="selectCand(this,'images/v4.jpg')"><img src="images/v4.jpg"><div class="fav on" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="selectCand(this,'images/v5.jpg')"><img src="images/v5.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="selectCand(this,'images/v6.jpg')"><img src="images/v6.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="selectCand(this,'images/v1.jpg')"><img src="images/v1.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="selectCand(this,'images/c2.jpg')"><img src="images/c2.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="selectCand(this,'images/c4.jpg')"><img src="images/c4.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v2.jpg')"><img src="images/v2.jpg"><div class="fav on" onclick="toggleFav(event,this)">♥</div><div class="ovl"><button class="ovl-btn edit" onclick="event.stopPropagation(); selectCand(this.closest('.cand'), this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Edit</button><button class="ovl-btn view" onclick="event.stopPropagation(); openFocus(this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>View</button></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v3.jpg')"><img src="images/v3.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><button class="ovl-btn edit" onclick="event.stopPropagation(); selectCand(this.closest('.cand'), this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Edit</button><button class="ovl-btn view" onclick="event.stopPropagation(); openFocus(this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>View</button></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v4.jpg')"><img src="images/v4.jpg"><div class="fav on" onclick="toggleFav(event,this)">♥</div><div class="ovl"><button class="ovl-btn edit" onclick="event.stopPropagation(); selectCand(this.closest('.cand'), this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Edit</button><button class="ovl-btn view" onclick="event.stopPropagation(); openFocus(this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>View</button></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v5.jpg')"><img src="images/v5.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><button class="ovl-btn edit" onclick="event.stopPropagation(); selectCand(this.closest('.cand'), this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Edit</button><button class="ovl-btn view" onclick="event.stopPropagation(); openFocus(this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>View</button></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v6.jpg')"><img src="images/v6.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><button class="ovl-btn edit" onclick="event.stopPropagation(); selectCand(this.closest('.cand'), this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Edit</button><button class="ovl-btn view" onclick="event.stopPropagation(); openFocus(this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>View</button></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v1.jpg')"><img src="images/v1.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><button class="ovl-btn edit" onclick="event.stopPropagation(); selectCand(this.closest('.cand'), this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Edit</button><button class="ovl-btn view" onclick="event.stopPropagation(); openFocus(this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>View</button></div></div>
+          <div class="cand" onclick="selectCand(this,'images/c2.jpg')"><img src="images/c2.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><button class="ovl-btn edit" onclick="event.stopPropagation(); selectCand(this.closest('.cand'), this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Edit</button><button class="ovl-btn view" onclick="event.stopPropagation(); openFocus(this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>View</button></div></div>
+          <div class="cand" onclick="selectCand(this,'images/c4.jpg')"><img src="images/c4.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><button class="ovl-btn edit" onclick="event.stopPropagation(); selectCand(this.closest('.cand'), this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Edit</button><button class="ovl-btn view" onclick="event.stopPropagation(); openFocus(this.closest('.cand').querySelector('img').src)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/></svg>View</button></div></div>
         </div>
       </div>
 
       <div class="focus" id="focus">
+        <button class="focus-back" onclick="backToTriage()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7 2L3 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
+        <button class="focus-nav prev" onclick="prevAsset()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="focus-nav next" onclick="nextAsset()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="branch-banner" id="branchBanner">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 3v6M5 9a3 3 0 003 3h3M11 9l2-2-2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           You edited an older version — started a new direction: <b style="margin-left:4px;">White Shirt</b>.
           <span class="x" onclick="this.parentElement.classList.remove('show')">✕</span>
         </div>
-        <div class="stage-row">
-          <div class="versions">
-            <div class="vthumb sel" onclick="pickVersion(this,false)"><img src="images/v2.jpg"><span>v3</span></div>
-            <div class="vthumb" onclick="pickVersion(this,true)"><img src="images/v3.jpg"><span>v2</span></div>
-            <div class="vthumb" onclick="pickVersion(this,true)"><img src="images/v4.jpg"><span>v1</span></div>
-            <div class="vthumb branch"><img src="images/c3.jpg"><span>WS</span></div>
-          </div>
-          <div class="asset"><img id="assetImg" src="images/v2.jpg" alt="asset"></div>
-          <div class="focus-actions">
-            <button class="fa-btn primary"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.7 3.8L14 6.3l-3 2.9.7 4.1L8 11.4 4.3 13.3 5 9.2 2 6.3l4.3-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Add to Final Selects</button>
-            <button class="fa-btn">Compare versions</button>
-            <button class="fa-btn">Download</button>
-          </div>
-        </div>
+        <div class="asset"><img id="assetImg" src="images/v2.jpg" alt="asset"></div>
       </div>
 
     </div>
@@ -499,7 +498,6 @@
   function setActiveView(v) {
     document.getElementById('vGrid').classList.toggle('active', v === 'grid');
     document.getElementById('vTwo').classList.toggle('active', v === 'two');
-    document.getElementById('vFocus').classList.toggle('active', v === 'focus');
   }
   function setView(v) {
     if (v === 'focus') { showFocus(); return; }
@@ -508,19 +506,42 @@
     document.getElementById('focus').classList.remove('show');
     document.getElementById('branchBanner').classList.remove('show');
     document.querySelector('.cand-grid').classList.toggle('two', v === 'two');
+    document.getElementById('canvasHead').style.display = 'flex';
     setActiveView(v);
     setAgent();
   }
   function showFocus() {
     document.getElementById('triage').style.display = 'none';
     document.getElementById('focus').classList.add('show');
+    document.getElementById('canvasHead').style.display = 'none';
     setActiveView('focus');
   }
+  var focusList = ['images/v2.jpg','images/v3.jpg','images/v4.jpg','images/v5.jpg','images/v6.jpg','images/v1.jpg','images/c2.jpg','images/c4.jpg'];
+  var focusIndex = 0;
   function openFocus(src, isBranch) {
-    if (src) { document.getElementById('assetImg').src = src; }
+    if (src) { focusIndex = Math.max(0, focusList.indexOf(src)); document.getElementById('assetImg').src = src; }
     showFocus();
     document.getElementById('branchBanner').classList.toggle('show', !!isBranch);
   }
+  function slideTo(newSrc, dir) {
+    var img = document.getElementById('assetImg');
+    var outX = dir === 'next' ? -90 : 90;
+    var inX = dir === 'next' ? 90 : -90;
+    img.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+    img.style.transform = 'translateX(' + outX + 'px)';
+    img.style.opacity = '0';
+    setTimeout(function () {
+      img.src = newSrc;
+      img.style.transition = 'none';
+      img.style.transform = 'translateX(' + inX + 'px)';
+      void img.offsetWidth;
+      img.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+      img.style.transform = 'translateX(0)';
+      img.style.opacity = '1';
+    }, 200);
+  }
+  function prevAsset() { focusIndex = (focusIndex - 1 + focusList.length) % focusList.length; slideTo(focusList[focusIndex], 'prev'); }
+  function nextAsset() { focusIndex = (focusIndex + 1) % focusList.length; slideTo(focusList[focusIndex], 'next'); }
   function backToTriage() { setView(lastGrid); }
   function pickVersion(el, isOld) {
     document.querySelectorAll('.versions .vthumb').forEach(v => v.classList.remove('sel'));
