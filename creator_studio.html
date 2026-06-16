@@ -19,10 +19,9 @@
   body { background: var(--bg-canvas); color: var(--text-primary); height: 100vh; overflow: hidden; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; }
   button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
 
-  /* full-page modal */
   .modal { position: fixed; inset: 0; background: var(--bg-panel); display: flex; flex-direction: column; overflow: hidden; }
 
-  /* top bar */
+  /* TOP BAR */
   .modal-top { height: 52px; flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--border-subtle); }
   .brief-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; }
   .brief-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand-accent); }
@@ -34,56 +33,48 @@
   .ticon { width: 30px; height: 30px; border-radius: 7px; background: var(--surface-1); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; text-decoration: none; }
   .ticon:hover { background: var(--surface-3); color: var(--text-primary); }
 
-  /* references & moodboard dropdown */
-  .ref-dd { position: relative; }
-  .ref-dd-btn { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px; border-radius: 7px; background: var(--surface-1); border: 1px solid var(--border-standard); color: var(--text-secondary); font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; letter-spacing: -0.13px; }
-  .ref-dd-btn:hover { background: var(--surface-3); color: var(--text-primary); }
-  .ref-dd-btn .chev { transition: transform 0.18s; }
-  .ref-dd.open .ref-dd-btn .chev { transform: rotate(180deg); }
-  .ref-dd-panel { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 340px; background: var(--bg-surface); border: 1px solid var(--border-standard); border-radius: 12px; padding: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); z-index: 20; }
-  .ref-dd.open .ref-dd-panel { display: block; }
-  .tuck-row { display: flex; gap: 14px; }
-  .tuck-col { flex: 1; }
-  .tuck-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .ref-imgs { display: flex; gap: 6px; }
-  .ref-imgs .ri { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .ref-imgs img { width: 40px; height: 40px; border-radius: 5px; object-fit: cover; border: 1px solid var(--border-standard); }
-  .ref-imgs .cap { font-size: 9px; color: var(--text-quaternary); }
-  .mini-mood { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-  .mini-mood img { width: 100%; aspect-ratio: 1; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle); }
-
   .modal-body { flex: 1; display: flex; min-height: 0; }
 
-  /* LEFT — exploration navigation (Figma Pages feel) */
-  .explorer { width: 232px; min-width: 232px; background: var(--bg-panel); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; overflow-y: auto; padding: 14px 10px; }
-  .exp-crumb { font-size: 11px; color: var(--text-tertiary); padding: 0 8px 10px; letter-spacing: -0.13px; }
-  .exp-crumb b { color: var(--text-secondary); font-weight: 510; }
-  .exp-search { display: flex; align-items: center; gap: 7px; margin: 0 4px 12px; padding: 7px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 7px; color: var(--text-quaternary); font-size: 12px; }
-  .exp-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px 6px; }
-  .exp-item { display: flex; align-items: center; gap: 9px; padding: 8px 9px; margin-bottom: 2px; border-radius: 7px; cursor: pointer; transition: background 0.1s; }
-  .exp-item:hover { background: rgba(255,255,255,0.03); }
-  .exp-item.active { background: var(--surface-2); }
-  .exp-thumb { width: 34px; height: 34px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-standard); flex-shrink: 0; }
-  .exp-meta { flex: 1; min-width: 0; }
-  .exp-name { font-size: 13px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .exp-item.active .exp-name { color: var(--text-primary); }
-  .exp-count { font-size: 11px; color: var(--text-quaternary); margin-top: 1px; }
-  .exp-star { color: var(--brand-accent); }
-  .exp-new { display: flex; align-items: center; gap: 8px; padding: 8px 9px; margin-top: 6px; border-radius: 7px; border: 1px dashed var(--border-standard); color: var(--text-tertiary); font-size: 12px; font-weight: 510; cursor: pointer; }
-  .exp-new:hover { color: var(--text-secondary); border-color: rgba(255,255,255,0.18); }
+  /* LEFT — collapsible timeline */
+  .timeline-rail { width: 48px; min-width: 48px; background: var(--bg-panel); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 10px; }
+  .rail-btn { width: 32px; height: 32px; border-radius: 8px; background: var(--surface-1); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; }
+  .rail-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+  .rail-dots { display: flex; flex-direction: column; align-items: center; gap: 7px; margin-top: 4px; }
+  .rail-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--text-quaternary); }
+  .rail-dots i.cur { background: var(--brand-accent); }
 
-  /* CENTER — canvas */
+  .timeline { width: 272px; min-width: 272px; background: var(--bg-panel); border-right: 1px solid var(--border-subtle); display: none; flex-direction: column; overflow: hidden; }
+  .timeline.open { display: flex; }
+  .timeline-rail.hide { display: none; }
+  .tl-head { flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 14px 14px 12px; }
+  .tl-head .t { font-size: 12px; font-weight: 590; letter-spacing: -0.13px; }
+  .tl-head .collapse { margin-left: auto; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); cursor: pointer; }
+  .tl-head .collapse:hover { background: var(--surface-2); color: var(--text-primary); }
+  .tl { flex: 1; overflow-y: auto; padding: 0 12px 16px; display: flex; flex-direction: column; }
+  .tl-step { display: flex; gap: 11px; padding: 9px 0; cursor: pointer; }
+  .tl-step:hover .tl-title { color: var(--text-primary); }
+  .tl-gutter { width: 10px; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .tl-gutter::before { content: ''; position: absolute; left: 50%; top: 0; bottom: -18px; width: 1px; background: var(--border-standard); transform: translateX(-50%); }
+  .tl-step:last-child .tl-gutter::before { display: none; }
+  .tl-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-quaternary); margin-top: 18px; z-index: 1; border: 2px solid var(--bg-panel); box-sizing: content-box; }
+  .tl-step.cur .tl-dot { background: var(--brand-accent); }
+  .tl-step.branch .tl-dot { background: var(--bg-panel); border: 1.5px solid var(--brand-accent); }
+  .tl-thumb { width: 52px; height: 52px; min-width: 52px; border-radius: 7px; overflow: hidden; border: 1px solid var(--border-standard); }
+  .tl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tl-thumb.quad { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1px; }
+  .tl-info { flex: 1; min-width: 0; padding-top: 14px; }
+  .tl-title { font-size: 12.5px; font-weight: 510; color: var(--text-secondary); letter-spacing: -0.13px; }
+  .tl-meta { font-size: 10.5px; color: var(--text-quaternary); margin-top: 2px; }
+  .tl-tag { display: inline-block; font-size: 9px; font-weight: 510; color: var(--brand-accent); background: rgba(113,112,255,0.1); border: 1px solid rgba(113,112,255,0.28); border-radius: 9999px; padding: 0 6px; margin-top: 4px; }
+
+  /* CENTER — canvas (images only) */
   .canvas { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
-  .canvas-head { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 16px 24px 12px; }
-  .canvas-title { font-size: 17px; font-weight: 590; letter-spacing: -0.24px; }
-  .canvas-sub { font-size: 12px; color: var(--text-tertiary); }
+  .canvas-head { flex-shrink: 0; display: flex; align-items: center; padding: 14px 24px 10px; }
   .seg { margin-left: auto; display: inline-flex; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 7px; padding: 2px; }
-  .seg button { padding: 4px 11px; border: none; background: transparent; border-radius: 5px; color: var(--text-tertiary); font-size: 11px; font-weight: 510; cursor: pointer; font-family: inherit; }
+  .seg button { padding: 5px 14px; border: none; background: transparent; border-radius: 5px; color: var(--text-tertiary); font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; }
   .seg button.active { background: var(--surface-3); color: var(--text-primary); }
 
-  /* triage grid (candidates) */
-  .triage { flex: 1; overflow-y: auto; padding: 4px 24px 28px; }
-  .triage-note { font-size: 11px; color: var(--text-quaternary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .triage { flex: 1; overflow-y: auto; padding: 4px 24px 24px; }
   .cand-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   .cand { position: relative; aspect-ratio: 4/5; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-standard); cursor: pointer; transition: transform 0.12s, border-color 0.12s; background: var(--bg-surface); }
   .cand:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.16); }
@@ -93,31 +84,29 @@
   .cand .ovl { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; opacity: 0; background: linear-gradient(to top, rgba(8,9,10,0.7), transparent 45%); transition: opacity 0.12s; }
   .cand:hover .ovl { opacity: 1; }
   .cand .ovl .refine { font-size: 11px; font-weight: 510; color: #fff; background: rgba(94,106,210,0.9); border-radius: 6px; padding: 5px 12px; }
-  .gen-more { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
+
+  .gen-bar { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--border-subtle); }
   .gen-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; }
   .gen-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+  .gen-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .gen-btn.primary:hover { background: var(--brand-hover); }
 
   /* focus mode */
-  .focus { flex: 1; overflow-y: auto; display: none; flex-direction: column; align-items: center; padding: 6px 24px 28px; }
+  .focus { flex: 1; overflow-y: auto; display: none; flex-direction: column; align-items: center; padding: 6px 24px 24px; }
   .focus.show { display: flex; }
-  .focus-bar { width: 100%; max-width: 760px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-  .back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 510; color: var(--text-tertiary); background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 7px; padding: 6px 11px; cursor: pointer; font-family: inherit; }
-  .back-btn:hover { color: var(--text-primary); }
-  .branch-banner { display: none; width: 100%; max-width: 760px; align-items: center; gap: 9px; margin-bottom: 14px; padding: 10px 13px; background: rgba(113,112,255,0.08); border: 1px solid rgba(113,112,255,0.28); border-radius: 8px; font-size: 12px; color: #cdd2ff; letter-spacing: -0.13px; }
+  .branch-banner { display: none; width: 100%; max-width: 720px; align-items: center; gap: 9px; margin-bottom: 14px; padding: 10px 13px; background: rgba(113,112,255,0.08); border: 1px solid rgba(113,112,255,0.28); border-radius: 8px; font-size: 12px; color: #cdd2ff; letter-spacing: -0.13px; }
   .branch-banner.show { display: flex; }
   .branch-banner .x { margin-left: auto; cursor: pointer; color: var(--text-tertiary); }
   .stage-row { display: flex; gap: 16px; align-items: flex-start; }
   .versions { display: flex; flex-direction: column; gap: 8px; align-items: center; }
-  .vthumb { width: 52px; height: 66px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-subtle); cursor: pointer; position: relative; transition: all 0.12s; }
+  .vthumb { width: 50px; height: 64px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-subtle); cursor: pointer; position: relative; }
   .vthumb img { width: 100%; height: 100%; object-fit: cover; }
   .vthumb.sel { border-color: var(--brand-accent); box-shadow: 0 0 0 1px var(--brand-accent); }
   .vthumb.branch { border-style: dashed; }
   .vthumb span { position: absolute; bottom: 2px; right: 3px; font-size: 9px; font-weight: 510; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.7); }
-  .vthumb .blabel { left: 3px; right: auto; bottom: auto; top: 2px; font-size: 8px; color: #cdd2ff; }
   .asset { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-standard); box-shadow: 0 8px 32px rgba(0,0,0,0.45); }
-  .asset img { display: block; width: 460px; height: 575px; object-fit: cover; }
-  .asset .vtag { position: absolute; left: 10px; top: 10px; font-size: 10px; font-weight: 510; color: var(--text-primary); background: rgba(8,9,10,0.6); backdrop-filter: blur(8px); border: 1px solid var(--border-standard); border-radius: 5px; padding: 3px 8px; }
-  .focus-actions { display: flex; flex-direction: column; gap: 8px; padding-top: 2px; }
+  .asset img { display: block; width: 440px; height: 550px; object-fit: cover; }
+  .focus-actions { display: flex; flex-direction: column; gap: 8px; }
   .fa-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 7px; color: var(--text-secondary); font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; white-space: nowrap; }
   .fa-btn:hover { background: var(--surface-3); color: var(--text-primary); }
   .fa-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
@@ -125,9 +114,6 @@
 
   /* RIGHT — chat / manual */
   .panel { width: 384px; min-width: 384px; display: flex; flex-direction: column; background: var(--bg-panel); border-left: 1px solid var(--border-subtle); }
-  .ctx { flex-shrink: 0; padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--text-tertiary); }
-  .ctx img { width: 26px; height: 32px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle); }
-  .ctx b { color: var(--text-primary); font-weight: 510; }
   .chat-view { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .chat-view.hide { display: none; }
   .chat-msgs { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
@@ -139,7 +125,13 @@
   .result { margin-top: 10px; display: flex; gap: 10px; align-items: center; }
   .result img { width: 44px; height: 55px; border-radius: 5px; object-fit: cover; border: 1px solid var(--border-subtle); }
   .result .meta { font-size: 11px; color: var(--text-quaternary); }
-  .composer { padding: 14px 16px 18px; border-top: 1px solid var(--border-subtle); flex-shrink: 0; }
+
+  .composer { padding: 12px 16px 18px; border-top: 1px solid var(--border-subtle); flex-shrink: 0; }
+  .pills { display: flex; gap: 8px; margin-bottom: 11px; }
+  .pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 6px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 510; cursor: pointer; letter-spacing: -0.13px; }
+  .pill:hover { background: var(--surface-3); color: var(--text-primary); }
+  .pill svg { color: var(--text-tertiary); }
+  .pill:hover svg { color: var(--brand-accent); }
   .composer-box { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 12px 14px; }
   .composer-box:focus-within { border-color: rgba(113,112,255,0.45); }
   .composer-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 14px; resize: none; min-height: 24px; letter-spacing: -0.13px; font-family: inherit; }
@@ -149,6 +141,7 @@
   .composer-row .sp { flex: 1; }
   .send-btn { background: var(--brand); color: #fff; border: none; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .send-btn:hover { background: var(--brand-hover); }
+
   /* manual */
   .manual { flex: 1; display: none; flex-direction: column; padding: 18px; overflow-y: auto; gap: 15px; }
   .manual.show { display: flex; }
@@ -164,6 +157,35 @@
   .btn-primary:hover { background: var(--brand-hover); }
   .btn-ghost { background: var(--surface-1); border-color: var(--border-standard); color: var(--text-secondary); }
   .btn-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+
+  /* BLOCK SIDE MODAL (Environment / Person / Products) */
+  .block-modal { position: fixed; top: 52px; right: 0; bottom: 0; width: 380px; background: var(--bg-surface); border-left: 1px solid var(--border-standard); box-shadow: -16px 0 40px rgba(0,0,0,0.5); transform: translateX(100%); transition: transform 0.2s ease; z-index: 60; display: flex; flex-direction: column; }
+  .block-modal.show { transform: translateX(0); }
+  .block-head { flex-shrink: 0; display: flex; align-items: center; gap: 9px; padding: 16px; border-bottom: 1px solid var(--border-subtle); }
+  .block-head .ic { width: 30px; height: 30px; border-radius: 8px; background: rgba(113,112,255,0.12); border: 1px solid rgba(113,112,255,0.3); display: flex; align-items: center; justify-content: center; color: var(--brand-accent); }
+  .block-head h3 { font-size: 15px; font-weight: 590; letter-spacing: -0.2px; }
+  .block-head .x { margin-left: auto; width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); cursor: pointer; }
+  .block-head .x:hover { background: var(--surface-2); color: var(--text-primary); }
+  .block-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .block-body .sub { font-size: 12px; color: var(--text-tertiary); margin-bottom: 16px; line-height: 1.5; }
+  .blk-label { font-size: 10px; font-weight: 510; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-quaternary); margin: 18px 0 9px; }
+  .blk-label:first-child { margin-top: 0; }
+  .ref-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .ref-tile { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-standard); }
+  .ref-tile img { width: 100%; height: 100%; object-fit: cover; }
+  .ref-tile .lock { position: absolute; left: 6px; top: 6px; font-size: 8px; font-weight: 510; color: #fff; background: rgba(94,106,210,0.9); border-radius: 4px; padding: 1px 6px; }
+  .ref-add { aspect-ratio: 1; border-radius: 8px; border: 1px dashed var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-quaternary); cursor: pointer; }
+  .ref-add:hover { color: var(--text-secondary); border-color: rgba(255,255,255,0.18); }
+  .blk-desc { width: 100%; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 10px 12px; color: var(--text-secondary); font-size: 13px; resize: none; min-height: 64px; font-family: inherit; letter-spacing: -0.13px; }
+  .prod-row { display: flex; align-items: center; gap: 10px; padding: 9px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; margin-bottom: 7px; }
+  .prod-row img { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-standard); }
+  .prod-row .pn { flex: 1; font-size: 13px; font-weight: 510; color: var(--text-primary); }
+  .prod-row .pn small { display: block; font-size: 10px; font-weight: 400; color: var(--text-quaternary); }
+  .prod-row .rm { color: var(--text-quaternary); cursor: pointer; padding: 4px; }
+  .prod-row .rm:hover { color: var(--text-primary); }
+  .block-foot { flex-shrink: 0; padding: 14px 16px; border-top: 1px solid var(--border-subtle); }
+  .block-foot .btn { width: 100%; display: flex; align-items: center; justify-content: center; }
+  .blk-hide { display: none; }
 </style>
 </head>
 <body>
@@ -177,28 +199,6 @@
       <button class="mode-btn" id="modeManual" onclick="openManual()">Manual</button>
     </div>
     <div class="top-actions">
-      <div class="ref-dd" id="refDd">
-        <button class="ref-dd-btn" onclick="document.getElementById('refDd').classList.toggle('open')">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="3" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3 11h10M3 13h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          References &amp; moodboard
-          <svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="ref-dd-panel">
-          <div class="tuck-row">
-            <div class="tuck-col">
-              <div class="tuck-label">References in play</div>
-              <div class="ref-imgs">
-                <div class="ri"><img src="images/c1.jpg"><span class="cap">Face</span></div>
-                <div class="ri"><img src="images/3.jpg"><span class="cap">Camo</span></div>
-              </div>
-            </div>
-            <div class="tuck-col">
-              <div class="tuck-label">Moodboard in use</div>
-              <div class="mini-mood"><img src="images/5.jpg"><img src="images/9.jpg"><img src="images/7.jpg"><img src="images/1.jpg"></div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="ticon" title="Download"><svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 6l3 3 3-3M2 10h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="ticon" title="Save"><svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M3 2v8l3-2 3 2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
       <a class="ticon" href="asset_manager.html" title="Close"><svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></a>
@@ -206,50 +206,54 @@
   </div>
 
   <div class="modal-body">
-    <!-- LEFT: exploration navigation -->
-    <div class="explorer">
-      <div class="exp-crumb">BAPE <b>›</b> SS26 Hana Matsuri</div>
-      <div class="exp-search">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        Search explorations
+    <!-- LEFT: collapsed rail (default) -->
+    <div class="timeline-rail" id="rail">
+      <div class="rail-btn" title="Show timeline" onclick="toggleTimeline()">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="1.6" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="12" r="1.6" stroke="currentColor" stroke-width="1.2"/><path d="M4 5.6v4.8M8 4h5M8 12h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       </div>
-      <div class="exp-label">Explorations</div>
-      <div class="exp-item active" onclick="selectExp(this,'Grey Hat Lifestyle','8 candidates · 24 versions')">
-        <img class="exp-thumb" src="images/v2.jpg"><div class="exp-meta"><div class="exp-name">Grey Hat Lifestyle</div><div class="exp-count">24 versions</div></div>
-      </div>
-      <div class="exp-item" onclick="selectExp(this,'Product Hero Shot','6 candidates · 18 versions')">
-        <img class="exp-thumb" src="images/v4.jpg"><div class="exp-meta"><div class="exp-name">Product Hero Shot</div><div class="exp-count">18 versions</div></div>
-      </div>
-      <div class="exp-item" onclick="selectExp(this,'Summer Beach Scene','9 candidates · 31 versions')">
-        <img class="exp-thumb" src="images/11.jpg"><div class="exp-meta"><div class="exp-name">Summer Beach Scene</div><div class="exp-count">31 versions</div></div>
-      </div>
-      <div class="exp-label" style="margin-top:10px;">Deliverable</div>
-      <div class="exp-item" onclick="selectExp(this,'Final Selects','5 images for client')">
-        <span class="exp-thumb" style="display:flex;align-items:center;justify-content:center;" class="exp-star"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.7 3.8L14 6.3l-3 2.9.7 4.1L8 11.4 4.3 13.3 5 9.2 2 6.3l4.3-.5z" stroke="#7170ff" stroke-width="1.2" stroke-linejoin="round"/></svg></span>
-        <div class="exp-meta"><div class="exp-name">Final Selects</div><div class="exp-count">5 images · shareable</div></div>
-      </div>
-      <div class="exp-new"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>New exploration</div>
+      <div class="rail-dots"><i class="cur"></i><i></i><i></i><i></i></div>
     </div>
 
-    <!-- CENTER: canvas -->
+    <!-- LEFT: expanded timeline -->
+    <div class="timeline" id="timeline">
+      <div class="tl-head">
+        <span class="t">Timeline</span>
+        <div class="collapse" title="Collapse" onclick="toggleTimeline()"><svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M7 2L3 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="tl">
+        <div class="tl-step cur" onclick="openFocus('images/v2.jpg')">
+          <div class="tl-gutter"><span class="tl-dot"></span></div>
+          <div class="tl-thumb"><img src="images/v2.jpg"></div>
+          <div class="tl-info"><div class="tl-title">Darker hair, kept face</div><div class="tl-meta">v3 · now showing · 2m ago</div></div>
+        </div>
+        <div class="tl-step branch" onclick="openFocus('images/c3.jpg')">
+          <div class="tl-gutter"><span class="tl-dot"></span></div>
+          <div class="tl-thumb"><img src="images/c3.jpg"></div>
+          <div class="tl-info"><div class="tl-title">White shirt direction</div><div class="tl-meta">from v1 · 9m ago</div><span class="tl-tag">branch</span></div>
+        </div>
+        <div class="tl-step" onclick="backToTriage()">
+          <div class="tl-gutter"><span class="tl-dot"></span></div>
+          <div class="tl-thumb quad"><img src="images/v2.jpg"><img src="images/v3.jpg"><img src="images/v4.jpg"><img src="images/v5.jpg"></div>
+          <div class="tl-info"><div class="tl-title">8 candidates generated</div><div class="tl-meta">2 favorited · 18m ago</div></div>
+        </div>
+        <div class="tl-step" onclick="backToTriage()">
+          <div class="tl-gutter"><span class="tl-dot"></span></div>
+          <div class="tl-thumb quad"><img src="images/c2.jpg"><img src="images/c4.jpg"><img src="images/v6.jpg"><img src="images/v1.jpg"></div>
+          <div class="tl-info"><div class="tl-title">Hero shot from brief</div><div class="tl-meta">first pass · 1h ago</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: canvas (images only) -->
     <div class="canvas">
       <div class="canvas-head">
-        <div>
-          <div class="canvas-title" id="canvasTitle">Grey Hat Lifestyle</div>
-          <div class="canvas-sub" id="canvasSub">8 candidates · 24 versions</div>
-        </div>
         <div class="seg">
           <button class="active" id="segTriage" onclick="backToTriage()">Candidates</button>
           <button id="segFocus" onclick="openFocus(null)">Focus</button>
         </div>
       </div>
 
-      <!-- TRIAGE: candidate grid -->
       <div class="triage" id="triage">
-        <div class="triage-note">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 3 3 .5-2.2 2.2.5 3.3L8 9.5 4.2 11l.5-3.3L2.5 5.5l3-.5z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
-          8 options from your last prompt — favorite the keepers, open one to refine.
-        </div>
         <div class="cand-grid">
           <div class="cand" onclick="openFocus('images/v2.jpg')"><img src="images/v2.jpg"><div class="fav on" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
           <div class="cand" onclick="openFocus('images/v3.jpg')"><img src="images/v3.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
@@ -260,17 +264,9 @@
           <div class="cand" onclick="openFocus('images/c2.jpg')"><img src="images/c2.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
           <div class="cand" onclick="openFocus('images/c4.jpg')"><img src="images/c4.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
         </div>
-        <div class="gen-more">
-          <button class="gen-btn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Generate 8 more</button>
-          <button class="gen-btn">Compare selected</button>
-        </div>
       </div>
 
-      <!-- FOCUS: one asset + versions -->
       <div class="focus" id="focus">
-        <div class="focus-bar">
-          <button class="back-btn" onclick="backToTriage()"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M7 2L3 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>All candidates</button>
-        </div>
         <div class="branch-banner" id="branchBanner">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 3v6M5 9a3 3 0 003 3h3M11 9l2-2-2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           You edited an older version — started a new direction: <b style="margin-left:4px;">White Shirt</b>.
@@ -278,42 +274,47 @@
         </div>
         <div class="stage-row">
           <div class="versions">
-            <div class="vthumb sel" title="Current" onclick="pickVersion(this,false)"><img src="images/v2.jpg"><span>v3</span></div>
-            <div class="vthumb" title="Edit from here to keep v3" onclick="pickVersion(this,true)"><img src="images/v3.jpg"><span>v2</span></div>
-            <div class="vthumb" title="Edit from here to keep v3" onclick="pickVersion(this,true)"><img src="images/v4.jpg"><span>v1</span></div>
-            <div class="vthumb branch" title="Branch: White Shirt"><img src="images/c3.jpg"><span class="blabel">WS</span></div>
+            <div class="vthumb sel" onclick="pickVersion(this,false)"><img src="images/v2.jpg"><span>v3</span></div>
+            <div class="vthumb" onclick="pickVersion(this,true)"><img src="images/v3.jpg"><span>v2</span></div>
+            <div class="vthumb" onclick="pickVersion(this,true)"><img src="images/v4.jpg"><span>v1</span></div>
+            <div class="vthumb branch"><img src="images/c3.jpg"><span>WS</span></div>
           </div>
-          <div class="asset" id="asset">
-            <img id="assetImg" src="images/v2.jpg" alt="asset">
-            <span class="vtag" id="assetTag">v3 · current</span>
-          </div>
+          <div class="asset"><img id="assetImg" src="images/v2.jpg" alt="asset"></div>
           <div class="focus-actions">
             <button class="fa-btn primary"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.7 3.8L14 6.3l-3 2.9.7 4.1L8 11.4 4.3 13.3 5 9.2 2 6.3l4.3-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Add to Final Selects</button>
             <button class="fa-btn">Compare versions</button>
             <button class="fa-btn">Download</button>
-            <button class="fa-btn" onclick="document.getElementById('branchBanner').classList.remove('show')">Restore this version</button>
           </div>
         </div>
+      </div>
+
+      <div class="gen-bar">
+        <button class="gen-btn primary"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Generate 8</button>
+        <button class="gen-btn">Compare selected</button>
       </div>
     </div>
 
     <!-- RIGHT: chat / manual -->
     <div class="panel">
-      <div class="ctx" id="ctx" style="display:none;"><img id="ctxImg" src="images/v2.jpg"><span>Editing <b id="ctxName">v3</b> — your messages apply to this image</span></div>
       <div class="chat-view" id="chatView">
         <div class="chat-msgs">
           <div class="m u">Sakura Camo hero shot — premium product photography, dark background, editorial lighting. Give me 8.</div>
           <div class="m a">
             <div class="who">KittyKat</div>
-            <div class="bubble">Here are 8 candidates using the Sakura Camo brief — moodboard, palette and camo reference. Favorite the ones worth keeping, or open one to refine.</div>
+            <div class="bubble">Here are 8 candidates. Favorite the keepers, or open one to refine.</div>
           </div>
-          <div class="m u">Open the first one — keep the face, make the hair darker.</div>
+          <div class="m u">Open the first — keep the face, make the hair darker.</div>
           <div class="m a">
             <div class="who">KittyKat</div>
             <div class="bubble">Done — kept the locked face, darkened the hair. Saved as v3.<div class="result"><img src="images/v2.jpg"><div class="meta">v3 · current</div></div></div>
           </div>
         </div>
         <div class="composer">
+          <div class="pills">
+            <div class="pill" onclick="openBlock('environment')"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-5 3 3.5L11 7l3 5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="11.5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>Environment</div>
+            <div class="pill" onclick="openBlock('person')"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 13c0-2.5 2-4.2 4.5-4.2s4.5 1.7 4.5 4.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Person</div>
+            <div class="pill" onclick="openBlock('products')"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 5l5-2.5L13 5v6l-5 2.5L3 11z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 5l5 2.5L13 5M8 7.5V13" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Products</div>
+          </div>
           <div class="composer-box">
             <textarea class="composer-input" rows="1" placeholder="Refine this image, or generate more options…"></textarea>
             <div class="composer-row">
@@ -342,46 +343,95 @@
   </div>
 </div>
 
+<!-- BLOCK SIDE MODAL -->
+<div class="block-modal" id="blockModal">
+  <div class="block-head">
+    <div class="ic" id="blockIc"></div>
+    <h3 id="blockTitle">Environment</h3>
+    <div class="x" onclick="closeBlock()"><svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="block-body">
+    <!-- environment -->
+    <div class="blk-content" id="blk-environment">
+      <div class="sub">Set the scene the agent places the subject in — location, lighting, mood.</div>
+      <div class="blk-label">Scene references</div>
+      <div class="ref-tiles">
+        <div class="ref-tile"><img src="images/11.jpg"></div>
+        <div class="ref-tile"><img src="images/16.jpg"></div>
+        <div class="ref-tile"><img src="images/18.jpg"></div>
+        <div class="ref-add"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="blk-label">Describe the scene</div>
+      <textarea class="blk-desc">Outdoor warehouse car park, overcast daylight, urban streetwear mood.</textarea>
+    </div>
+    <!-- person -->
+    <div class="blk-content blk-hide" id="blk-person">
+      <div class="sub">Lock the model so the same face carries across every version.</div>
+      <div class="blk-label">Face reference</div>
+      <div class="ref-tiles">
+        <div class="ref-tile"><span class="lock">Locked</span><img src="images/c1.jpg"></div>
+        <div class="ref-add"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="blk-label">Describe the model</div>
+      <textarea class="blk-desc">High-end model, late 20s, blonde, confident posture.</textarea>
+    </div>
+    <!-- products -->
+    <div class="blk-content blk-hide" id="blk-products">
+      <div class="sub">Add the exact products to place in the shot. References keep logos and shapes accurate.</div>
+      <div class="blk-label">Products in shot</div>
+      <div class="prod-row"><img src="images/3.jpg"><div class="pn">Sakura camo hoodie<small>product reference</small></div><span class="rm">✕</span></div>
+      <div class="prod-row"><img src="images/c5.jpg"><div class="pn">Grey shark cap<small>product reference</small></div><span class="rm">✕</span></div>
+      <div class="prod-row"><img src="images/7.jpg"><div class="pn">ABC camo bracelet<small>product reference</small></div><span class="rm">✕</span></div>
+    </div>
+  </div>
+  <div class="block-foot">
+    <button class="btn btn-primary" onclick="closeBlock()">Done</button>
+  </div>
+</div>
+
 <script>
-  // exploration switch
-  function selectExp(el, title, sub) {
-    document.querySelectorAll('.exp-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('canvasTitle').textContent = title;
-    document.getElementById('canvasSub').textContent = sub;
-    backToTriage();
+  var blockMeta = {
+    environment: { title: 'Environment', icon: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-5 3 3.5L11 7l3 5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><circle cx="11.5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>' },
+    person: { title: 'Person', icon: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 13c0-2.5 2-4.2 4.5-4.2s4.5 1.7 4.5 4.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' },
+    products: { title: 'Products', icon: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 5l5-2.5L13 5v6l-5 2.5L3 11z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' }
+  };
+  function openBlock(name) {
+    document.querySelectorAll('.blk-content').forEach(c => c.classList.add('blk-hide'));
+    document.getElementById('blk-' + name).classList.remove('blk-hide');
+    document.getElementById('blockTitle').textContent = blockMeta[name].title;
+    document.getElementById('blockIc').innerHTML = blockMeta[name].icon;
+    document.getElementById('blockModal').classList.add('show');
   }
-  // candidate favorite
+  function closeBlock() { document.getElementById('blockModal').classList.remove('show'); }
+
+  function toggleTimeline() {
+    document.getElementById('timeline').classList.toggle('open');
+    document.getElementById('rail').classList.toggle('hide');
+  }
+
   function toggleFav(e, el) { e.stopPropagation(); el.classList.toggle('on'); }
-  // triage <-> focus
+
   function openFocus(src) {
     if (src) { document.getElementById('assetImg').src = src; }
     document.getElementById('triage').style.display = 'none';
     document.getElementById('focus').classList.add('show');
-    document.getElementById('ctx').style.display = 'flex';
     document.getElementById('segTriage').classList.remove('active');
     document.getElementById('segFocus').classList.add('active');
   }
   function backToTriage() {
     document.getElementById('triage').style.display = 'block';
     document.getElementById('focus').classList.remove('show');
-    document.getElementById('ctx').style.display = 'none';
     document.getElementById('branchBanner').classList.remove('show');
     document.getElementById('segTriage').classList.add('active');
     document.getElementById('segFocus').classList.remove('active');
     setAgent();
   }
-  // pick a version; editing a non-tip version announces a branch
   function pickVersion(el, isOld) {
     document.querySelectorAll('.versions .vthumb').forEach(v => v.classList.remove('sel'));
     el.classList.add('sel');
     document.getElementById('assetImg').src = el.querySelector('img').src;
-    var label = el.querySelector('span').textContent;
-    document.getElementById('assetTag').textContent = label + (isOld ? ' · older' : ' · current');
-    document.getElementById('ctxName').textContent = label;
     document.getElementById('branchBanner').classList.toggle('show', !!isOld);
   }
-  // agent / manual
   function openManual() {
     document.getElementById('manualView').classList.add('show');
     document.getElementById('chatView').classList.add('hide');
