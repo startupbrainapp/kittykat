@@ -13,7 +13,7 @@
     --border-subtle: rgba(255,255,255,0.05); --border-standard: rgba(255,255,255,0.08); --border-solid: #23252a;
     --divider: rgba(255,255,255,0.16);
     --surface-1: rgba(255,255,255,0.02); --surface-2: rgba(255,255,255,0.04); --surface-3: rgba(255,255,255,0.05);
-    --status-green: #10b981; --pink: #ff5a8a;
+    --status-green: #10b981; --pink: #ff5a8a; --gold: #e8c464;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
@@ -168,8 +168,12 @@
   .pills { display: flex; gap: 8px; margin-bottom: 11px; }
   .pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 6px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 510; cursor: pointer; letter-spacing: -0.13px; }
   .pill:hover { background: var(--surface-3); color: var(--text-primary); }
-  .pill svg { color: var(--text-tertiary); }
-  .pill:hover svg { color: var(--brand-accent); }
+  .pill .lock { display: inline-flex; align-items: center; }
+  .pill .lock.closed { display: none; }
+  .pill.set .lock.open { display: none; }
+  .pill.set .lock.closed { display: inline-flex; }
+  .pill.set { color: var(--gold); border-color: rgba(232,196,100,0.45); }
+  .pill.set:hover { color: var(--gold); }
   .composer-box { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 12px 14px; }
   .composer-box:focus-within { border-color: rgba(113,112,255,0.45); }
   .composer-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 14px; resize: none; min-height: 24px; letter-spacing: -0.13px; font-family: inherit; }
@@ -368,9 +372,15 @@
         </div>
         <div class="composer">
           <div class="pills">
-            <div class="pill" onclick="openBlock('environment')"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-5 3 3.5L11 7l3 5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="11.5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>Environment</div>
-            <div class="pill" onclick="openBlock('person')"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 13c0-2.5 2-4.2 4.5-4.2s4.5 1.7 4.5 4.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Person</div>
-            <div class="pill" onclick="openBlock('products')"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 5l5-2.5L13 5v6l-5 2.5L3 11z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 5l5 2.5L13 5M8 7.5V13" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Products</div>
+            <div class="pill" id="pill-environment" onclick="openBlock('environment')">
+              <span class="lock open"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 014.85-.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="lock closed"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>Environment
+            </div>
+            <div class="pill set" id="pill-person" onclick="openBlock('person')">
+              <span class="lock open"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 014.85-.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="lock closed"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>Person
+            </div>
+            <div class="pill" id="pill-products" onclick="openBlock('products')">
+              <span class="lock open"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 014.85-.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="lock closed"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>Products
+            </div>
           </div>
           <div class="ctx-chip" id="ctxChip" style="display:none;">
             <img id="ctxThumb" src="images/v2.jpg">
@@ -451,7 +461,7 @@
     </div>
   </div>
   <div class="block-foot">
-    <button class="btn btn-primary" onclick="closeBlock()">Done</button>
+    <button class="btn btn-primary" onclick="confirmBlock()">Done</button>
   </div>
 </div>
 
@@ -461,7 +471,13 @@
     person: { title: 'Person', icon: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 13c0-2.5 2-4.2 4.5-4.2s4.5 1.7 4.5 4.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' },
     products: { title: 'Products', icon: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 5l5-2.5L13 5v6l-5 2.5L3 11z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' }
   };
+  var currentBlock = null;
+  function confirmBlock() {
+    if (currentBlock) document.getElementById('pill-' + currentBlock).classList.add('set');
+    closeBlock();
+  }
   function openBlock(name) {
+    currentBlock = name;
     document.querySelectorAll('.blk-content').forEach(c => c.classList.add('blk-hide'));
     document.getElementById('blk-' + name).classList.remove('blk-hide');
     document.getElementById('blockTitle').textContent = blockMeta[name].title;
