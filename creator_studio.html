@@ -89,21 +89,28 @@
   /* CENTER — canvas (images only) */
   .canvas { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
   .canvas-head { flex-shrink: 0; display: flex; align-items: center; padding: 14px 24px 10px; }
+  .asset-count { font-size: 13px; font-weight: 400; color: var(--text-tertiary); letter-spacing: -0.13px; }
+  .asset-count b { color: var(--text-primary); font-weight: 590; }
   .head-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-  .seg { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 7px; padding: 2px; }
-  .seg button { padding: 5px 14px; border: none; background: transparent; border-radius: 5px; color: var(--text-tertiary); font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; }
-  .seg button.active { background: var(--surface-3); color: var(--text-primary); }
+  .viewseg { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 7px; padding: 2px; }
+  .vbtn { width: 32px; height: 28px; border: none; background: transparent; border-radius: 5px; color: var(--text-tertiary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .vbtn:hover { color: var(--text-secondary); }
+  .vbtn.active { background: var(--surface-3); color: var(--text-primary); }
 
   .triage { flex: 1; overflow-y: auto; padding: 4px 24px 24px; }
   .cand-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .cand-grid.two { grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 720px; margin: 0 auto; }
   .cand { position: relative; aspect-ratio: 4/5; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-standard); cursor: pointer; transition: transform 0.12s, border-color 0.12s; background: var(--bg-surface); }
   .cand:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.16); }
   .cand img { width: 100%; height: 100%; object-fit: cover; }
   .cand .fav { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%; background: rgba(8,9,10,0.55); backdrop-filter: blur(6px); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; z-index: 2; }
   .cand .fav.on { background: var(--pink); border-color: var(--pink); }
-  .cand .ovl { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; opacity: 0; background: linear-gradient(to top, rgba(8,9,10,0.7), transparent 45%); transition: opacity 0.12s; }
-  .cand:hover .ovl { opacity: 1; }
-  .cand .ovl .refine { font-size: 11px; font-weight: 510; color: #fff; background: rgba(94,106,210,0.9); border-radius: 6px; padding: 5px 12px; }
+  .cand .ovl { display: none; }
+  .cand.selected { border-color: var(--brand-accent); box-shadow: 0 0 0 2px var(--brand-accent); }
+  .ctx-chip { display: flex; align-items: center; gap: 9px; padding: 7px 10px; margin-bottom: 9px; background: rgba(113,112,255,0.1); border: 1px solid rgba(113,112,255,0.3); border-radius: 8px; font-size: 12px; font-weight: 510; color: #cdd2ff; letter-spacing: -0.13px; }
+  .ctx-chip img { width: 24px; height: 30px; border-radius: 4px; object-fit: cover; }
+  .ctx-chip .x { margin-left: auto; cursor: pointer; color: var(--text-tertiary); }
+  .ctx-chip .x:hover { color: var(--text-primary); }
 
   .gen-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 13px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 7px; color: var(--text-secondary); font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; }
   .gen-btn:hover { background: var(--surface-3); color: var(--text-primary); }
@@ -137,10 +144,10 @@
   .chat-view.hide { display: none; }
   .chat-msgs { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
   .m { max-width: 90%; font-size: 13.5px; line-height: 1.5; letter-spacing: -0.13px; }
-  .m.u { align-self: flex-end; background: var(--brand); color: #fff; padding: 9px 13px; border-radius: 12px 12px 4px 12px; }
+  .m.u { align-self: flex-end; background: var(--bg-surface); color: var(--text-primary); padding: 9px 13px; border-radius: 12px 12px 4px 12px; }
   .m.a { align-self: flex-start; }
   .m.a .who { font-size: 10px; font-weight: 510; color: var(--text-quaternary); margin-bottom: 6px; letter-spacing: 0.4px; text-transform: uppercase; }
-  .m.a .bubble { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px 12px 12px 4px; padding: 11px 13px; color: var(--text-secondary); }
+  .m.a .bubble { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 12px 12px 12px 4px; padding: 11px 13px; color: var(--text-secondary); }
   .result { margin-top: 10px; display: flex; gap: 10px; align-items: center; }
   .result img { width: 44px; height: 55px; border-radius: 5px; object-fit: cover; border: 1px solid var(--border-subtle); }
   .result .meta { font-size: 11px; color: var(--text-quaternary); }
@@ -291,10 +298,18 @@
     <!-- CENTER: canvas (images only) -->
     <div class="canvas">
       <div class="canvas-head">
+        <div class="asset-count"><b>8</b> assets produced</div>
         <div class="head-right">
-          <div class="seg">
-            <button class="active" id="segTriage" onclick="backToTriage()">Candidates</button>
-            <button id="segFocus" onclick="openFocus(null)">Focus</button>
+          <div class="viewseg">
+            <button class="vbtn active" id="vGrid" onclick="setView('grid')" title="Grid">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="3" height="3" rx=".6"/><rect x="6.5" y="2" width="3" height="3" rx=".6"/><rect x="11" y="2" width="3" height="3" rx=".6"/><rect x="2" y="6.5" width="3" height="3" rx=".6"/><rect x="6.5" y="6.5" width="3" height="3" rx=".6"/><rect x="11" y="6.5" width="3" height="3" rx=".6"/><rect x="2" y="11" width="3" height="3" rx=".6"/><rect x="6.5" y="11" width="3" height="3" rx=".6"/><rect x="11" y="11" width="3" height="3" rx=".6"/></svg>
+            </button>
+            <button class="vbtn" id="vTwo" onclick="setView('two')" title="2 × 2">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1"/><rect x="9" y="9" width="4.5" height="4.5" rx="1"/></svg>
+            </button>
+            <button class="vbtn" id="vFocus" onclick="setView('focus')" title="Focus">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="3.5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+            </button>
           </div>
           <button class="gen-btn primary"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Generate 8</button>
         </div>
@@ -302,14 +317,14 @@
 
       <div class="triage" id="triage">
         <div class="cand-grid">
-          <div class="cand" onclick="openFocus('images/v2.jpg')"><img src="images/v2.jpg"><div class="fav on" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="openFocus('images/v3.jpg')"><img src="images/v3.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="openFocus('images/v4.jpg')"><img src="images/v4.jpg"><div class="fav on" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="openFocus('images/v5.jpg')"><img src="images/v5.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="openFocus('images/v6.jpg')"><img src="images/v6.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="openFocus('images/v1.jpg')"><img src="images/v1.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="openFocus('images/c2.jpg')"><img src="images/c2.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
-          <div class="cand" onclick="openFocus('images/c4.jpg')"><img src="images/c4.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v2.jpg')"><img src="images/v2.jpg"><div class="fav on" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v3.jpg')"><img src="images/v3.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v4.jpg')"><img src="images/v4.jpg"><div class="fav on" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v5.jpg')"><img src="images/v5.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v6.jpg')"><img src="images/v6.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
+          <div class="cand" onclick="selectCand(this,'images/v1.jpg')"><img src="images/v1.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
+          <div class="cand" onclick="selectCand(this,'images/c2.jpg')"><img src="images/c2.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
+          <div class="cand" onclick="selectCand(this,'images/c4.jpg')"><img src="images/c4.jpg"><div class="fav" onclick="toggleFav(event,this)">♥</div><div class="ovl"><span class="refine">Refine →</span></div></div>
         </div>
       </div>
 
@@ -358,8 +373,13 @@
             <div class="pill" onclick="openBlock('person')"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 13c0-2.5 2-4.2 4.5-4.2s4.5 1.7 4.5 4.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Person</div>
             <div class="pill" onclick="openBlock('products')"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 5l5-2.5L13 5v6l-5 2.5L3 11z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 5l5 2.5L13 5M8 7.5V13" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Products</div>
           </div>
+          <div class="ctx-chip" id="ctxChip" style="display:none;">
+            <img id="ctxThumb" src="images/v2.jpg">
+            <span>Editing this image</span>
+            <span class="x" onclick="clearSelect()">✕</span>
+          </div>
           <div class="composer-box">
-            <textarea class="composer-input" rows="1" placeholder="Refine this image, or generate more options…"></textarea>
+            <textarea class="composer-input" rows="1" placeholder="Describe what you want, or generate options…"></textarea>
             <div class="composer-row">
               <div class="mode-toggle">
                 <button class="mode-btn active" id="modeAgent" onclick="setAgent()"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Agent</button>
@@ -457,24 +477,51 @@
   }
 
   function toggleFav(e, el) { e.stopPropagation(); el.classList.toggle('on'); }
+  var selectedSrc = null;
+  function selectCand(el, src) {
+    document.querySelectorAll('.cand').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSrc = src;
+    document.getElementById('assetImg').src = src;
+    document.getElementById('ctxThumb').src = src;
+    document.getElementById('ctxChip').style.display = 'flex';
+    document.querySelector('.composer-input').placeholder = 'Refine this image, or ask for variations…';
+  }
+  function clearSelect() {
+    document.querySelectorAll('.cand').forEach(c => c.classList.remove('selected'));
+    selectedSrc = null;
+    document.getElementById('ctxChip').style.display = 'none';
+    document.querySelector('.composer-input').placeholder = 'Describe what you want, or generate options…';
+  }
 
   function toggleBranch(id) { document.getElementById(id).classList.toggle('open'); }
-  function openFocus(src, isBranch) {
-    if (src) { document.getElementById('assetImg').src = src; }
-    document.getElementById('triage').style.display = 'none';
-    document.getElementById('focus').classList.add('show');
-    document.getElementById('segTriage').classList.remove('active');
-    document.getElementById('segFocus').classList.add('active');
-    document.getElementById('branchBanner').classList.toggle('show', !!isBranch);
+  var lastGrid = 'grid';
+  function setActiveView(v) {
+    document.getElementById('vGrid').classList.toggle('active', v === 'grid');
+    document.getElementById('vTwo').classList.toggle('active', v === 'two');
+    document.getElementById('vFocus').classList.toggle('active', v === 'focus');
   }
-  function backToTriage() {
+  function setView(v) {
+    if (v === 'focus') { showFocus(); return; }
+    lastGrid = v;
     document.getElementById('triage').style.display = 'block';
     document.getElementById('focus').classList.remove('show');
     document.getElementById('branchBanner').classList.remove('show');
-    document.getElementById('segTriage').classList.add('active');
-    document.getElementById('segFocus').classList.remove('active');
+    document.querySelector('.cand-grid').classList.toggle('two', v === 'two');
+    setActiveView(v);
     setAgent();
   }
+  function showFocus() {
+    document.getElementById('triage').style.display = 'none';
+    document.getElementById('focus').classList.add('show');
+    setActiveView('focus');
+  }
+  function openFocus(src, isBranch) {
+    if (src) { document.getElementById('assetImg').src = src; }
+    showFocus();
+    document.getElementById('branchBanner').classList.toggle('show', !!isBranch);
+  }
+  function backToTriage() { setView(lastGrid); }
   function pickVersion(el, isOld) {
     document.querySelectorAll('.versions .vthumb').forEach(v => v.classList.remove('sel'));
     el.classList.add('sel');
