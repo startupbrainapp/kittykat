@@ -112,6 +112,7 @@
     cursor: pointer;
     transition: background 0.12s, border-color 0.12s;
     align-items: center;
+    position: relative;
   }
   .brief-row:hover {
     background: var(--surface-1);
@@ -119,6 +120,17 @@
     border-radius: 8px;
     border-bottom-color: var(--border-standard);
   }
+  .row-studio {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 7px;
+    background: var(--brand); color: #fff; border: 1px solid var(--brand);
+    font-size: 12px; font-weight: 510; cursor: pointer; font-family: inherit; letter-spacing: -0.13px;
+    opacity: 0; transition: opacity 0.12s;
+    box-shadow: -14px 0 14px 10px var(--bg-canvas);
+  }
+  .brief-row:hover .row-studio { opacity: 1; }
+  .row-studio:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
 
   .brief-main { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
   .brief-status-dot {
@@ -289,7 +301,6 @@
   <div class="nav-section">
     <div class="nav-section-label">Execution</div>
     <a class="nav-item active" href="briefs.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Briefs</span></a>
-    <a class="nav-item" href="creator_studio.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Creator Studio</span></a>
     <a class="nav-item" href="asset_manager.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Asset Manager</span></a>
     <a class="nav-item" href="reviews.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
   </div>
@@ -665,6 +676,9 @@
     list.innerHTML = briefs.map(b => {
       const assetsText = b.assetsDone + '/' + b.assetsTotal;
       const assetsMuted = b.assetsDone === 0 ? ' muted' : '';
+      const studioBtn = (b.status === 'draft' || b.status === 'production')
+        ? `<button class="row-studio" onclick="event.stopPropagation(); window.location.href='creator_studio.html'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>`
+        : '';
       return `
         <div class="brief-row" onclick="openDrawer('${b.id}')">
           <div class="brief-main">
@@ -679,6 +693,7 @@
           <div class="cell-assignee"><div class="cell-assignee-avatar">${b.initial}</div>${b.assignee}</div>
           <div class="cell-assets${assetsMuted}">${assetsText}</div>
           <div class="cell-due">${b.due}</div>
+          ${studioBtn}
         </div>`;
     }).join('');
   }
@@ -798,11 +813,11 @@
     let footer = '';
     if (b.status === 'draft') {
       footer = `
-        <button class="d-btn primary" onclick="window.location.href='creator_studio.html'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Start production</button>
+        <button class="d-btn primary" onclick="window.location.href='creator_studio.html'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>
         <button class="d-btn secondary">Edit brief</button>`;
     } else if (b.status === 'production') {
       footer = `
-        <button class="d-btn primary" onclick="window.location.href='creator_studio.html'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3 8l2-2 1.5 1.5L9 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>View in Creator Studio</button>
+        <button class="d-btn primary" onclick="window.location.href='creator_studio.html'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>
         <button class="d-btn secondary">Edit brief</button>`;
     } else if (b.status === 'review') {
       footer = `
