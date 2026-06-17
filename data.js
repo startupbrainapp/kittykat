@@ -49,7 +49,7 @@
           { name: 'Story', spec: '1080×1920 × 1' },
           { name: 'Web Banner', spec: '1920×600 × 1' }
         ],
-        tiles: [3, 4] },
+        finalSelects: ['images/v1.jpg', 'images/v2.jpg'], tiles: [3, 4] },
       { id: 'shibuya-3am', name: 'Shibuya 3am Street Shoot', status: 'review', statusLabel: 'In Review', campaign: 'Tokyo After Dark', assignee: 'Regional Lead', initial: 'R', assetsDone: 4, assetsTotal: 4, due: 'Apr 25',
         desc: 'Guerrilla-style street photography at 3am in Shibuya. Neon reflections on wet pavement, convenience-store fluorescence, crossing lights. Raw Tokyo energy.',
         deliverables: [
@@ -57,7 +57,7 @@
           { name: 'Story', spec: '1080×1920 × 1' },
           { name: 'Editorial Spread', spec: '2480×3508 × 1' }
         ],
-        tiles: [5, 6, 7, 8] },
+        finalSelects: ['images/v3.jpg', 'images/v4.jpg'], tiles: [5, 6, 7, 8] },
       { id: 'neomax-retail', name: 'Neo-Max Retail Concept · Interior', status: 'production', statusLabel: 'In Production', campaign: 'Neo-Max Store · Shibuya', assignee: 'Kathy S.', initial: 'K', assetsDone: 2, assetsTotal: 6, due: 'May 28',
         desc: 'Interior design renders + visual merchandising concepts for the Neo-Maximalist pop-up in Shibuya. Print-on-print walls, camo-tile floors, LED canopy ceiling.',
         deliverables: [
@@ -146,6 +146,44 @@
     enterStudio: function (id) {
       var b = this.brief(id);
       if (b && b.status === 'draft') { this.setStatus(id, 'production'); }
+      return b;
+    },
+
+    // Phase 2 — Final Selects (the brief's deliverable set)
+    finalSelects: function (id) {
+      var b = this.brief(id);
+      return (b && b.finalSelects) || [];
+    },
+    isFinal: function (id, src) {
+      return this.finalSelects(id).indexOf(src) >= 0;
+    },
+    toggleFinal: function (id, src) {
+      var b = this.brief(id);
+      if (!b) return false;
+      if (!b.finalSelects) b.finalSelects = [];
+      var i = b.finalSelects.indexOf(src);
+      if (i >= 0) { b.finalSelects.splice(i, 1); } else { b.finalSelects.push(src); }
+      save();
+      return b.finalSelects.indexOf(src) >= 0;
+    },
+
+    // Phase 3 — review lifecycle
+    reviewBriefs: function () {
+      return state.briefs.filter(function (b) { return b.status === 'review'; });
+    },
+    submitReview: function (id) {
+      var b = this.brief(id);
+      if (b) { b.status = 'review'; b.statusLabel = STATUS_LABEL.review; save(); }
+      return b;
+    },
+    approve: function (id) {
+      var b = this.brief(id);
+      if (b) { b.status = 'shipped'; b.statusLabel = STATUS_LABEL.shipped; b.assetsDone = b.assetsTotal; save(); }
+      return b;
+    },
+    requestChanges: function (id, notes) {
+      var b = this.brief(id);
+      if (b) { b.status = 'production'; b.statusLabel = STATUS_LABEL.production; if (notes) b.reviewNotes = notes; save(); }
       return b;
     },
 

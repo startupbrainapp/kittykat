@@ -304,7 +304,7 @@
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
           </div>
           <div class="stat-meta">
-            <div class="stat-value">22</div>
+            <div class="stat-value" id="statPending">22</div>
             <div class="stat-label">Pending review</div>
           </div>
         </div>
@@ -313,7 +313,7 @@
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="stat-meta">
-            <div class="stat-value">8</div>
+            <div class="stat-value" id="statApproved">8</div>
             <div class="stat-label">Approved today</div>
           </div>
         </div>
@@ -322,7 +322,7 @@
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M6 6l4 4M10 6l-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
           </div>
           <div class="stat-meta">
-            <div class="stat-value">2</div>
+            <div class="stat-value" id="statChanges">2</div>
             <div class="stat-label">Changes requested</div>
           </div>
         </div>
@@ -367,6 +367,7 @@
   <div class="drawer-footer" id="drawerFooter"></div>
 </aside>
 
+<script src="data.js"></script>
 <script>
   const items = [
     { id: 0, name: 'Neon ABC Camo \u00b7 Hero Shot 1', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', score: 88, submitter: 'Maya T.', time: '2h ago', img: 'images/v1.jpg', briefDesc: 'Neon-lit product hero for the Tokyo After Dark ABC Camo variant. Cyber-purple and electric-green palette. Studio shot with LED strip lighting.', spec: 'Instagram Post 1080\u00d71080', visual: 85, tonal: 90, cultural: 92, audience: 86 },
@@ -383,12 +384,53 @@
 
   function scoreTier(s) { return s >= 80 ? 'green' : s >= 60 ? 'indigo' : 'amber'; }
 
+  // Phase 3: the queue is driven by KK — only briefs in 'review' status appear.
+  // Static items carry the rich scores; briefs submitted from the studio (no
+  // static items) generate cards from their Final Selects.
+  function briefIdOf(it) {
+    var n = it.name || '';
+    if (n.indexOf('Neon ABC') === 0) return 'neon-abc';
+    if (n.indexOf('Shibuya 3am') === 0) return 'shibuya-3am';
+    if (n.indexOf('Neo-Max') === 0) return 'neomax-retail';
+    if (n.indexOf('Sakura Camo') === 0) return 'sakura-camo';
+    return null;
+  }
+  var rendered = [];
+  function buildList() {
+    var reviewIds = (window.KK ? KK.reviewBriefs() : []).map(function (b) { return b.id; });
+    var list = [], covered = {};
+    items.forEach(function (it) {
+      var bid = briefIdOf(it);
+      if (bid && reviewIds.indexOf(bid) >= 0) { it.briefId = bid; list.push(it); covered[bid] = true; }
+    });
+    if (window.KK) {
+      KK.reviewBriefs().forEach(function (b) {
+        if (!covered[b.id]) {
+          KK.finalSelects(b.id).forEach(function (src, i) {
+            list.push({ id: 'g-' + b.id + '-' + i, briefId: b.id, generated: true,
+              name: b.name + ' · Select ' + (i + 1), brief: b.campaign, campaign: b.campaign,
+              score: 90, submitter: 'You', time: 'just now', img: src, briefDesc: b.desc || '',
+              spec: (b.deliverables && b.deliverables[0] ? b.deliverables[0].spec : ''),
+              visual: 90, tonal: 88, cultural: 90, audience: 89 });
+          });
+        }
+      });
+    }
+    rendered = list;
+    return list;
+  }
   function renderList() {
-    const list = document.getElementById('reviewList');
-    list.innerHTML = items.map(it => {
+    const list = buildList();
+    const el = document.getElementById('reviewList');
+    if (!list.length) {
+      el.innerHTML = '<div style="padding: 48px 16px; text-align: center; color: var(--text-tertiary); font-size: 13px; letter-spacing: -0.13px;">Nothing in review right now. Submit a brief’s Final Selects from the studio to see it here.</div>';
+      updateStats();
+      return;
+    }
+    el.innerHTML = list.map(it => {
       const tier = scoreTier(it.score);
       return `
-        <div class="review-item" onclick="openDrawer(${it.id})">
+        <div class="review-item" onclick="openDrawer('${it.id}')">
           <img class="review-thumb" src="${it.img}" alt="${it.name}">
           <div class="review-details">
             <div class="review-asset-name">${it.name}</div>
@@ -399,19 +441,39 @@
             </div>
           </div>
           <div class="review-actions" onclick="event.stopPropagation()">
-            <button class="btn-approve" onclick="event.stopPropagation()">Approve</button>
-            <button class="btn-changes" onclick="event.stopPropagation()">Changes</button>
-            <button class="btn-chevron" onclick="event.stopPropagation(); openDrawer(${it.id})">
+            <button class="btn-approve" onclick="event.stopPropagation(); approveBrief('${it.briefId}')">Approve</button>
+            <button class="btn-changes" onclick="event.stopPropagation(); changesBrief('${it.briefId}')">Changes</button>
+            <button class="btn-chevron" onclick="event.stopPropagation(); openDrawer('${it.id}')">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>
         </div>`;
     }).join('');
+    updateStats();
+  }
+  function updateStats() {
+    var p = document.getElementById('statPending'); if (p) p.textContent = rendered.length;
+  }
+  function approveBrief(id) {
+    if (window.KK && id && id !== 'null') {
+      KK.approve(id);
+      var a = document.getElementById('statApproved'); if (a) a.textContent = (parseInt(a.textContent, 10) || 0) + 1;
+    }
+    closeDrawer();
+    renderList();
+  }
+  function changesBrief(id) {
+    if (window.KK && id && id !== 'null') {
+      KK.requestChanges(id);
+      var c = document.getElementById('statChanges'); if (c) c.textContent = (parseInt(c.textContent, 10) || 0) + 1;
+    }
+    closeDrawer();
+    renderList();
   }
   renderList();
 
   function openDrawer(id) {
-    const it = items.find(x => x.id === id);
+    const it = rendered.find(x => String(x.id) === String(id));
     if (!it) return;
 
     document.getElementById('drawerTitle').textContent = it.name;
@@ -524,12 +586,12 @@
     `;
 
     document.getElementById('drawerFooter').innerHTML = `
-      <button class="d-btn green">
+      <button class="d-btn green" onclick="approveBrief('${it.briefId}')">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Approve
       </button>
-      <button class="d-btn secondary">Request changes</button>
-      <button class="d-btn danger">Reject</button>
+      <button class="d-btn secondary" onclick="changesBrief('${it.briefId}')">Request changes</button>
+      <button class="d-btn danger" onclick="changesBrief('${it.briefId}')">Reject</button>
     `;
 
     document.getElementById('drawer').classList.add('open');
