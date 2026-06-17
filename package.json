@@ -1,0 +1,9 @@
+{
+  "name": "kittykat-prototype",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KittyKat creative-intelligence prototype (static HTML).",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

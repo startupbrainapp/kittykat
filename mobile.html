@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Mobile</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a; --bg-panel: #0f1011; --bg-surface: #191a1b; --bg-elevated: #28282c;
+    --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+    --brand: #5e6ad2; --brand-accent: #7170ff; --brand-hover: #828fff;
+    --border-subtle: rgba(255,255,255,0.05); --border-standard: rgba(255,255,255,0.08); --border-solid: #23252a;
+    --surface-1: rgba(255,255,255,0.02); --surface-2: rgba(255,255,255,0.04); --surface-3: rgba(255,255,255,0.05);
+    --status-green: #10b981;
+    --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { background: #050506; color: var(--text-primary); font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: -0.165px; display: flex; justify-content: center; min-height: 100dvh; }
+  button, input, textarea { font-family: inherit; font-feature-settings: 'cv01', 'ss03'; }
+  img { display: block; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+
+  /* ── PHONE-WIDTH APP COLUMN (full-window responsive, no device bezel) ── */
+  .app {
+    position: relative; width: 100%; max-width: 460px; height: 100dvh; overflow: hidden;
+    background: var(--bg-canvas); display: flex; flex-direction: column;
+    border-left: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle);
+  }
+  @media (max-width: 480px) { .app { border: none; } }
+
+  /* ── TOP BAR ── */
+  .topbar { flex-shrink: 0; padding-top: var(--sat); height: calc(54px + var(--sat)); display: flex; align-items: center; gap: 10px; padding-left: 16px; padding-right: 14px; border-bottom: 1px solid var(--border-subtle); background: var(--bg-canvas); }
+  .brand-sw { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
+  .brand-sw img { width: 32px; height: 32px; border-radius: 7px; background: var(--bg-elevated); padding: 3px; object-fit: contain; }
+  .brand-sw .nm { font-size: 15px; font-weight: 590; letter-spacing: -0.2px; color: var(--text-primary); }
+  .brand-sw .lbl { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .brand-sw .chev { color: var(--text-tertiary); }
+  .top-ic { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-1); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); }
+  .top-ic.avatar { background: var(--brand); color: #fff; font-size: 13px; font-weight: 590; border: none; }
+
+  /* ── SCREENS ── */
+  .screens { flex: 1; position: relative; overflow: hidden; }
+  .screen { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 18px 16px calc(96px + var(--sab)); display: none; }
+  .screen.active { display: block; }
+
+  .scr-title { font-size: 26px; font-weight: 510; letter-spacing: -0.7px; color: var(--text-primary); margin-bottom: 2px; }
+  .scr-sub { font-size: 13px; color: var(--text-tertiary); margin-bottom: 18px; }
+  .sect-label { font-size: 11px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin: 22px 2px 11px; }
+
+  /* cards */
+  .card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 14px; overflow: hidden; }
+  .card.pad { padding: 16px; }
+
+  /* resume hero */
+  .resume { display: flex; gap: 14px; padding: 14px; align-items: center; }
+  .resume img { width: 84px; height: 105px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border-standard); flex-shrink: 0; }
+  .resume .info { flex: 1; min-width: 0; }
+  .resume .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 510; color: var(--brand-accent); margin-bottom: 6px; }
+  .resume .tag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-accent); }
+  .resume .ttl { font-size: 16px; font-weight: 590; letter-spacing: -0.3px; color: var(--text-primary); line-height: 1.3; }
+  .resume .meta { font-size: 12px; color: var(--text-tertiary); margin-top: 3px; }
+  .resume .go { margin-top: 11px; display: inline-flex; align-items: center; gap: 6px; background: var(--brand); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; }
+
+  /* horizontal strips */
+  .hstrip { display: flex; gap: 11px; overflow-x: auto; padding: 2px 16px 2px; margin: 0 -16px; scroll-snap-type: x mandatory; }
+  .hstrip::after { content: ''; flex: 0 0 4px; }
+  .brief-mini { scroll-snap-align: start; flex: 0 0 168px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 12px; overflow: hidden; cursor: pointer; }
+  .brief-mini img { width: 100%; height: 96px; object-fit: cover; }
+  .brief-mini .bm-body { padding: 10px 11px 12px; }
+  .brief-mini .bm-name { font-size: 13px; font-weight: 590; letter-spacing: -0.2px; color: var(--text-primary); }
+  .brief-mini .bm-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
+  .asset-mini { scroll-snap-align: start; flex: 0 0 108px; }
+  .asset-mini img { width: 108px; height: 135px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border-subtle); cursor: pointer; }
+
+  /* opportunity */
+  .opp { padding: 16px; }
+  .opp .pill { display: inline-block; font-size: 10px; font-weight: 510; color: var(--status-green); background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); border-radius: 9999px; padding: 2px 9px; margin-bottom: 10px; }
+  .opp .ttl { font-size: 15px; font-weight: 590; letter-spacing: -0.25px; line-height: 1.4; }
+  .opp .desc { font-size: 13px; color: var(--text-tertiary); margin-top: 7px; line-height: 1.5; }
+
+  /* chips row */
+  .chips { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px 16px; padding: 0 16px; }
+  .chip { flex-shrink: 0; font-size: 13px; font-weight: 510; color: var(--text-secondary); background: transparent; border: 1px solid var(--border-solid); border-radius: 9999px; padding: 6px 14px; cursor: pointer; letter-spacing: -0.13px; }
+  .chip.active { background: var(--surface-3); color: var(--text-primary); border-color: var(--border-standard); }
+
+  /* brief list */
+  .brief-row { display: flex; gap: 13px; padding: 13px; margin-bottom: 11px; align-items: center; }
+  .brief-row img { width: 64px; height: 80px; border-radius: 9px; object-fit: cover; border: 1px solid var(--border-standard); flex-shrink: 0; }
+  .brief-row .br-info { flex: 1; min-width: 0; }
+  .brief-row .br-name { font-size: 15px; font-weight: 590; letter-spacing: -0.25px; color: var(--text-primary); }
+  .brief-row .br-meta { font-size: 12px; color: var(--text-tertiary); margin-top: 3px; }
+  .status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 510; padding: 2px 9px 2px 7px; border-radius: 9999px; margin-top: 8px; border: 1px solid var(--border-solid); color: var(--text-secondary); }
+  .status .d { width: 6px; height: 6px; border-radius: 50%; background: var(--status-green); }
+  .status.draft .d { background: var(--text-quaternary); }
+  .br-cta { margin-top: 10px; width: 100%; background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-primary); border-radius: 8px; padding: 9px; font-size: 13px; font-weight: 510; cursor: pointer; letter-spacing: -0.13px; }
+  .br-cta:active { background: var(--surface-3); }
+
+  /* assets grid */
+  .agrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .agrid img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 11px; border: 1px solid var(--border-subtle); cursor: pointer; }
+
+  /* brand screen */
+  .swatches { display: flex; gap: 10px; margin-top: 4px; }
+  .sw { flex: 1; height: 56px; border-radius: 10px; border: 1px solid var(--border-standard); }
+  .mood4 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .mood4 img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 1px solid var(--border-subtle); }
+
+  /* ── BOTTOM TAB BAR ── */
+  .tabbar { position: absolute; left: 0; right: 0; bottom: 0; padding-bottom: var(--sab); height: calc(64px + var(--sab)); background: rgba(15,16,17,0.86); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: 1px solid var(--border-subtle); display: flex; align-items: center; z-index: 40; }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-quaternary); cursor: pointer; padding: 6px 0; }
+  .tab.active { color: var(--text-primary); }
+  .tab svg { width: 22px; height: 22px; }
+  .tab .tl { font-size: 10px; font-weight: 510; letter-spacing: 0.1px; }
+  .tab.create { color: #fff; }
+  .tab.create .cbtn { width: 46px; height: 46px; border-radius: 15px; background: var(--brand); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(94,106,210,0.5); margin-top: -16px; }
+  .tab.create .cbtn svg { width: 24px; height: 24px; }
+  .tab.create .tl { color: var(--text-tertiary); }
+
+  /* ── STUDIO (full-screen takeover) ── */
+  .studio { position: absolute; inset: 0; background: var(--bg-panel); display: flex; flex-direction: column; z-index: 60; transform: translateY(100%); transition: transform 0.32s cubic-bezier(.32,.72,0,1); }
+  .studio.open { transform: translateY(0); }
+
+  .st-head { flex-shrink: 0; padding-top: var(--sat); height: calc(52px + var(--sat)); display: flex; align-items: center; gap: 10px; padding-left: 8px; padding-right: 10px; border-bottom: 1px solid var(--border-subtle); }
+  .st-back { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; }
+  .st-brief { flex: 1; min-width: 0; }
+  .st-brief .bn { font-size: 14px; font-weight: 510; letter-spacing: -0.2px; color: var(--text-primary); display: flex; align-items: center; gap: 7px; }
+  .st-brief .bn .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand-accent); flex-shrink: 0; }
+  .st-brief .bs { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; padding-left: 14px; }
+  .st-act { width: 36px; height: 36px; border-radius: 9px; background: var(--surface-1); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; }
+
+  .st-toolbar { flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 10px 14px; }
+  .seg { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 9px; padding: 2px; }
+  .seg button { padding: 6px 16px; border: none; background: transparent; border-radius: 7px; color: var(--text-tertiary); font-size: 13px; font-weight: 510; cursor: pointer; letter-spacing: -0.13px; display: inline-flex; align-items: center; gap: 5px; }
+  .seg button.active { background: var(--brand); color: #fff; }
+  .ref-chip { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 9px; padding: 7px 11px; color: var(--text-secondary); font-size: 12px; font-weight: 510; cursor: pointer; letter-spacing: -0.13px; }
+
+  /* asset stage */
+  .stage { flex-shrink: 0; padding: 4px 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 11px; background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.03), transparent 65%); }
+  .asset-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-standard); box-shadow: 0 10px 34px rgba(0,0,0,0.5); }
+  .asset-wrap.editing { border-color: var(--brand-accent); box-shadow: 0 0 0 1px var(--brand-accent), 0 10px 34px rgba(0,0,0,0.5); }
+  .asset-wrap img { width: 100%; height: 38vh; max-height: 360px; object-fit: cover; }
+  .asset-wrap .vtag { position: absolute; left: 11px; top: 11px; font-size: 11px; font-weight: 510; color: var(--text-primary); background: rgba(8,9,10,0.62); backdrop-filter: blur(8px); border: 1px solid var(--border-standard); border-radius: 6px; padding: 3px 9px; }
+  .asset-wrap .swipe-hint { position: absolute; right: 11px; bottom: 11px; font-size: 10px; font-weight: 510; color: var(--text-tertiary); background: rgba(8,9,10,0.55); backdrop-filter: blur(8px); border: 1px solid var(--border-subtle); border-radius: 9999px; padding: 3px 9px; }
+  .vstrip { display: flex; gap: 8px; align-items: center; }
+  .vthumb { width: 44px; height: 56px; border-radius: 7px; overflow: hidden; border: 1px solid var(--border-subtle); position: relative; cursor: pointer; }
+  .vthumb img { width: 100%; height: 100%; object-fit: cover; }
+  .vthumb.sel { border-color: var(--brand-accent); box-shadow: 0 0 0 1px var(--brand-accent); }
+  .vthumb span { position: absolute; bottom: 2px; right: 3px; font-size: 9px; font-weight: 510; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+  .vadd { width: 44px; height: 56px; border-radius: 7px; border: 1px dashed var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-quaternary); cursor: pointer; }
+
+  /* agent: chat region */
+  .st-body { flex: 1; display: flex; flex-direction: column; min-height: 0; border-top: 1px solid var(--border-subtle); }
+  .chat { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .m { max-width: 88%; font-size: 14px; line-height: 1.5; letter-spacing: -0.13px; }
+  .m.u { align-self: flex-end; background: var(--brand); color: #fff; padding: 9px 13px; border-radius: 14px 14px 4px 14px; }
+  .m.a .who { font-size: 10px; font-weight: 510; color: var(--text-quaternary); margin-bottom: 6px; letter-spacing: 0.4px; text-transform: uppercase; }
+  .m.a .bubble { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 14px 14px 14px 4px; padding: 11px 13px; color: var(--text-secondary); }
+  .steps { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+  .step { font-size: 10px; font-weight: 510; color: var(--text-tertiary); background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 9999px; padding: 2px 9px; }
+  .step.done::before { content: "✓ "; color: var(--status-green); }
+  .result { margin-top: 10px; display: flex; gap: 10px; align-items: center; }
+  .result img { width: 42px; height: 53px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-subtle); }
+  .result .meta { font-size: 11px; color: var(--text-quaternary); }
+
+  .composer { flex-shrink: 0; padding: 12px 14px calc(14px + var(--sab)); border-top: 1px solid var(--border-subtle); background: var(--bg-panel); }
+  .composer-box { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 13px; padding: 11px 13px; }
+  .composer-box:focus-within { border-color: rgba(113,112,255,0.45); }
+  .composer-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 15px; resize: none; min-height: 22px; max-height: 96px; letter-spacing: -0.13px; }
+  .composer-input::placeholder { color: var(--text-quaternary); }
+  .composer-row { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
+  .ic-btn { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); cursor: pointer; }
+  .composer-row .sp { flex: 1; }
+  .composer-row .mdl { font-size: 11px; color: var(--text-quaternary); }
+  .send { background: var(--brand); color: #fff; border: none; border-radius: 9px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+  /* manual view */
+  .manual { flex: 1; display: none; flex-direction: column; padding: 16px calc(16px) calc(16px + var(--sab)); overflow-y: auto; gap: 15px; border-top: 1px solid var(--border-subtle); }
+  .fld label { display: block; font-size: 10px; font-weight: 510; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-quaternary); margin-bottom: 8px; }
+  .prompt-box { background: rgba(255,255,255,0.02); border: 1px solid var(--border-standard); border-radius: 10px; padding: 12px 14px; }
+  .prompt-box:focus-within { border-color: rgba(113,112,255,0.45); }
+  .prompt-ta { width: 100%; background: transparent; border: none; outline: none; color: var(--text-secondary); font-size: 14px; line-height: 1.55; resize: none; min-height: 96px; letter-spacing: -0.13px; }
+  .ctrl { display: flex; align-items: center; gap: 6px; padding: 11px 13px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-standard); border-radius: 9px; color: var(--text-primary); font-size: 14px; cursor: pointer; width: 100%; }
+  .ctrl .auto { font-size: 9px; font-weight: 510; color: var(--brand-accent); background: rgba(113,112,255,0.1); border: 1px solid rgba(113,112,255,0.3); border-radius: 9999px; padding: 2px 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .ctrl .sp { flex: 1; }
+  .m-actions { display: flex; gap: 9px; margin-top: 4px; }
+  .btn { flex: 1; padding: 12px; border-radius: 9px; font-size: 14px; font-weight: 510; cursor: pointer; border: 1px solid transparent; letter-spacing: -0.13px; }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-ghost { background: var(--surface-1); border-color: var(--border-standard); color: var(--text-secondary); }
+
+  /* ── BOTTOM SHEET (references) ── */
+  .scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 70; }
+  .scrim.show { opacity: 1; pointer-events: auto; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--bg-surface); border-radius: 20px 20px 0 0; border-top: 1px solid var(--border-standard); padding: 10px 18px calc(22px + var(--sab)); transform: translateY(100%); transition: transform 0.32s cubic-bezier(.32,.72,0,1); z-index: 71; }
+  .sheet.open { transform: translateY(0); }
+  .grab { width: 38px; height: 4px; border-radius: 9999px; background: var(--border-solid); margin: 4px auto 16px; }
+  .sheet h4 { font-size: 16px; font-weight: 590; letter-spacing: -0.3px; margin-bottom: 16px; }
+  .sheet-lbl { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 9px; }
+  .ref-imgs { display: flex; gap: 12px; }
+  .ref-imgs .ri { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .ref-imgs img { width: 54px; height: 54px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-standard); }
+  .ref-imgs .cap { font-size: 10px; color: var(--text-quaternary); }
+  .mini-mood { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+  .mini-mood img { width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-subtle); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand-sw">
+      <img src="bape-logo.png" alt="BAPE">
+      <div>
+        <div class="lbl">Brand</div>
+        <div class="nm">BAPE</div>
+      </div>
+      <svg class="chev" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="top-ic"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2a4 4 0 0 0-4 4v2.5L3.5 11h11L13 8.5V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M7 13a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+    <div class="top-ic avatar">K</div>
+  </header>
+
+  <!-- SCREENS -->
+  <div class="screens">
+
+    <!-- HOME -->
+    <section class="screen active" id="scr-home">
+      <div class="scr-title">Good morning, Kathy</div>
+      <div class="scr-sub">3 briefs in production · 2 need review</div>
+
+      <div class="sect-label">Pick up where you left off</div>
+      <div class="card resume">
+        <img src="images/v2.jpg" alt="">
+        <div class="info">
+          <span class="tag"><span class="dot"></span>Creator Studio</span>
+          <div class="ttl">Sakura Camo · Hero Pattern</div>
+          <div class="meta">v3 · edited 12m ago</div>
+          <button class="go" onclick="openStudio()">
+            Continue
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="sect-label">Active briefs</div>
+      <div class="hstrip">
+        <div class="brief-mini" onclick="openStudio()"><img src="images/v1.jpg"><div class="bm-body"><div class="bm-name">Sakura Camo</div><div class="bm-meta">SS26 · Hana Matsuri</div></div></div>
+        <div class="brief-mini" onclick="openStudio()"><img src="images/8.jpg"><div class="bm-body"><div class="bm-name">Tokyo Nights</div><div class="bm-meta">SS26 · Capsule</div></div></div>
+        <div class="brief-mini" onclick="openStudio()"><img src="images/16.jpg"><div class="bm-body"><div class="bm-name">Concrete Bloom</div><div class="bm-meta">SS26 · Editorial</div></div></div>
+      </div>
+
+      <div class="sect-label">Recent assets</div>
+      <div class="hstrip">
+        <div class="asset-mini"><img src="images/v3.jpg" onclick="openStudio()"></div>
+        <div class="asset-mini"><img src="images/v4.jpg" onclick="openStudio()"></div>
+        <div class="asset-mini"><img src="images/v5.jpg" onclick="openStudio()"></div>
+        <div class="asset-mini"><img src="images/v6.jpg" onclick="openStudio()"></div>
+      </div>
+
+      <div class="sect-label">Opportunity</div>
+      <div class="card opp">
+        <span class="pill">Trending now</span>
+        <div class="ttl">Sakura motifs are spiking 3 weeks early this year</div>
+        <div class="desc">Spring florals are showing up in streetwear feeds ahead of season. Your Sakura Camo brief is well-timed — consider a second colorway.</div>
+      </div>
+    </section>
+
+    <!-- BRIEFS -->
+    <section class="screen" id="scr-briefs">
+      <div class="scr-title">Briefs</div>
+      <div class="scr-sub">Turn a brief into finished assets</div>
+      <div class="chips">
+        <button class="chip active">All</button>
+        <button class="chip">In production</button>
+        <button class="chip">Needs review</button>
+        <button class="chip">Draft</button>
+      </div>
+
+      <div class="card brief-row">
+        <img src="images/v1.jpg">
+        <div class="br-info">
+          <div class="br-name">Sakura Camo · Hero Pattern</div>
+          <div class="br-meta">SS26 · Hana Matsuri capsule</div>
+          <span class="status"><span class="d"></span>In production</span>
+          <button class="br-cta" onclick="openStudio()">Start production</button>
+        </div>
+      </div>
+      <div class="card brief-row">
+        <img src="images/8.jpg">
+        <div class="br-info">
+          <div class="br-name">Tokyo Nights · Lookbook</div>
+          <div class="br-meta">SS26 · Capsule drop</div>
+          <span class="status"><span class="d"></span>In production</span>
+          <button class="br-cta" onclick="openStudio()">Start production</button>
+        </div>
+      </div>
+      <div class="card brief-row">
+        <img src="images/16.jpg">
+        <div class="br-info">
+          <div class="br-name">Concrete Bloom · Editorial</div>
+          <div class="br-meta">SS26 · Brand campaign</div>
+          <span class="status draft"><span class="d"></span>Draft</span>
+          <button class="br-cta" onclick="openStudio()">Open brief</button>
+        </div>
+      </div>
+      <div class="card brief-row">
+        <img src="images/18.jpg">
+        <div class="br-info">
+          <div class="br-name">Camo Remix · Social</div>
+          <div class="br-meta">SS26 · Always-on</div>
+          <span class="status draft"><span class="d"></span>Draft</span>
+          <button class="br-cta" onclick="openStudio()">Open brief</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ASSETS -->
+    <section class="screen" id="scr-assets">
+      <div class="scr-title">Assets</div>
+      <div class="scr-sub">Everything you've generated</div>
+      <div class="chips">
+        <button class="chip active">All</button>
+        <button class="chip">Hero</button>
+        <button class="chip">Social</button>
+        <button class="chip">Approved</button>
+      </div>
+      <div class="agrid">
+        <img src="images/v1.jpg" onclick="openStudio()"><img src="images/v2.jpg" onclick="openStudio()">
+        <img src="images/v3.jpg" onclick="openStudio()"><img src="images/v4.jpg" onclick="openStudio()">
+        <img src="images/2.jpg" onclick="openStudio()"><img src="images/4.jpg" onclick="openStudio()">
+        <img src="images/8.jpg" onclick="openStudio()"><img src="images/11.jpg" onclick="openStudio()">
+        <img src="images/16.jpg" onclick="openStudio()"><img src="images/18.jpg" onclick="openStudio()">
+        <img src="images/5.jpg" onclick="openStudio()"><img src="images/9.jpg" onclick="openStudio()">
+      </div>
+    </section>
+
+    <!-- BRAND -->
+    <section class="screen" id="scr-brand">
+      <div class="scr-title">BAPE</div>
+      <div class="scr-sub">Your brand profile</div>
+
+      <div class="sect-label">Logo</div>
+      <div class="card pad" style="display:flex;align-items:center;gap:14px;">
+        <img src="bape-logo.png" style="width:48px;height:48px;border-radius:10px;background:var(--bg-elevated);padding:6px;object-fit:contain;">
+        <div><div style="font-size:15px;font-weight:590;letter-spacing:-0.2px;">A Bathing Ape</div><div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">Streetwear · Tokyo</div></div>
+      </div>
+
+      <div class="sect-label">Palette</div>
+      <div class="swatches">
+        <div class="sw" style="background:#e9a9c0;"></div>
+        <div class="sw" style="background:#1f2733;"></div>
+        <div class="sw" style="background:#c8b273;"></div>
+        <div class="sw" style="background:#f3ede2;"></div>
+      </div>
+
+      <div class="sect-label">Moodboard</div>
+      <div class="mood4">
+        <img src="images/5.jpg"><img src="images/9.jpg"><img src="images/7.jpg"><img src="images/1.jpg">
+      </div>
+    </section>
+
+  </div>
+
+  <!-- TAB BAR -->
+  <nav class="tabbar">
+    <div class="tab active" data-screen="scr-home" onclick="showScreen('scr-home', this)">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 10L12 4l8 6v9a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1v-9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span class="tl">Home</span>
+    </div>
+    <div class="tab" data-screen="scr-briefs" onclick="showScreen('scr-briefs', this)">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h8l4 4v14H6V3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 11h7M9 14h6M9 17h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span class="tl">Briefs</span>
+    </div>
+    <div class="tab create" onclick="openStudio()">
+      <div class="cbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5l1.8 4.5L18 11l-4.2 1.5L12 17l-1.8-4.5L6 11l4.2-1.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="rgba(255,255,255,0.15)"/></svg></div>
+      <span class="tl">Create</span>
+    </div>
+    <div class="tab" data-screen="scr-assets" onclick="showScreen('scr-assets', this)">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 16l4-4 3 3 4-4 7 6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="8.5" cy="9.5" r="1.3" fill="currentColor"/></svg>
+      <span class="tl">Assets</span>
+    </div>
+    <div class="tab" data-screen="scr-brand" onclick="showScreen('scr-brand', this)">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+      <span class="tl">Brand</span>
+    </div>
+  </nav>
+
+  <!-- ═══ STUDIO TAKEOVER ═══ -->
+  <div class="studio" id="studio">
+    <div class="st-head">
+      <div class="st-back" onclick="closeStudio()"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="st-brief">
+        <div class="bn"><span class="dot"></span>Sakura Camo · Hero Pattern</div>
+        <div class="bs">SS26 · Hana Matsuri</div>
+      </div>
+      <div class="st-act" title="Download"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 13h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="st-act" title="Save"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2v11l4-2.5L12 13V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></div>
+    </div>
+
+    <div class="st-toolbar">
+      <div class="seg">
+        <button id="segAgent" class="active" onclick="setAgent()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Agent</button>
+        <button id="segManual" onclick="openManual()">Manual</button>
+      </div>
+      <button class="ref-chip" onclick="openSheet()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="3" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3 11h10M3 13h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        References
+      </button>
+    </div>
+
+    <!-- asset stage -->
+    <div class="stage">
+      <div class="asset-wrap" id="assetWrap">
+        <img id="assetImg" src="images/v2.jpg" alt="asset">
+        <span class="vtag" id="assetTag">v3</span>
+        <span class="swipe-hint">‹ swipe versions ›</span>
+      </div>
+      <div class="vstrip" id="vstrip"></div>
+    </div>
+
+    <!-- agent: chat -->
+    <div class="st-body" id="agentBody">
+      <div class="chat" id="chat">
+        <div class="m u">Sakura Camo hero shot — premium product photography, dark background, editorial lighting.</div>
+        <div class="m a">
+          <div class="who">KittyKat</div>
+          <div class="bubble">
+            Used the Sakura Camo brief — its moodboard, palette and camo reference.
+            <div class="steps"><span class="step done">Brand</span><span class="step done">Moodboard</span><span class="step done">Generated</span></div>
+            <div class="result"><img src="images/v4.jpg"><div class="meta">v1 · on canvas</div></div>
+          </div>
+        </div>
+        <div class="m u">Keep the same face, make the hair darker.</div>
+        <div class="m a">
+          <div class="who">KittyKat</div>
+          <div class="bubble">Done — locked face kept, hair darkened.<div class="result"><img src="images/v2.jpg"><div class="meta">v3 · now showing</div></div></div>
+        </div>
+      </div>
+      <div class="composer">
+        <div class="composer-box">
+          <textarea class="composer-input" id="composer" rows="1" placeholder="Ask for another change, or a new asset…"></textarea>
+          <div class="composer-row">
+            <div class="ic-btn"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <span class="mdl">Model auto</span>
+            <span class="sp"></span>
+            <button class="send" onclick="sendMsg()"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 7l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- manual -->
+    <div class="manual" id="manualBody">
+      <div class="fld">
+        <label>Prompt behind this asset · editable</label>
+        <div class="prompt-box"><textarea class="prompt-ta">Sakura pink ABC camo pattern, shark-head silhouette, pale gold accents, premium streetwear product photography, dark background, editorial lighting — darker hair, keep the locked face.</textarea></div>
+      </div>
+      <div class="fld">
+        <label>Model</label>
+        <button class="ctrl">Gemini 3.0 Pro Image <span class="auto">Auto-picked</span><span class="sp"></span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div class="m-actions">
+        <button class="btn btn-primary">Regenerate</button>
+        <button class="btn btn-ghost" onclick="setAgent()">Back to agent</button>
+      </div>
+    </div>
+
+    <!-- references sheet -->
+    <div class="scrim" id="scrim" onclick="closeSheet()"></div>
+    <div class="sheet" id="sheet">
+      <div class="grab"></div>
+      <h4>References &amp; moodboard</h4>
+      <div class="sheet-lbl">References in play</div>
+      <div class="ref-imgs">
+        <div class="ri"><img src="images/c1.jpg"><span class="cap">Face</span></div>
+        <div class="ri"><img src="images/3.jpg"><span class="cap">Camo</span></div>
+        <div class="ri"><img src="images/c4.jpg"><span class="cap">Pose</span></div>
+      </div>
+      <div class="sheet-lbl">Moodboard in use</div>
+      <div class="mini-mood"><img src="images/5.jpg"><img src="images/9.jpg"><img src="images/7.jpg"><img src="images/1.jpg"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── screen switching ──
+  function showScreen(id, el) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.tabbar .tab').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+  }
+
+  // ── studio open/close ──
+  function openStudio() {
+    document.getElementById('studio').classList.add('open');
+    setAgent();
+  }
+  function closeStudio() { document.getElementById('studio').classList.remove('open'); }
+
+  // ── agent / manual ──
+  function setAgent() {
+    document.getElementById('agentBody').style.display = 'flex';
+    document.getElementById('manualBody').style.display = 'none';
+    document.getElementById('assetWrap').classList.remove('editing');
+    document.getElementById('segAgent').classList.add('active');
+    document.getElementById('segManual').classList.remove('active');
+  }
+  function openManual() {
+    document.getElementById('agentBody').style.display = 'none';
+    document.getElementById('manualBody').style.display = 'flex';
+    document.getElementById('assetWrap').classList.add('editing');
+    document.getElementById('segManual').classList.add('active');
+    document.getElementById('segAgent').classList.remove('active');
+  }
+
+  // ── references sheet ──
+  function openSheet() { document.getElementById('scrim').classList.add('show'); document.getElementById('sheet').classList.add('open'); }
+  function closeSheet() { document.getElementById('scrim').classList.remove('show'); document.getElementById('sheet').classList.remove('open'); }
+
+  // ── versions ──
+  const versions = [
+    { img: 'images/v2.jpg', tag: 'v3' },
+    { img: 'images/v3.jpg', tag: 'v2' },
+    { img: 'images/v4.jpg', tag: 'v1' }
+  ];
+  let vi = 0;
+  function renderVstrip() {
+    const strip = document.getElementById('vstrip');
+    strip.innerHTML = versions.map((v, i) =>
+      `<div class="vthumb ${i === vi ? 'sel' : ''}" onclick="selectVersion(${i})"><img src="${v.img}"><span>${v.tag}</span></div>`
+    ).join('') + `<div class="vadd"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>`;
+  }
+  function selectVersion(i) {
+    vi = (i + versions.length) % versions.length;
+    document.getElementById('assetImg').src = versions[vi].img;
+    document.getElementById('assetTag').textContent = versions[vi].tag;
+    renderVstrip();
+  }
+  renderVstrip();
+
+  // ── swipe to flip versions ──
+  let sx = 0;
+  const aw = document.getElementById('assetWrap');
+  aw.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  aw.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (dx < -40) selectVersion(vi + 1);
+    else if (dx > 40) selectVersion(vi - 1);
+  }, { passive: true });
+
+  // ── composer (fake send) ──
+  const composer = document.getElementById('composer');
+  composer.addEventListener('input', () => { composer.style.height = 'auto'; composer.style.height = composer.scrollHeight + 'px'; });
+  function sendMsg() {
+    const txt = composer.value.trim();
+    if (!txt) return;
+    const chat = document.getElementById('chat');
+    const u = document.createElement('div'); u.className = 'm u'; u.textContent = txt; chat.appendChild(u);
+    composer.value = ''; composer.style.height = 'auto';
+    const a = document.createElement('div'); a.className = 'm a';
+    a.innerHTML = '<div class="who">KittyKat</div><div class="bubble">On it — applying that now…<div class="steps"><span class="step done">Brand</span><span class="step done">Generated</span></div></div>';
+    chat.appendChild(a);
+    chat.scrollTop = chat.scrollHeight;
+  }
+</script>
+</body>
+</html>
