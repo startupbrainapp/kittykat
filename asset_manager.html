@@ -384,10 +384,14 @@
         <button class="filter-dropdown"><span class="filter-dropdown-label">Format</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="filter-spacer"></div>
         <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Newest</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <span class="filter-count">63 assets</span>
+        <span class="filter-count" id="filterCount">20 assets</span>
       </div>
 
       <!-- Asset grid -->
+      <div id="briefFilter" style="display:none; align-items:center; gap:10px; margin-bottom:14px; padding:9px 13px; background:rgba(113,112,255,0.08); border:1px solid rgba(113,112,255,0.28); border-radius:8px; font-size:12px; color:#cdd2ff; letter-spacing:-0.13px;">
+        <span id="briefFilterText"></span>
+        <a href="asset_manager.html" style="margin-left:auto; color:var(--text-tertiary); text-decoration:none;">Clear ✕</a>
+      </div>
       <div class="asset-grid" id="assetGrid"></div>
     </div>
   </div>
@@ -407,6 +411,7 @@
   <div class="drawer-footer" id="drawerFooter"></div>
 </aside>
 
+<script src="data.js"></script>
 <script>
   const assets = [
     { id: 1, img: 'images/1.jpg', name: 'Heritage \u00b7 Hero Film Still 1', brief: '30yr Retrospective \u00b7 Hero Film', campaign: 'Heritage Storytelling \u00b7 30yr', status: 'approved', statusLabel: 'Approved', format: '1080\u00d71080', created: 'Mar 2, 2026', creator: 'Kathy S.', score: 92, visual: 90, tonal: 88, cultural: 96, audience: 94, usedIn: 'Instagram @bape_us \u00b7 Posted Mar 5', usedIcon: 'ig' },
@@ -431,20 +436,47 @@
     { id: 20, img: 'images/20.jpg', name: 'Chrome Milo \u00b7 Y2K Concept', brief: 'Chrome Milo Reissue \u00b7 Archive', campaign: 'Y2K Revival Capsule', status: 'draft', statusLabel: 'Draft', format: '2400\u00d72400', created: 'Apr 16, 2026', creator: 'Kathy S.', score: 65, visual: 62, tonal: 68, cultural: 70, audience: 60, usedIn: null }
   ];
 
-  // Render grid
+  // Phase 4: status reflects the asset's brief in shared state (KK). A shipped
+  // brief shows its assets as Approved. Supports ?brief=<id> filtering so a
+  // shipped brief's "View in Asset Manager" lands here pre-filtered.
+  function kkBriefByName(name) {
+    return (window.KK ? KK.briefs() : []).find(function (b) { return b.name === name; }) || null;
+  }
+  function liveStatus(a) {
+    var b = kkBriefByName(a.brief);
+    if (!b) return { status: a.status, label: a.statusLabel, briefId: null };
+    var s = b.status === 'shipped' ? 'approved' : b.status;
+    return { status: s, label: (s === 'approved' ? 'Approved' : b.statusLabel), briefId: b.id };
+  }
+  function briefFilterId() {
+    try { return new URLSearchParams(location.search).get('brief'); } catch (e) { return null; }
+  }
+
   function renderGrid() {
     const grid = document.getElementById('assetGrid');
-    grid.innerHTML = assets.map(a => `
+    const filterId = briefFilterId();
+    let list = assets.slice();
+    if (filterId) {
+      list = list.filter(function (a) { var l = liveStatus(a); return l.briefId === filterId; });
+      var fb = document.getElementById('briefFilter');
+      var b = window.KK ? KK.brief(filterId) : null;
+      if (fb && b) { fb.style.display = 'flex'; document.getElementById('briefFilterText').textContent = 'Showing assets for: ' + b.name; }
+    }
+    grid.innerHTML = list.map(a => {
+      const l = liveStatus(a);
+      return `
       <div class="asset-tile" onclick="openDrawer(${a.id})">
         <img src="${a.img}" alt="${a.name}">
-        <div class="asset-status-dot ${a.status}"></div>
+        <div class="asset-status-dot ${l.status}"></div>
         <div class="asset-format-badge">${a.format}</div>
         <div class="asset-overlay">
           <div class="asset-overlay-name">${a.name}</div>
           <div class="asset-overlay-brief">${a.brief}</div>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
+    var fc = document.getElementById('filterCount');
+    if (fc) fc.textContent = list.length + ' asset' + (list.length === 1 ? '' : 's');
   }
   renderGrid();
 
@@ -452,10 +484,11 @@
   function openDrawer(id) {
     const a = assets.find(x => x.id === id);
     if (!a) return;
+    const live = liveStatus(a);
 
     document.getElementById('drawerTitle').textContent = a.name;
 
-    const statusPill = '<span class="status-pill ' + a.status + '">' + a.statusLabel + '</span>';
+    const statusPill = '<span class="status-pill ' + live.status + '">' + live.label + '</span>';
 
     // Score bar color helper
     function barColor(val) { return val >= 80 ? 'green' : 'indigo'; }
@@ -547,25 +580,26 @@
       </div>
     `;
 
-    // Footer actions by status
+    // Footer actions by status — wired to the brief's studio / reviews.
+    var studio = "window.location.href='creator_studio.html?brief=" + live.briefId + "'";
+    var reviews = "window.location.href='reviews.html'";
     let footer = '';
-    if (a.status === 'approved') {
+    if (live.status === 'approved') {
       footer = `
         <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Publish</button>
-        <button class="d-btn secondary">Edit in Creator Studio</button>
+        <button class="d-btn secondary" onclick="${studio}">Edit in Creator Studio</button>
         <button class="d-btn secondary">Download</button>`;
-    } else if (a.status === 'review') {
+    } else if (live.status === 'review') {
       footer = `
-        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve</button>
-        <button class="d-btn secondary">Request changes</button>
-        <button class="d-btn secondary">View in Reviews</button>`;
-    } else if (a.status === 'production') {
+        <button class="d-btn primary" onclick="${reviews}"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve in Reviews</button>
+        <button class="d-btn secondary" onclick="${reviews}">View in Reviews</button>`;
+    } else if (live.status === 'production') {
       footer = `
-        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3 8l2-2 1.5 1.5L9 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Open in Creator Studio</button>
-        <button class="d-btn secondary">Submit to Review</button>`;
-    } else if (a.status === 'draft') {
+        <button class="d-btn primary" onclick="${studio}"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3 8l2-2 1.5 1.5L9 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Open in Creator Studio</button>
+        <button class="d-btn secondary" onclick="${studio}">Submit to Review</button>`;
+    } else if (live.status === 'draft') {
       footer = `
-        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3 8l2-2 1.5 1.5L9 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Open in Creator Studio</button>`;
+        <button class="d-btn primary" onclick="${studio}"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3 8l2-2 1.5 1.5L9 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Open in Creator Studio</button>`;
     }
     document.getElementById('drawerFooter').innerHTML = footer;
 
