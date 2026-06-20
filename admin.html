@@ -248,64 +248,9 @@
       <!-- INTEGRATIONS -->
       <div class="section-header">
         <span class="section-label">Integrations</span>
-        <span class="section-badge">6</span>
+        <span class="section-badge" id="int-badge">6</span>
       </div>
-      <div class="int-grid">
-        <div class="int-card">
-          <div class="int-logo meta">M</div>
-          <div class="int-info">
-            <div class="int-name">Meta Ads</div>
-            <div class="int-status"><span class="int-dot green"></span> Connected</div>
-            <div class="int-sync">Last synced: 2h ago</div>
-          </div>
-          <div class="int-action"><button class="btn-disconnect">Disconnect</button></div>
-        </div>
-        <div class="int-card">
-          <div class="int-logo google">G</div>
-          <div class="int-info">
-            <div class="int-name">Google Ads</div>
-            <div class="int-status"><span class="int-dot green"></span> Connected</div>
-            <div class="int-sync">Last synced: 1h ago</div>
-          </div>
-          <div class="int-action"><button class="btn-disconnect">Disconnect</button></div>
-        </div>
-        <div class="int-card">
-          <div class="int-logo tiktok">T</div>
-          <div class="int-info">
-            <div class="int-name">TikTok Ads</div>
-            <div class="int-status"><span class="int-dot green"></span> Connected</div>
-            <div class="int-sync">Last synced: 3h ago</div>
-          </div>
-          <div class="int-action"><button class="btn-disconnect">Disconnect</button></div>
-        </div>
-        <div class="int-card">
-          <div class="int-logo pinterest">P</div>
-          <div class="int-info">
-            <div class="int-name">Pinterest Ads</div>
-            <div class="int-status"><span class="int-dot green"></span> Connected</div>
-            <div class="int-sync">Last synced: 6h ago</div>
-          </div>
-          <div class="int-action"><button class="btn-disconnect">Disconnect</button></div>
-        </div>
-        <div class="int-card">
-          <div class="int-logo ga4">A</div>
-          <div class="int-info">
-            <div class="int-name">Google Analytics 4</div>
-            <div class="int-status"><span class="int-dot green"></span> Connected</div>
-            <div class="int-sync">Last synced: 30m ago</div>
-          </div>
-          <div class="int-action"><button class="btn-disconnect">Disconnect</button></div>
-        </div>
-        <div class="int-card">
-          <div class="int-logo shopify">S</div>
-          <div class="int-info">
-            <div class="int-name">Shopify</div>
-            <div class="int-status"><span class="int-dot green"></span> Connected</div>
-            <div class="int-sync">Last synced: 1h ago</div>
-          </div>
-          <div class="int-action"><button class="btn-disconnect">Disconnect</button></div>
-        </div>
-      </div>
+      <div class="int-grid" id="int-grid"></div>
 
       <!-- BILLING & USAGE -->
       <div class="section-header">
@@ -313,13 +258,13 @@
       </div>
       <div class="plan-card">
         <div class="plan-info">
-          <div class="plan-name">Pro Plan</div>
-          <div class="plan-meta">Renews Apr 30, 2026</div>
+          <div class="plan-name" id="plan-name">Pro Plan</div>
+          <div class="plan-meta" id="plan-meta">Renews Apr 30, 2026</div>
         </div>
         <div style="text-align: right;">
-          <div class="plan-price">$499<span class="plan-period">/mo</span></div>
+          <div class="plan-price" id="plan-price">$499<span class="plan-period">/mo</span></div>
         </div>
-        <button class="btn btn-ghost" style="margin-left: 16px;">Manage</button>
+        <button class="btn btn-ghost" id="plan-manage" style="margin-left: 16px;">Manage</button>
       </div>
       <div class="usage-grid">
         <div class="usage-item">
@@ -367,10 +312,10 @@
             <div class="settings-desc">How long to keep historical campaign performance data</div>
           </div>
           <div class="settings-control">
-            <select class="select-input">
+            <select class="select-input" id="set-retainCampaignData">
               <option>6 months</option>
               <option>12 months</option>
-              <option selected>24 months</option>
+              <option>24 months</option>
               <option>36 months</option>
               <option>Indefinitely</option>
             </select>
@@ -382,9 +327,9 @@
             <div class="settings-desc">How long to store uploaded and generated creative assets</div>
           </div>
           <div class="settings-control">
-            <select class="select-input">
+            <select class="select-input" id="set-retainCreativeAssets">
               <option>6 months</option>
-              <option selected>12 months</option>
+              <option>12 months</option>
               <option>24 months</option>
               <option>36 months</option>
               <option>Indefinitely</option>
@@ -397,7 +342,7 @@
             <div class="settings-desc">Automatically remove assets that were rejected during review</div>
           </div>
           <div class="settings-control">
-            <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div>
+            <div class="toggle" id="set-autoDeleteRejected"><div class="toggle-knob"></div></div>
           </div>
         </div>
         <div class="settings-row">
@@ -406,7 +351,7 @@
             <div class="settings-desc">Automatically purge personally identifiable data per GDPR requirements</div>
           </div>
           <div class="settings-control">
-            <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div>
+            <div class="toggle" id="set-gdprPurge"><div class="toggle-knob"></div></div>
           </div>
         </div>
       </div>
@@ -415,7 +360,7 @@
       <div class="section-header">
         <span class="section-label">Audit Log</span>
         <span class="section-badge">Recent</span>
-        <a class="section-link" href="#">Export CSV</a>
+        <a class="section-link" href="#" id="audit-export">Export CSV</a>
       </div>
       <div style="background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; overflow: hidden;">
         <table class="audit-table">
@@ -427,56 +372,7 @@
               <th>Time</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td class="audit-user">Kathy S.</td>
-              <td class="audit-action">Changed role for James K. to Analyst</td>
-              <td class="audit-date">Apr 17, 2026</td>
-              <td class="audit-time">10:42 AM</td>
-            </tr>
-            <tr>
-              <td class="audit-user">Marcus T.</td>
-              <td class="audit-action">Approved brief "Sakura Camo"</td>
-              <td class="audit-date">Apr 17, 2026</td>
-              <td class="audit-time">9:15 AM</td>
-            </tr>
-            <tr>
-              <td class="audit-user system">System</td>
-              <td class="audit-action">Auto-synced Meta Ads data</td>
-              <td class="audit-date">Apr 17, 2026</td>
-              <td class="audit-time">8:00 AM</td>
-            </tr>
-            <tr>
-              <td class="audit-user">Yuki A.</td>
-              <td class="audit-action">Exported Q1 Brand Health report</td>
-              <td class="audit-date">Apr 16, 2026</td>
-              <td class="audit-time">4:30 PM</td>
-            </tr>
-            <tr>
-              <td class="audit-user">Kathy S.</td>
-              <td class="audit-action">Updated scoring weights</td>
-              <td class="audit-date">Apr 16, 2026</td>
-              <td class="audit-time">2:15 PM</td>
-            </tr>
-            <tr>
-              <td class="audit-user system">System</td>
-              <td class="audit-action">Auto-purged 34 rejected assets</td>
-              <td class="audit-date">Apr 16, 2026</td>
-              <td class="audit-time">12:00 AM</td>
-            </tr>
-            <tr>
-              <td class="audit-user">Sarah L.</td>
-              <td class="audit-action">Uploaded 12 assets to Sakura Camo</td>
-              <td class="audit-date">Apr 15, 2026</td>
-              <td class="audit-time">3:45 PM</td>
-            </tr>
-            <tr>
-              <td class="audit-user">Marcus T.</td>
-              <td class="audit-action">Invited priya@bape.com</td>
-              <td class="audit-date">Apr 15, 2026</td>
-              <td class="audit-time">11:20 AM</td>
-            </tr>
-          </tbody>
+          <tbody id="audit-body"></tbody>
         </table>
       </div>
 
@@ -484,15 +380,8 @@
       <div class="section-header">
         <span class="section-label">Brand Workspaces</span>
       </div>
-      <div class="ws-card">
-        <div class="ws-card-logo"><img src="bape-logo.png" alt="BAPE"></div>
-        <div class="ws-card-info">
-          <div class="ws-card-name">BAPE</div>
-          <div class="ws-card-status"><span class="int-dot green"></span> Active workspace</div>
-        </div>
-        <span style="font-size: 11px; font-weight: 510; color: var(--status-green); background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 9999px; letter-spacing: 0.4px; text-transform: uppercase;">Current</span>
-      </div>
-      <button class="btn btn-ghost" style="margin-top: 4px;">
+      <div id="ws-list"></div>
+      <button class="btn btn-ghost" id="ws-add" style="margin-top: 4px;">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 3v8M3 7h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Add Workspace
       </button>
@@ -501,6 +390,190 @@
     </div>
   </div>
 </div>
+
+<script src="data.js"></script>
+<script src="data-admin.js"></script>
+<script>
+(function () {
+  var A = window.KK && window.KK.admin;
+  if (!A) { console.warn('admin.html: KK.admin missing'); return; }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+
+  /* ---------- INTEGRATIONS ---------- */
+  function renderIntegrations() {
+    var list = A.integrations();
+    var grid = document.getElementById('int-grid');
+    grid.innerHTML = list.map(function (it) {
+      var initial = (it.name[0] || '?').toUpperCase();
+      var statusHtml = it.connected
+        ? '<div class="int-status"><span class="int-dot green"></span> Connected</div>' +
+          '<div class="int-sync">Last synced: ' + esc(it.lastSync) + '</div>'
+        : '<div class="int-status"><span class="int-dot red"></span> Disconnected</div>';
+      var btn = it.connected
+        ? '<button class="btn-disconnect" data-int="' + esc(it.id) + '" data-connect="0">Disconnect</button>'
+        : '<button class="btn-disconnect" data-int="' + esc(it.id) + '" data-connect="1">Connect</button>';
+      return '<div class="int-card">' +
+        '<div class="int-logo ' + esc(it.cls) + '">' + esc(initial) + '</div>' +
+        '<div class="int-info"><div class="int-name">' + esc(it.name) + '</div>' + statusHtml + '</div>' +
+        '<div class="int-action">' + btn + '</div>' +
+      '</div>';
+    }).join('');
+    var connected = list.filter(function (i) { return i.connected; }).length;
+    document.getElementById('int-badge').textContent = connected;
+  }
+  document.getElementById('int-grid').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-int]');
+    if (!btn) return;
+    A.setIntegration(btn.getAttribute('data-int'), btn.getAttribute('data-connect') === '1');
+    renderIntegrations();
+    renderAudit();
+  });
+
+  /* ---------- DATA RETENTION ---------- */
+  function initSettings() {
+    var s = A.settings();
+    var c = document.getElementById('set-retainCampaignData');
+    var a = document.getElementById('set-retainCreativeAssets');
+    c.value = s.retainCampaignData;
+    a.value = s.retainCreativeAssets;
+    c.addEventListener('change', function () { A.setSetting('retainCampaignData', c.value); renderAudit(); });
+    a.addEventListener('change', function () { A.setSetting('retainCreativeAssets', a.value); renderAudit(); });
+
+    [['set-autoDeleteRejected', 'autoDeleteRejected'], ['set-gdprPurge', 'gdprPurge']].forEach(function (pair) {
+      var el = document.getElementById(pair[0]);
+      var key = pair[1];
+      if (s[key]) el.classList.add('on');
+      el.addEventListener('click', function () {
+        var next = !el.classList.contains('on');
+        el.classList.toggle('on', next);
+        A.setSetting(key, next);
+        renderAudit();
+      });
+    });
+  }
+
+  /* ---------- AUDIT LOG ---------- */
+  function renderAudit() {
+    var rows = A.audit();
+    document.getElementById('audit-body').innerHTML = rows.map(function (e) {
+      var userCls = e.system ? 'audit-user system' : 'audit-user';
+      return '<tr>' +
+        '<td class="' + userCls + '">' + esc(e.user) + '</td>' +
+        '<td class="audit-action">' + esc(e.action) + '</td>' +
+        '<td class="audit-date">' + esc(e.date) + '</td>' +
+        '<td class="audit-time">' + esc(e.time) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+  document.getElementById('audit-export').addEventListener('click', function (e) {
+    e.preventDefault();
+    var blob = new Blob([A.auditCsv()], { type: 'text/csv' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'audit-log.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  /* ---------- WORKSPACES ---------- */
+  function renderWorkspaces() {
+    var list = A.workspaces();
+    document.getElementById('ws-list').innerHTML = list.map(function (w) {
+      var logo = w.logo
+        ? '<img src="' + esc(w.logo) + '" alt="' + esc(w.name) + '">'
+        : esc((w.name[0] || '?').toUpperCase());
+      var statusTxt = w.active ? 'Active workspace' : 'Workspace';
+      var badge = w.active
+        ? '<span style="font-size: 11px; font-weight: 510; color: var(--status-green); background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 9999px; letter-spacing: 0.4px; text-transform: uppercase;">Current</span>'
+        : '';
+      var dot = w.active ? '<span class="int-dot green"></span> ' : '';
+      return '<div class="ws-card">' +
+        '<div class="ws-card-logo">' + logo + '</div>' +
+        '<div class="ws-card-info"><div class="ws-card-name">' + esc(w.name) + '</div>' +
+        '<div class="ws-card-status">' + dot + esc(statusTxt) + '</div></div>' +
+        badge +
+      '</div>';
+    }).join('');
+  }
+
+  /* ---------- BILLING ---------- */
+  function renderPlan() {
+    var p = A.plan();
+    document.getElementById('plan-name').textContent = p.name;
+    document.getElementById('plan-meta').textContent = 'Renews ' + p.renews;
+    document.getElementById('plan-price').innerHTML = esc(p.price) + '<span class="plan-period">' + esc(p.period) + '</span>';
+  }
+
+  /* ---------- INLINE MODAL ---------- */
+  function showModal(opts) {
+    // opts: { title, body(html), withInput, placeholder, confirmLabel, onConfirm(value) }
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;';
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:var(--bg-panel);border:1px solid var(--border-standard);border-radius:12px;padding:22px;width:380px;max-width:90vw;box-shadow:0 16px 48px rgba(0,0,0,0.5);';
+    var inputHtml = opts.withInput
+      ? '<input type="text" id="modal-input" placeholder="' + esc(opts.placeholder || '') + '" style="width:100%;padding:8px 10px;border-radius:6px;background:var(--surface-1);border:1px solid var(--border-standard);color:var(--text-primary);font-size:13px;letter-spacing:-0.13px;margin-top:14px;outline:none;">'
+      : '';
+    panel.innerHTML =
+      '<div style="font-size:15px;font-weight:510;color:var(--text-primary);letter-spacing:-0.165px;">' + esc(opts.title) + '</div>' +
+      (opts.body ? '<div style="font-size:13px;color:var(--text-tertiary);letter-spacing:-0.13px;margin-top:6px;line-height:1.5;">' + opts.body + '</div>' : '') +
+      inputHtml +
+      '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">' +
+        '<button class="btn btn-ghost" id="modal-cancel">' + esc(opts.cancelLabel || 'Cancel') + '</button>' +
+        (opts.onConfirm ? '<button class="btn btn-primary" id="modal-confirm">' + esc(opts.confirmLabel || 'Confirm') + '</button>' : '') +
+      '</div>';
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+    var input = panel.querySelector('#modal-input');
+    if (input) input.focus();
+    function close() { document.body.removeChild(overlay); }
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    panel.querySelector('#modal-cancel').addEventListener('click', close);
+    var confirmBtn = panel.querySelector('#modal-confirm');
+    if (confirmBtn) {
+      function doConfirm() {
+        var val = input ? input.value.trim() : null;
+        if (opts.withInput && !val) { if (input) input.focus(); return; }
+        close();
+        opts.onConfirm(val);
+      }
+      confirmBtn.addEventListener('click', doConfirm);
+      if (input) input.addEventListener('keydown', function (e) { if (e.key === 'Enter') doConfirm(); });
+    }
+  }
+
+  document.getElementById('ws-add').addEventListener('click', function () {
+    showModal({
+      title: 'Add Workspace',
+      body: 'Create a new brand workspace.',
+      withInput: true,
+      placeholder: 'Workspace name',
+      confirmLabel: 'Add',
+      onConfirm: function (name) {
+        A.addWorkspace(name);
+        renderWorkspaces();
+        renderAudit();
+      }
+    });
+  });
+
+  document.getElementById('plan-manage').addEventListener('click', function () {
+    showModal({
+      title: 'Manage Plan',
+      body: 'This is a prototype — billing is not connected. In the live product this opens your subscription and payment settings.',
+      cancelLabel: 'Close'
+    });
+  });
+
+  /* ---------- INIT ---------- */
+  renderIntegrations();
+  initSettings();
+  renderAudit();
+  renderWorkspaces();
+  renderPlan();
+})();
+</script>
 
 </body>
 </html>

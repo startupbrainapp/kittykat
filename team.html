@@ -718,19 +718,13 @@
 
       <!-- Invite bar -->
       <div class="invite-bar">
-        <input type="email" placeholder="Email address (e.g. name@bape.com)">
-        <select>
-          <option>Designer</option>
-          <option>Analyst</option>
-          <option>Creative Lead</option>
-          <option>Regional Manager</option>
-          <option>CMO</option>
-        </select>
-        <button class="btn-primary">Invite</button>
+        <input type="email" id="inviteEmail" placeholder="Email address (e.g. name@bape.com)">
+        <select id="inviteRole"></select>
+        <button class="btn-primary" id="inviteBtn">Invite</button>
       </div>
 
       <!-- Team members -->
-      <div class="section-header">Team members <span class="section-count">7</span></div>
+      <div class="section-header">Team members <span class="section-count" id="memberCount">7</span></div>
       <table class="team-table">
         <thead>
           <tr>
@@ -741,7 +735,7 @@
             <th></th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="membersBody">
           <!-- Kathy S. -->
           <tr>
             <td>
@@ -858,7 +852,7 @@
       </table>
 
       <!-- Pending invites -->
-      <div class="section-header">Pending invites <span class="section-count">2</span></div>
+      <div class="section-header">Pending invites <span class="section-count" id="inviteCount">2</span></div>
       <table class="pending-table">
         <thead>
           <tr>
@@ -868,7 +862,7 @@
             <th></th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="invitesBody">
           <tr>
             <td><span class="pending-email">alex.chen@bape.com</span></td>
             <td><span class="role-pill role-designer">Designer</span></td>
@@ -986,5 +980,325 @@
   </div>
 </div>
 
+<!-- Inline modal/menu (matches page tokens) -->
+<style>
+  .kk-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 1000;
+  }
+  .kk-overlay.open { display: flex; }
+  .kk-modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-standard);
+    border-radius: 10px;
+    padding: 20px;
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  }
+  .kk-modal-title {
+    font-size: 14px; font-weight: 590;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+    margin-bottom: 14px;
+  }
+  .kk-field-label {
+    font-size: 11px; font-weight: 510;
+    color: var(--text-quaternary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .kk-input, .kk-select {
+    width: 100%;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-standard);
+    border-radius: 6px;
+    padding: 7px 12px;
+    color: var(--text-primary);
+    font-size: 13px; font-weight: 400;
+    letter-spacing: -0.13px;
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 14px;
+  }
+  .kk-select {
+    padding-right: 28px;
+    color: var(--text-secondary);
+    font-weight: 510;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238a8f98' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .kk-input:focus, .kk-select:focus { border-color: var(--brand); }
+  .kk-modal-actions {
+    display: flex; justify-content: flex-end; gap: 8px;
+    margin-top: 4px;
+  }
+  /* Row context menu */
+  .kk-menu {
+    position: fixed;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-standard);
+    border-radius: 8px;
+    padding: 4px;
+    min-width: 150px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    z-index: 1001;
+    display: none;
+  }
+  .kk-menu.open { display: block; }
+  .kk-menu-item {
+    display: block; width: 100%;
+    text-align: left;
+    padding: 7px 10px;
+    border-radius: 5px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px; font-weight: 510;
+    letter-spacing: -0.13px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .kk-menu-item:hover { background: var(--surface-3); }
+  .kk-menu-item.danger { color: var(--status-red); }
+  /* Toast */
+  .kk-toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-standard);
+    color: var(--text-primary);
+    font-size: 13px; font-weight: 510;
+    letter-spacing: -0.13px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    z-index: 1002;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .kk-toast.show { opacity: 1; }
+</style>
+
+<div class="kk-overlay" id="kkOverlay"><div class="kk-modal" id="kkModal"></div></div>
+<div class="kk-menu" id="kkMenu"></div>
+<div class="kk-toast" id="kkToast"></div>
+
+<script src="data.js"></script>
+<script src="data-admin.js"></script>
+<script>
+(function () {
+  function start() {
+  var A = KK.admin;
+  var membersBody = document.getElementById('membersBody');
+  var invitesBody = document.getElementById('invitesBody');
+  var memberCount = document.getElementById('memberCount');
+  var inviteCount = document.getElementById('inviteCount');
+  var overlay = document.getElementById('kkOverlay');
+  var modal = document.getElementById('kkModal');
+  var menu = document.getElementById('kkMenu');
+  var toast = document.getElementById('kkToast');
+
+  var DOTS = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="11" r="1" fill="currentColor"/></svg>';
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function roleClass(role) {
+    if (role === 'CMO') return 'role-cmo';
+    if (role === 'Creative Lead') return 'role-creative-lead';
+    if (/^Regional/.test(role)) return 'role-regional';
+    if (role === 'Designer') return 'role-designer';
+    if (role === 'Analyst') return 'role-analyst';
+    return 'role-designer';
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () { toast.classList.remove('show'); }, 1800);
+  }
+
+  function closeMenu() { menu.classList.remove('open'); }
+  function closeModal() { overlay.classList.remove('open'); modal.innerHTML = ''; }
+
+  // ─── RENDER ───
+  function renderMembers() {
+    var members = A.members();
+    memberCount.textContent = members.length;
+    membersBody.innerHTML = members.map(function (m) {
+      var activeCell = m.activeNow
+        ? '<span class="active-now"><span class="active-dot"></span>Active now</span>'
+        : '<span class="last-active">' + esc(m.lastActive) + '</span>';
+      return '<tr data-id="' + esc(m.id) + '">' +
+        '<td><div class="member-cell">' +
+          '<div class="member-avatar" style="background: ' + esc(m.color) + ';">' + esc(m.initial) + '</div>' +
+          '<div><div class="member-name">' + esc(m.name) + '</div>' +
+          '<div class="member-email">' + esc(m.email) + '</div></div>' +
+        '</div></td>' +
+        '<td><span class="role-pill ' + roleClass(m.role) + '">' + esc(m.role) + '</span></td>' +
+        '<td><span class="access-text">' + esc(m.access) + '</span></td>' +
+        '<td>' + activeCell + '</td>' +
+        '<td><button class="btn-icon" data-action="menu" data-id="' + esc(m.id) + '">' + DOTS + '</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderInvites() {
+    var invites = A.invites();
+    inviteCount.textContent = invites.length;
+    invitesBody.innerHTML = invites.map(function (i) {
+      return '<tr data-id="' + esc(i.id) + '">' +
+        '<td><span class="pending-email">' + esc(i.email) + '</span></td>' +
+        '<td><span class="role-pill ' + roleClass(i.role) + '">' + esc(i.role) + '</span></td>' +
+        '<td><span class="pending-date">' + esc(i.invited) + '</span></td>' +
+        '<td><div class="action-btns">' +
+          '<button class="btn-sm" data-action="resend" data-id="' + esc(i.id) + '">Resend</button>' +
+          '<button class="btn-sm-danger" data-action="revoke" data-id="' + esc(i.id) + '">Revoke</button>' +
+        '</div></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function roleOptions(selected) {
+    return A.roles().map(function (r) {
+      return '<option value="' + esc(r) + '"' + (r === selected ? ' selected' : '') + '>' + esc(r) + '</option>';
+    }).join('');
+  }
+
+  // ─── INVITE BAR ───
+  document.getElementById('inviteRole').innerHTML = roleOptions('Designer');
+  document.getElementById('inviteBtn').addEventListener('click', function () {
+    var email = (document.getElementById('inviteEmail').value || '').trim();
+    var role = document.getElementById('inviteRole').value;
+    if (email.indexOf('@') === -1) { showToast('Enter a valid email address'); return; }
+    A.invite(email, role);
+    document.getElementById('inviteEmail').value = '';
+    renderInvites();
+    showToast('Invite sent to ' + email);
+  });
+
+  // ─── ROW MENU ───
+  function openRowMenu(id, anchor) {
+    closeMenu();
+    menu.innerHTML =
+      '<button class="kk-menu-item" data-m="role" data-id="' + esc(id) + '">Change role</button>' +
+      '<button class="kk-menu-item" data-m="access" data-id="' + esc(id) + '">Edit access</button>' +
+      '<button class="kk-menu-item danger" data-m="remove" data-id="' + esc(id) + '">Remove</button>';
+    var r = anchor.getBoundingClientRect();
+    menu.style.top = (r.bottom + 4) + 'px';
+    menu.style.left = (r.right - 150) + 'px';
+    menu.classList.add('open');
+  }
+
+  function openRoleModal(id) {
+    var m = A.member(id);
+    if (!m) return;
+    modal.innerHTML =
+      '<div class="kk-modal-title">Change role &mdash; ' + esc(m.name) + '</div>' +
+      '<label class="kk-field-label">Role</label>' +
+      '<select class="kk-select" id="kkRoleSelect">' + roleOptions(m.role) + '</select>' +
+      '<div class="kk-modal-actions">' +
+        '<button class="btn-sm" data-x="cancel">Cancel</button>' +
+        '<button class="btn-primary" data-x="save">Save</button>' +
+      '</div>';
+    overlay.classList.add('open');
+    modal.querySelector('[data-x=save]').addEventListener('click', function () {
+      A.updateMember(id, { role: modal.querySelector('#kkRoleSelect').value });
+      closeModal(); renderMembers(); showToast('Role updated');
+    });
+    modal.querySelector('[data-x=cancel]').addEventListener('click', closeModal);
+  }
+
+  function openAccessModal(id) {
+    var m = A.member(id);
+    if (!m) return;
+    modal.innerHTML =
+      '<div class="kk-modal-title">Edit access &mdash; ' + esc(m.name) + '</div>' +
+      '<label class="kk-field-label">Access</label>' +
+      '<input class="kk-input" id="kkAccessInput" value="' + esc(m.access) + '">' +
+      '<div class="kk-modal-actions">' +
+        '<button class="btn-sm" data-x="cancel">Cancel</button>' +
+        '<button class="btn-primary" data-x="save">Save</button>' +
+      '</div>';
+    overlay.classList.add('open');
+    var input = modal.querySelector('#kkAccessInput');
+    input.focus();
+    modal.querySelector('[data-x=save]').addEventListener('click', function () {
+      A.updateMember(id, { access: input.value.trim() });
+      closeModal(); renderMembers(); showToast('Access updated');
+    });
+    modal.querySelector('[data-x=cancel]').addEventListener('click', closeModal);
+  }
+
+  // ─── EVENT DELEGATION ───
+  membersBody.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-action="menu"]');
+    if (btn) { e.stopPropagation(); openRowMenu(btn.getAttribute('data-id'), btn); }
+  });
+
+  menu.addEventListener('click', function (e) {
+    var item = e.target.closest('.kk-menu-item');
+    if (!item) return;
+    var id = item.getAttribute('data-id');
+    var action = item.getAttribute('data-m');
+    closeMenu();
+    if (action === 'role') openRoleModal(id);
+    else if (action === 'access') openAccessModal(id);
+    else if (action === 'remove') {
+      var m = A.member(id);
+      if (confirm('Remove ' + (m ? m.name : 'this member') + ' from the team?')) {
+        A.removeMember(id); renderMembers(); showToast('Member removed');
+      }
+    }
+  });
+
+  invitesBody.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var id = btn.getAttribute('data-id');
+    if (btn.getAttribute('data-action') === 'resend') {
+      A.resendInvite(id);
+      var orig = btn.textContent;
+      btn.textContent = 'Sent';
+      setTimeout(function () { btn.textContent = orig; }, 1500);
+    } else {
+      A.revokeInvite(id); renderInvites(); showToast('Invite revoked');
+    }
+  });
+
+  // Dismiss menu/overlay on outside click
+  document.addEventListener('click', function (e) {
+    if (!menu.contains(e.target) && !e.target.closest('[data-action="menu"]')) closeMenu();
+  });
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+  window.addEventListener('scroll', closeMenu, true);
+
+  // ─── INIT ───
+  renderMembers();
+  renderInvites();
+  }
+
+  // Wait for the engine (handles any script load-order timing)
+  (function ready() {
+    if (window.KK && KK.admin) { start(); }
+    else { setTimeout(ready, 20); }
+  })();
+})();
+</script>
 </body>
 </html>

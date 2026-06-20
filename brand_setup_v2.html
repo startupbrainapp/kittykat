@@ -665,363 +665,158 @@
   </div>
 </main>
 
+<!-- Add-source modal -->
+<div id="addSourceModal" style="display:none; position:fixed; inset:0; z-index:100; align-items:center; justify-content:center; background:rgba(0,0,0,0.55);">
+  <div style="background:var(--bg-panel); border:1px solid var(--border-standard); border-radius:10px; width:380px; max-width:calc(100vw - 40px); padding:18px;">
+    <div class="section-label" id="addSourceTitle" style="margin-bottom:10px;">Add Source</div>
+    <input id="addSourceInput" class="source-input" style="width:100%;" placeholder="Name e.g. @bape_jp">
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:14px;">
+      <button class="btn btn-ghost" onclick="closeAddSource()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmAddSource()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="data-admin.js"></script>
 <script>
-  const tabContent = {
-    own: `
-      <div class="section-label">Social Channels</div>
-      <div class="source-grid">
-        <div class="source-card connected">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <rect x="2" y="2" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/>
-                <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/>
-                <circle cx="11.5" cy="4.5" r="0.8" fill="currentColor"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Instagram</div>
-              <div class="source-desc">Posts, reels, stories archive</div>
-            </div>
-            <div class="source-status">
-              <span class="status-pill live"><span class="pill-dot"></span>Live</span>
-            </div>
-          </div>
-          <div class="connected-list">
-            <div class="connected-item">
-              <span class="connected-label">@bape_us</span>
-              <span class="connected-meta">8,576 assets · syncing daily</span>
-              <button class="remove-btn">×</button>
-            </div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="Add another handle e.g. @bape_jp">
-            <button class="source-btn">Add</button>
-          </div>
-        </div>
 
-        <div class="source-card connected">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/>
-                <path d="M2 8h12M8 2c2 2 3 4 3 6s-1 4-3 6M8 2c-2 2-3 4-3 6s1 4 3 6" stroke="currentColor" stroke-width="1.2"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Website</div>
-              <div class="source-desc">Product pages, campaigns, lookbooks</div>
-            </div>
-            <div class="source-status">
-              <span class="status-pill live"><span class="pill-dot"></span>Live</span>
-            </div>
-          </div>
-          <div class="connected-list">
-            <div class="connected-item">
-              <span class="connected-label">us.bape.com</span>
-              <span class="connected-meta">Crawling weekly</span>
-              <button class="remove-btn">×</button>
-            </div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="Add another URL e.g. bape.com/jp">
-            <button class="source-btn">Add</button>
-          </div>
-        </div>
+  // ── Engine-driven data sources ──────────────────────────────────────
+  // Maps each tab to the engine group it renders + the static chrome
+  // (section label, footer sync-bar, upload zone) wrapped around the rows.
+  const tabConfig = {
+    own:         { group: 'Social Channels',          label: 'Social Channels',          addLabel: 'Add',     placeholder: 'Add a channel e.g. @bape_jp' },
+    competitors: { group: 'Competitor Handles',       label: 'Competitor Instagram Handles', addLabel: 'Track', placeholder: 'Add competitor Instagram handle' },
+    catalog:     { group: 'Product Catalog',          label: 'Product Catalog',          addLabel: 'Add',     placeholder: 'Catalog source name' },
+    ads:         { group: 'Ad Platform Connections',  label: 'Ad Platform Connections',  addLabel: 'Connect', placeholder: 'Ad platform name' }
+  };
 
-        <div class="source-card">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/>
-                <path d="M8 4v6M6 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Pinterest</div>
-              <div class="source-desc">Boards and saved inspiration</div>
-            </div>
-            <div class="source-status">
-              <span class="status-pill empty">Not connected</span>
-            </div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="Pinterest board URL or handle">
-            <button class="source-btn">Connect</button>
-          </div>
-        </div>
+  let currentTab = 'own';
+  let pendingGroup = null;
 
-        <div class="source-card">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M9 2v8a3 3 0 1 1-3-3V4c1 1 2 1.5 3 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">TikTok</div>
-              <div class="source-desc">Brand video content archive</div>
-            </div>
-            <div class="source-status">
-              <span class="status-pill empty">Not connected</span>
-            </div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="TikTok handle e.g. @bapeofficial">
-            <button class="source-btn">Connect</button>
-          </div>
-        </div>
-      </div>
-      <div class="sync-bar">
-        <div class="sync-dot"></div>
-        <div class="sync-label">Brand Brain last synced <strong>2 hours ago</strong> · 8,576 assets indexed across 2 sources</div>
-        <div class="sync-meta">Next sync in 22h</div>
-      </div>`,
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
 
-    competitors: `
-      <div class="section-label">Competitor Instagram Handles</div>
-      <div class="source-grid">
-        <div class="source-card connected">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.2"/>
-                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Competitor Tracking</div>
-              <div class="source-desc">Visual benchmarking & trend delta</div>
-            </div>
-            <div class="source-status">
-              <span class="status-pill live"><span class="pill-dot"></span>2 tracked</span>
-            </div>
+  function sourceCardHTML(s) {
+    const live = s.connected
+      ? '<span class="status-pill live"><span class="pill-dot"></span>Connected</span>'
+      : '<span class="status-pill empty">Not connected</span>';
+    const btnLabel = s.connected ? 'Disconnect' : 'Connect';
+    return `
+      <div class="source-card${s.connected ? ' connected' : ''}">
+        <div class="source-card-header">
+          <div class="source-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <div class="connected-list">
-            <div class="connected-item">
-              <span class="connected-label">@supremenewyork</span>
-              <span class="connected-meta">4,201 assets · weekly sync</span>
-              <button class="remove-btn">×</button>
-            </div>
-            <div class="connected-item">
-              <span class="connected-label">@palace_latest</span>
-              <span class="connected-meta">2,887 assets · weekly sync</span>
-              <button class="remove-btn">×</button>
-            </div>
+          <div>
+            <div class="source-name">${esc(s.name)}</div>
+            <div class="source-desc">${esc(s.detail)}</div>
           </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="Add competitor Instagram handle">
-            <button class="source-btn">Track</button>
-          </div>
+          <div class="source-status">${live}</div>
         </div>
-
-        <div class="source-card">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/>
-                <path d="M2 8h12M8 2c2 2 3 4 3 6s-1 4-3 6M8 2c-2 2-3 4-3 6s1 4 3 6" stroke="currentColor" stroke-width="1.2"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Competitor Websites</div>
-              <div class="source-desc">Campaign pages, lookbooks</div>
-            </div>
-            <div class="source-status">
-              <span class="status-pill empty">Not set up</span>
-            </div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="Competitor website URL">
-            <button class="source-btn">Add</button>
-          </div>
+        <div class="input-row">
+          <button class="source-btn" onclick="onToggleSource('${esc(s.id)}')">${btnLabel}</button>
+          <button class="remove-btn" title="Remove" onclick="onRemoveSource('${esc(s.id)}')">×</button>
         </div>
-      </div>
-      <div class="sync-bar">
-        <div class="sync-dot"></div>
-        <div class="sync-label">Competitor data feeds into <strong>Trend Matching</strong> and <strong>Competitive Intel</strong> automatically</div>
-        <div class="sync-meta">Used in 2 modules</div>
-      </div>`,
+      </div>`;
+  }
 
-    catalog: `
-      <div class="section-label">Product Catalog</div>
-      <div class="source-grid" style="grid-template-columns: 1fr;">
-        <div class="source-card connected">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 4l6-2 6 2v8l-6 2-6-2V4zM8 2v12M2 4l6 2 6-2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Product Catalog</div>
-              <div class="source-desc">SKUs, images, descriptions, pricing</div>
-            </div>
-            <div class="source-status">
-              <span class="status-pill live"><span class="pill-dot"></span>1,240 SKUs</span>
-            </div>
-          </div>
-          <div class="connected-list">
-            <div class="connected-item">
-              <span class="connected-label">bape_catalog_ss26.csv</span>
-              <span class="connected-meta">Uploaded 3 days ago · 1,240 products</span>
-              <button class="remove-btn">×</button>
-            </div>
-          </div>
-        </div>
-      </div>
+  function tabBodyHTML(tab) {
+    const cfg = tabConfig[tab];
+    const sources = (window.KK && window.KK.admin) ? window.KK.admin.dataSources(cfg.group) : [];
+    const rows = sources.map(sourceCardHTML).join('') ||
+      `<div class="source-desc" style="grid-column:1/-1;">No sources yet. Add one to get started.</div>`;
+    const connectedCount = sources.filter(s => s.connected).length;
+    const gridStyle = tab === 'catalog' ? ' style="grid-template-columns: 1fr;"' : '';
 
+    const uploadZone = tab === 'catalog' ? `
       <div class="upload-zone">
         <svg class="upload-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:block; margin: 0 auto;">
           <path d="M12 16V4M12 4l-4 4M12 4l4 4M4 20h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <div class="upload-label">Drop a new catalog file here, or click to upload</div>
         <div class="upload-sub">Supports CSV, XLSX, Shopify export, or direct Shopify / WooCommerce URL</div>
-      </div>
+      </div>` : '';
 
-      <div class="section-label">Or Connect Directly</div>
-      <div class="source-grid">
-        <div class="source-card">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M3 6l1-3h8l1 3v7H3V6zM3 6h10" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Shopify</div>
-              <div class="source-desc">Auto-sync product catalog</div>
-            </div>
-            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="yourstore.myshopify.com">
-            <button class="source-btn">Connect</button>
-          </div>
-        </div>
-        <div class="source-card">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M5 11l-3-3 3-3M11 5l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Custom API</div>
-              <div class="source-desc">Connect any product feed via URL</div>
-            </div>
-            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="Product feed URL (JSON/XML)">
-            <button class="source-btn">Add</button>
-          </div>
-        </div>
-      </div>`,
-
-    ads: `
-      <div class="section-label">Ad Platform Connections</div>
-      <div class="source-grid">
-        <div class="source-card">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/>
-                <path d="M9 14V8h-2M9 8a2 2 0 0 0-4 0" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Meta Ads</div>
-              <div class="source-desc">Facebook + Instagram campaigns</div>
-            </div>
-            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="Meta Ads Account ID">
-            <button class="source-btn">Connect</button>
-          </div>
-        </div>
-        <div class="source-card">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/>
-                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">Google Ads</div>
-              <div class="source-desc">Search + Display + Shopping</div>
-            </div>
-            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="Google Ads Customer ID">
-            <button class="source-btn">Connect</button>
-          </div>
-        </div>
-        <div class="source-card">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M9 2v8a3 3 0 1 1-3-3V4c1 1 2 1.5 3 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">TikTok Ads</div>
-              <div class="source-desc">TikTok for Business campaigns</div>
-            </div>
-            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="TikTok Advertiser ID">
-            <button class="source-btn">Connect</button>
-          </div>
-        </div>
-        <div class="source-card">
-          <div class="source-card-header">
-            <div class="source-icon">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M3 5c0-1.5 2-3 5-3s5 1.5 5 3-2 3-5 3c-1 0-2-.2-3-.5L3 9l.5-2.5C3 6 3 5.5 3 5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-                <circle cx="6" cy="5" r="0.5" fill="currentColor"/>
-                <circle cx="8" cy="5" r="0.5" fill="currentColor"/>
-                <circle cx="10" cy="5" r="0.5" fill="currentColor"/>
-              </svg>
-            </div>
-            <div>
-              <div class="source-name">WeChat / LRB</div>
-              <div class="source-desc">WeChat Moments + Mini Program ads</div>
-            </div>
-            <div class="source-status"><span class="status-pill empty">Not connected</span></div>
-          </div>
-          <div class="input-row">
-            <input class="source-input" placeholder="WeChat Official Account ID">
-            <button class="source-btn">Connect</button>
-          </div>
-        </div>
-      </div>
+    const syncBar = `
       <div class="sync-bar">
-        <div class="sync-dot dim"></div>
-        <div class="sync-label">Connect ad accounts to activate the <strong>ROAS Dashboard</strong> and <strong>Performance Reports</strong></div>
-        <div class="sync-meta">0 of 4 connected</div>
-      </div>`
-  };
+        <div class="sync-dot${connectedCount ? '' : ' dim'}"></div>
+        <div class="sync-label"><strong>${connectedCount}</strong> of ${sources.length} ${connectedCount === 1 ? 'source' : 'sources'} connected in this group</div>
+        <div class="sync-meta">Powers your Brand Brain</div>
+      </div>`;
+
+    return `
+      <div class="section-label">${esc(cfg.label)}</div>
+      <div class="source-grid"${gridStyle}>${rows}</div>
+      ${uploadZone}
+      <div style="margin: 4px 0 20px;">
+        <button class="source-btn" onclick="openAddSource('${tab}')">+ ${cfg.addLabel}</button>
+      </div>
+      ${syncBar}`;
+  }
+
+  function renderTab() {
+    document.getElementById('tab-content').innerHTML = tabBodyHTML(currentTab);
+  }
 
   function switchTab(el, tab) {
     document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    document.getElementById('tab-content').innerHTML = tabContent[tab];
+    currentTab = tab;
+    renderTab();
   }
 
-  function toggleSection(s) {
-    const sub = document.getElementById('sub-' + s);
-    const chev = document.getElementById('chev-' + s);
-    if (sub) sub.classList.toggle('open');
-    if (chev) chev.classList.toggle('open');
+  function onToggleSource(id) {
+    if (window.KK && window.KK.admin) window.KK.admin.toggleSource(id);
+    renderTab();
   }
+
+  function onRemoveSource(id) {
+    if (confirm('Remove this data source?')) {
+      if (window.KK && window.KK.admin) window.KK.admin.removeSource(id);
+      renderTab();
+    }
+  }
+
+  // ── Add-source modal ──
+  function openAddSource(tab) {
+    pendingGroup = tabConfig[tab].group;
+    const modal = document.getElementById('addSourceModal');
+    const input = document.getElementById('addSourceInput');
+    document.getElementById('addSourceTitle').textContent = 'Add to ' + tabConfig[tab].label;
+    input.value = '';
+    input.placeholder = tabConfig[tab].placeholder;
+    modal.style.display = 'flex';
+    setTimeout(() => input.focus(), 0);
+  }
+  function closeAddSource() {
+    document.getElementById('addSourceModal').style.display = 'none';
+    pendingGroup = null;
+  }
+  function confirmAddSource() {
+    const name = document.getElementById('addSourceInput').value.trim();
+    if (!name) { document.getElementById('addSourceInput').focus(); return; }
+    if (window.KK && window.KK.admin) window.KK.admin.addSource({ group: pendingGroup, name: name });
+    closeAddSource();
+    renderTab();
+  }
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('addSourceModal').style.display !== 'flex') return;
+    if (e.key === 'Escape') closeAddSource();
+    if (e.key === 'Enter') confirmAddSource();
+  });
+  document.getElementById('addSourceModal').addEventListener('click', e => {
+    if (e.target.id === 'addSourceModal') closeAddSource();
+  });
+
+  // Top-bar "+ Add Source" adds to the currently-visible group
+  document.querySelectorAll('.topbar-right .btn-primary').forEach(b => {
+    if (b.textContent.indexOf('Add Source') >= 0) b.addEventListener('click', () => openAddSource(currentTab));
+  });
 
   // Load default tab
-  document.getElementById('tab-content').innerHTML = tabContent.own;
+  renderTab();
 </script>
 
 </body>

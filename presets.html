@@ -451,5 +451,238 @@
   </div>
 </div>
 
+<!-- Inline modal (matches design tokens) -->
+<div id="kk-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center;">
+  <div id="kk-modal" style="background:var(--bg-panel); border:1px solid var(--border-standard); border-radius:12px; padding:24px; width:440px; max-width:calc(100vw - 48px); max-height:calc(100vh - 80px); overflow-y:auto;">
+    <div id="kk-modal-title" style="font-size:16px; font-weight:590; color:var(--text-primary); letter-spacing:-0.18px; margin-bottom:18px;"></div>
+    <div id="kk-modal-fields"></div>
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:22px;">
+      <button id="kk-modal-cancel" class="btn btn-ghost btn-sm">Cancel</button>
+      <button id="kk-modal-save" class="btn btn-primary btn-sm">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="data-admin.js"></script>
+<script>
+(function () {
+  var A = window.KK.admin;
+
+  /* ---------- inline modal ---------- */
+  var overlay = document.getElementById('kk-modal-overlay');
+  var modalTitle = document.getElementById('kk-modal-title');
+  var fieldsWrap = document.getElementById('kk-modal-fields');
+  var saveBtn = document.getElementById('kk-modal-save');
+  var cancelBtn = document.getElementById('kk-modal-cancel');
+  var fieldLabelStyle = 'display:block; font-size:11px; font-weight:510; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.5px; margin:0 0 6px;';
+  var inputStyle = 'width:100%; background:var(--surface-1); border:1px solid var(--border-standard); border-radius:6px; color:var(--text-primary); font-size:14px; padding:8px 10px; outline:none;';
+
+  // fields: [{key, label, type:'text'|'textarea'|'number', value, min, max}]
+  function openModal(title, fields, onSave) {
+    modalTitle.textContent = title;
+    fieldsWrap.innerHTML = '';
+    var inputs = {};
+    fields.forEach(function (f, i) {
+      var group = document.createElement('div');
+      group.style.marginBottom = '16px';
+      var label = document.createElement('label');
+      label.setAttribute('style', fieldLabelStyle);
+      label.textContent = f.label;
+      group.appendChild(label);
+      var el;
+      if (f.type === 'textarea') {
+        el = document.createElement('textarea');
+        el.setAttribute('style', inputStyle + ' min-height:72px; resize:vertical; line-height:1.5;');
+      } else {
+        el = document.createElement('input');
+        el.type = (f.type === 'number') ? 'number' : 'text';
+        if (f.type === 'number') {
+          if (f.min != null) el.min = f.min;
+          if (f.max != null) el.max = f.max;
+        }
+        el.setAttribute('style', inputStyle);
+      }
+      el.value = (f.value != null) ? f.value : '';
+      group.appendChild(el);
+      inputs[f.key] = el;
+      fieldsWrap.appendChild(group);
+      if (i === 0) setTimeout(function () { el.focus(); }, 0);
+    });
+    function close() { overlay.style.display = 'none'; saveBtn.onclick = null; cancelBtn.onclick = null; }
+    saveBtn.onclick = function () {
+      var out = {};
+      Object.keys(inputs).forEach(function (k) {
+        var el = inputs[k];
+        out[k] = (el.type === 'number') ? Number(el.value) : el.value;
+      });
+      onSave(out);
+      close();
+    };
+    cancelBtn.onclick = close;
+    overlay.onclick = function (e) { if (e.target === overlay) close(); };
+    overlay.style.display = 'flex';
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  var deleteSvg = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 3h7M4.5 3V2h3v1M3.5 3l.4 6.5h4.2L8.5 3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var personSvg = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1"/></svg>';
+  var templateIconSvg = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
+  var formatIconSvg = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M4 7h6M4 9h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
+
+  /* ---------- 1. Brief Templates ---------- */
+  var templateGrid = document.querySelector('.template-grid');
+  function renderTemplates() {
+    templateGrid.innerHTML = A.templates().map(function (t) {
+      return '<div class="template-card" data-id="' + esc(t.id) + '">' +
+        '<div class="template-card-icon">' + templateIconSvg + '</div>' +
+        '<div class="template-card-title">' + esc(t.title) + '</div>' +
+        '<div class="template-card-desc">' + esc(t.desc) + '</div>' +
+        '<div class="template-card-meta">' +
+          '<span>' + personSvg + esc(t.owner) + '</span>' +
+          '<span>Used ' + (t.used || 0) + ' times</span>' +
+        '</div>' +
+        '<div class="template-card-actions">' +
+          '<button class="btn btn-ghost btn-sm" data-act="edit">Edit</button>' +
+          '<button class="btn btn-ghost btn-sm" data-act="dup">Duplicate</button>' +
+          '<button class="btn btn-ghost btn-sm" data-act="del">' + deleteSvg + '</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  templateGrid.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    var card = btn.closest('.template-card');
+    var id = card.getAttribute('data-id');
+    var act = btn.getAttribute('data-act');
+    if (act === 'dup') { A.duplicateTemplate(id); renderTemplates(); }
+    else if (act === 'del') {
+      var t = A.templates().find(function (x) { return x.id === id; });
+      if (confirm('Delete template "' + (t ? t.title : '') + '"?')) { A.removeTemplate(id); renderTemplates(); }
+    } else if (act === 'edit') {
+      var tpl = A.templates().find(function (x) { return x.id === id; });
+      openModal('Edit Template', [
+        { key: 'title', label: 'Title', type: 'text', value: tpl.title },
+        { key: 'desc', label: 'Description', type: 'textarea', value: tpl.desc }
+      ], function (out) { A.updateTemplate(id, { title: out.title, desc: out.desc }); renderTemplates(); });
+    }
+  });
+
+  /* ---------- 2. Export Formats ---------- */
+  var exportGrid = document.querySelector('.export-grid');
+  function renderFormats() {
+    exportGrid.innerHTML = A.exportFormats().map(function (f) {
+      return '<div class="export-card" data-id="' + esc(f.id) + '">' +
+        '<div class="export-card-header">' +
+          '<div class="export-card-icon">' + formatIconSvg + '</div>' +
+          '<div class="export-card-name">' + esc(f.name) + '</div>' +
+          '<button class="btn btn-ghost btn-sm" data-act="del" style="margin-left:auto;">' + deleteSvg + '</button>' +
+        '</div>' +
+        '<div class="export-card-specs">' + esc(f.specs) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  exportGrid.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-act="del"]');
+    if (!btn) return;
+    var id = btn.closest('.export-card').getAttribute('data-id');
+    var f = A.exportFormats().find(function (x) { return x.id === id; });
+    if (confirm('Delete export format "' + (f ? f.name : '') + '"?')) { A.removeFormat(id); renderFormats(); }
+  });
+
+  /* ---------- 3. Audience Presets ---------- */
+  var audienceList = document.querySelector('.audience-list');
+  function renderAudiences() {
+    audienceList.innerHTML = A.audiences().map(function (a) {
+      return '<div class="audience-row" data-id="' + esc(a.id) + '">' +
+        '<div class="audience-name">' + esc(a.name) + '</div>' +
+        '<div class="audience-detail">' + esc(a.region) + '</div>' +
+        '<div class="audience-detail">' + esc(a.interests) + '</div>' +
+        '<div class="audience-usage" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+          '<span>Used in ' + (a.used || 0) + ' campaigns</span>' +
+          '<button class="btn btn-ghost btn-sm" data-act="del">' + deleteSvg + '</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  audienceList.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-act="del"]');
+    if (!btn) return;
+    var id = btn.closest('.audience-row').getAttribute('data-id');
+    var a = A.audiences().find(function (x) { return x.id === id; });
+    if (confirm('Delete audience "' + (a ? a.name : '') + '"?')) { A.removeAudience(id); renderAudiences(); }
+  });
+
+  /* ---------- 4. Scoring Weights ---------- */
+  var weightsCard = document.querySelector('.weights-card');
+  function renderWeights() {
+    var ws = A.weights();
+    var total = A.weightsTotal();
+    var rows = ws.map(function (w) {
+      return '<div class="weight-row">' +
+        '<div class="weight-label">' + esc(w.label) + '</div>' +
+        '<div class="weight-bar-track"><div class="weight-bar-fill" style="width:' + (w.value || 0) + '%; background:' + w.color + ';"></div></div>' +
+        '<div class="weight-value">' + (w.value || 0) + '%</div>' +
+      '</div>';
+    }).join('');
+    var note = (total !== 100)
+      ? 'Weights total ' + total + '% — they don’t add up to 100%.'
+      : 'These weights determine how opportunities are ranked';
+    weightsCard.innerHTML = rows + '<div class="weights-note">' + note + '</div>';
+  }
+  var editWeightsBtn = document.querySelector('.section:last-of-type .section-header .btn');
+  editWeightsBtn.addEventListener('click', function () {
+    var ws = A.weights();
+    openModal('Edit Weights', ws.map(function (w) {
+      return { key: w.id, label: w.label + ' (%)', type: 'number', value: w.value, min: 0, max: 100 };
+    }), function (out) { A.setWeights(out); renderWeights(); });
+  });
+
+  /* ---------- "New" buttons ---------- */
+  var sections = document.querySelectorAll('.section');
+  // Templates: New Template
+  sections[0].querySelector('.section-header .btn').addEventListener('click', function () {
+    openModal('New Template', [
+      { key: 'title', label: 'Title', type: 'text', value: '' },
+      { key: 'desc', label: 'Description', type: 'textarea', value: '' }
+    ], function (out) {
+      if (!out.title.trim()) return;
+      A.addTemplate({ title: out.title, desc: out.desc }); renderTemplates();
+    });
+  });
+  // Formats: Add Format
+  sections[1].querySelector('.section-header .btn').addEventListener('click', function () {
+    openModal('Add Format', [
+      { key: 'name', label: 'Name', type: 'text', value: '' },
+      { key: 'specs', label: 'Specs (dimensions · file types)', type: 'text', value: '' }
+    ], function (out) {
+      if (!out.name.trim()) return;
+      A.addFormat({ name: out.name, specs: out.specs }); renderFormats();
+    });
+  });
+  // Audiences: New Audience
+  sections[2].querySelector('.section-header .btn').addEventListener('click', function () {
+    openModal('New Audience', [
+      { key: 'name', label: 'Name', type: 'text', value: '' },
+      { key: 'region', label: 'Age / Region', type: 'text', value: '' },
+      { key: 'interests', label: 'Interests', type: 'text', value: '' }
+    ], function (out) {
+      if (!out.name.trim()) return;
+      A.addAudience({ name: out.name, region: out.region, interests: out.interests }); renderAudiences();
+    });
+  });
+
+  /* ---------- initial render ---------- */
+  renderTemplates();
+  renderFormats();
+  renderAudiences();
+  renderWeights();
+})();
+</script>
+
 </body>
 </html>
