@@ -125,9 +125,31 @@
 
   var hadSaved = !!read();
   var state = read() || JSON.parse(JSON.stringify(SEED));
+  if (!state.customCampaigns) state.customCampaigns = [];
+  if (!state.shares) state.shares = [];
+
+  var seq = 1;
+  function newId(prefix) { return prefix + '-' + Date.now().toString(36) + '-' + (seq++); }
+
+  var TEAM = [
+    { name: 'Kathy S.', initial: 'K', role: 'CMO' },
+    { name: 'Grace L.', initial: 'G', role: 'Creative Lead' },
+    { name: 'Sonia M.', initial: 'S', role: 'Reviewer' },
+    { name: 'Regional Lead', initial: 'R', role: 'Regional' }
+  ];
 
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function slugify(s) {
+    return String(s || 'brief').toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '').slice(0, 40) || 'brief';
+  }
+  function uid(base) {
+    var id = base, n = 2;
+    while (state.briefs.some(function (b) { return b.id === id; })) { id = base + '-' + n++; }
+    return id;
   }
 
   window.KK = {
@@ -135,6 +157,140 @@
     briefs: function () { return state.briefs; },
     brief: function (id) { return state.briefs.find(function (b) { return b.id === id; }) || null; },
     statusLabel: function (s) { return STATUS_LABEL[s] || s; },
+    team: function () { return TEAM.slice(); },
+
+    // campaigns are derived from existing briefs + any custom-added ones
+    campaigns: function () {
+      var set = [];
+      state.briefs.forEach(function (b) {
+        if (b.campaign && set.indexOf(b.campaign) < 0) set.push(b.campaign);
+      });
+      (state.customCampaigns || []).forEach(function (c) {
+        if (set.indexOf(c) < 0) set.push(c);
+      });
+      return set;
+    },
+    addCampaign: function (name) {
+      name = (name || '').trim();
+      if (!state.customCampaigns) state.customCampaigns = [];
+      if (name && this.campaigns().indexOf(name) < 0) {
+        state.customCampaigns.push(name); save();
+      }
+      return name;
+    },
+
+    // create a brief from the New Brief form
+    createBrief: function (input) {
+      input = input || {};
+      var member = TEAM.filter(function (m) { return m.name === input.assignee; })[0];
+      var deliverables = (input.deliverables || []).map(function (d) {
+        return { name: d.name, spec: d.spec };
+      });
+      var total = (input.deliverables || []).reduce(function (n, d) {
+        return n + (parseInt(d.qty, 10) || 1);
+      }, 0) || deliverables.length || 1;
+      if (input.campaign) this.addCampaign(input.campaign);
+      var brief = {
+        id: uid(slugify(input.name)),
+        name: (input.name || 'Untitled Brief').trim(),
+        status: input.status === 'production' ? 'production' : 'draft',
+        statusLabel: input.status === 'production' ? STATUS_LABEL.production : STATUS_LABEL.draft,
+        campaign: input.campaign || 'Standalone',
+        assignee: (member && member.name) || input.assignee || 'Unassigned',
+        initial: (member && member.initial) || (input.assignee ? input.assignee[0] : 'U'),
+        assetsDone: 0,
+        assetsTotal: total,
+        due: input.due || 'TBD',
+        desc: input.desc || '',
+        deliverables: deliverables,
+        refs: input.refs || [],
+        tiles: [],
+        finalSelects: []
+      };
+      state.briefs.unshift(brief);
+      save();
+      return brief;
+    },
+
+    // generate produces candidate assets (stub) for a brief's studio
+    generate: function (id, count) {
+      var b = this.brief(id);
+      if (!b) return [];
+      var n = Math.max(1, Math.min(parseInt(count, 10) || 8, 12));
+      if (!b.tiles) b.tiles = [];
+      var added = [];
+      for (var i = 0; i < n; i++) {
+        var tile = (b.tiles.length % 8) + 1; // cycle images/1.jpg .. 8.jpg
+        b.tiles.push(tile);
+        added.push(tile);
+      }
+      b.assetsDone = Math.min(b.tiles.length, b.assetsTotal || b.tiles.length);
+      if (b.status === 'draft') { b.status = 'production'; b.statusLabel = STATUS_LABEL.production; }
+      save();
+      return added;
+    },
+
+    // edit a brief after creation
+    updateBrief: function (id, patch) {
+      var b = this.brief(id);
+      if (!b || !patch) return null;
+      ['name', 'campaign', 'desc', 'due', 'deliverables', 'refs'].forEach(function (k) {
+        if (k in patch) b[k] = patch[k];
+      });
+      if (patch.assignee) {
+        var m = TEAM.filter(function (t) { return t.name === patch.assignee; })[0];
+        b.assignee = (m && m.name) || patch.assignee;
+        b.initial = (m && m.initial) || patch.assignee[0];
+      }
+      if (patch.campaign) this.addCampaign(patch.campaign);
+      if (patch.deliverables) {
+        b.assetsTotal = patch.deliverables.reduce(function (n, d) { return n + (parseInt(d.qty, 10) || 1); }, 0) || b.assetsTotal;
+      }
+      save();
+      return b;
+    },
+
+    // favourite / archive
+    toggleFavourite: function (id) { var b = this.brief(id); if (b) { b.favourite = !b.favourite; save(); } return !!(b && b.favourite); },
+    toggleArchive: function (id) { var b = this.brief(id); if (b) { b.archived = !b.archived; save(); } return !!(b && b.archived); },
+    isFavourite: function (id) { var b = this.brief(id); return !!(b && b.favourite); },
+    isArchived: function (id) { var b = this.brief(id); return !!(b && b.archived); },
+
+    // threaded comments (stored on the brief)
+    comments: function (id) { var b = this.brief(id); return (b && b.comments) || []; },
+    addComment: function (id, text, author) {
+      var b = this.brief(id);
+      if (!b || !text || !text.trim()) return null;
+      if (!b.comments) b.comments = [];
+      var c = { id: newId('cm'), text: text.trim(), author: author || 'Kathy S.', initial: (author || 'Kathy S.')[0], at: new Date().toISOString(), replies: [] };
+      b.comments.push(c); save(); return c;
+    },
+    addReply: function (id, commentId, text, author) {
+      var b = this.brief(id);
+      if (!b || !text || !text.trim()) return null;
+      var c = (b.comments || []).filter(function (x) { return x.id === commentId; })[0];
+      if (!c) return null;
+      if (!c.replies) c.replies = [];
+      var r = { id: newId('rp'), text: text.trim(), author: author || 'Kathy S.', initial: (author || 'Kathy S.')[0], at: new Date().toISOString() };
+      c.replies.push(r); save(); return r;
+    },
+
+    // selects -> shareable client folder (only the curated winners)
+    exportSelects: function (id, name) {
+      var b = this.brief(id);
+      if (!b) return null;
+      var assets = (b.finalSelects || []).slice();
+      var share = { id: newId('sh'), briefId: id, briefName: b.name, campaign: b.campaign, name: name || (b.name + ' — Selects'), assets: assets, createdAt: new Date().toISOString() };
+      share.url = 'share.html?s=' + share.id;
+      if (!state.shares) state.shares = [];
+      state.shares.push(share);
+      b.shareId = share.id;
+      save();
+      return share;
+    },
+    shares: function () { return state.shares || []; },
+    getShare: function (sid) { return (state.shares || []).filter(function (s) { return s.id === sid; })[0] || null; },
+    sharesForBrief: function (id) { return (state.shares || []).filter(function (s) { return s.briefId === id; }); },
 
     // writes
     setStatus: function (id, status) {
@@ -189,7 +345,7 @@
 
     // maintenance
     save: save,
-    reset: function () { state = JSON.parse(JSON.stringify(SEED)); save(); return state; }
+    reset: function () { state = JSON.parse(JSON.stringify(SEED)); state.customCampaigns = []; state.shares = []; save(); return state; }
   };
 
   // Seed localStorage on first ever load so later pages share the same state.

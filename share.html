@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>KittyKat — Shared Selects</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg-canvas: #08090a; --bg-panel: #0f1011; --bg-surface: #191a1b; --bg-elevated: #28282c;
+    --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+    --brand: #5e6ad2; --brand-accent: #7170ff; --brand-hover: #828fff;
+    --border-subtle: rgba(255,255,255,0.05); --border-standard: rgba(255,255,255,0.08);
+    --surface-1: rgba(255,255,255,0.02); --surface-2: rgba(255,255,255,0.04);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Inter var', Inter, -apple-system, system-ui, sans-serif; font-feature-settings: 'cv01', 'ss03'; -webkit-font-smoothing: antialiased; }
+  body { background: var(--bg-canvas); color: var(--text-primary); min-height: 100vh; letter-spacing: -0.165px; }
+
+  .topbar { display: flex; align-items: center; gap: 10px; padding: 18px 28px; border-bottom: 1px solid var(--border-subtle); position: sticky; top: 0; background: rgba(8,9,10,0.85); backdrop-filter: blur(8px); z-index: 10; }
+  .logo { font-size: 16px; font-weight: 640; letter-spacing: -0.3px; }
+  .logo .dot { color: var(--brand-accent); }
+  .shared-by { margin-left: auto; font-size: 12px; color: var(--text-quaternary); }
+  .dl-btn { padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 510; cursor: pointer; background: var(--brand); border: 1px solid var(--brand); color: #fff; display: inline-flex; align-items: center; gap: 7px; font-family: inherit; transition: background 0.12s; }
+  .dl-btn:hover { background: var(--brand-hover); }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 28px 80px; }
+  .hero-eyebrow { font-size: 11px; font-weight: 510; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .hero-title { font-size: 30px; font-weight: 600; letter-spacing: -0.5px; line-height: 1.2; }
+  .hero-sub { font-size: 14px; color: var(--text-tertiary); margin-top: 8px; }
+  .hero-meta { display: flex; gap: 18px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-subtle); }
+  .hero-stat-label { font-size: 11px; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px; }
+  .hero-stat-value { font-size: 15px; font-weight: 510; color: var(--text-secondary); margin-top: 3px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 36px; }
+  .tile { border-radius: 12px; overflow: hidden; border: 1px solid var(--border-standard); background: var(--bg-surface); transition: border-color 0.15s, transform 0.15s; }
+  .tile:hover { border-color: rgba(255,255,255,0.18); transform: translateY(-2px); }
+  .tile img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .tile-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; font-size: 12px; color: var(--text-tertiary); }
+  .tile-foot a { color: var(--text-tertiary); text-decoration: none; }
+  .tile-foot a:hover { color: var(--text-primary); }
+
+  .empty { text-align: center; padding: 100px 20px; color: var(--text-tertiary); }
+  .empty-title { font-size: 18px; font-weight: 510; color: var(--text-secondary); }
+  .empty-sub { font-size: 13px; color: var(--text-quaternary); margin-top: 8px; }
+
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg-elevated); border: 1px solid var(--border-standard); color: var(--text-primary); padding: 10px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">KittyKat<span class="dot">.</span></div>
+  <div class="shared-by">Shared selects</div>
+  <button class="dl-btn" id="dlBtn" style="display:none;" onclick="downloadAll()">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M4 7l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13.5h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    Download all
+  </button>
+</div>
+
+<div class="wrap" id="content"></div>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(window.__tt); window.__tt = setTimeout(function () { t.classList.remove('show'); }, 1800);
+  }
+  function downloadAll() { toast('Preparing download… (prototype)'); }
+
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
+
+  function render() {
+    var content = document.getElementById('content');
+    var sid = getParam('s');
+    var share = (window.KK && sid) ? KK.getShare(sid) : null;
+
+    if (!share) {
+      content.innerHTML = '<div class="empty"><div class="empty-title">This link isn’t available</div>' +
+        '<div class="empty-sub">The shared selects may have been removed, or the link is incomplete.</div></div>';
+      return;
+    }
+
+    document.getElementById('dlBtn').style.display = share.assets.length ? 'inline-flex' : 'none';
+    document.title = 'KittyKat — ' + share.name;
+
+    var tiles = share.assets.map(function (src) {
+      return '<div class="tile"><img src="' + src + '" alt="Selected asset" loading="lazy">' +
+        '<div class="tile-foot"><span>Final select</span>' +
+        '<a href="' + src + '" target="_blank" rel="noopener">Open ↗</a></div></div>';
+    }).join('');
+
+    var body = '<div class="hero-eyebrow">Final selects</div>' +
+      '<div class="hero-title">' + share.name + '</div>' +
+      '<div class="hero-sub">A curated set, ready for your review.</div>' +
+      '<div class="hero-meta">' +
+        '<div><div class="hero-stat-label">Campaign</div><div class="hero-stat-value">' + (share.campaign || '—') + '</div></div>' +
+        '<div><div class="hero-stat-label">Selects</div><div class="hero-stat-value">' + share.assets.length + '</div></div>' +
+      '</div>';
+
+    if (share.assets.length) {
+      body += '<div class="grid">' + tiles + '</div>';
+    } else {
+      body += '<div class="empty"><div class="empty-title">No selects in this folder yet</div>' +
+        '<div class="empty-sub">Once final picks are added, they’ll appear here.</div></div>';
+    }
+    content.innerHTML = body;
+  }
+
+  render();
+</script>
+
+</body>
+</html>

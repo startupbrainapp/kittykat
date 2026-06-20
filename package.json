@@ -4,6 +4,14 @@
   "private": true,
   "description": "KittyKat creative-intelligence prototype (static HTML).",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test:engine": "node tests/engine.test.mjs",
+    "test:admin": "node tests/admin.test.mjs",
+    "test:dom": "node tests/dom.test.mjs",
+    "test:dom:admin": "node tests/dom-admin.test.mjs",
+    "test": "node tests/engine.test.mjs && node tests/admin.test.mjs && node tests/dom.test.mjs && node tests/dom-admin.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1"
   }
 }

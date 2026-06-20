@@ -162,6 +162,49 @@
   .status-pill.production { background: rgba(113,112,255,0.1); color: var(--brand-accent); border: 1px solid rgba(113,112,255,0.3); }
   .status-pill.draft { background: var(--surface-3); color: var(--text-tertiary); border: 1px solid var(--border-standard); }
 
+  /* Keyword search */
+  .asset-search { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; transition: border-color 0.12s, background 0.12s; }
+  .asset-search:focus-within { border-color: rgba(113,112,255,0.4); background: var(--surface-2); }
+  .asset-search-icon { width: 13px; height: 13px; color: var(--text-tertiary); flex-shrink: 0; }
+  .asset-search input { background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 12px; font-weight: 510; letter-spacing: -0.13px; width: 210px; }
+  .asset-search input::placeholder { color: var(--text-quaternary); font-weight: 400; }
+
+  /* Select mode */
+  .filter-dropdown.toggle-on { background: rgba(113,112,255,0.14); border-color: rgba(113,112,255,0.4); color: var(--brand-accent); }
+  .asset-tile.selectable { cursor: pointer; }
+  .asset-tile.selected { border-color: var(--brand-accent); box-shadow: 0 0 0 1px var(--brand-accent); }
+  .asset-check {
+    position: absolute; top: 8px; left: 8px; z-index: 3;
+    width: 18px; height: 18px; border-radius: 5px;
+    background: rgba(0,0,0,0.45); border: 1.5px solid rgba(255,255,255,0.55);
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px); transition: background 0.12s, border-color 0.12s;
+  }
+  .asset-tile.selectable .asset-check { display: flex; }
+  .asset-tile.selectable .asset-status-dot { left: 32px; }
+  .asset-check svg { width: 11px; height: 11px; color: #fff; opacity: 0; transition: opacity 0.1s; }
+  .asset-tile.selected .asset-check { background: var(--brand-accent); border-color: var(--brand-accent); }
+  .asset-tile.selected .asset-check svg { opacity: 1; }
+
+  /* Bulk action bar */
+  .bulk-bar {
+    position: fixed; bottom: 0; left: 240px; right: 0; z-index: 80;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 24px; background: var(--bg-elevated);
+    border-top: 1px solid var(--border-standard);
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
+    transform: translateY(110%); transition: transform 0.22s cubic-bezier(0.2,0.8,0.2,1);
+  }
+  .bulk-bar.open { transform: translateY(0); }
+  .bulk-count { font-size: 13px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.13px; }
+  .bulk-sub { font-size: 12px; color: var(--text-tertiary); letter-spacing: -0.13px; }
+  .bulk-spacer { flex: 1; }
+  .bulk-btn { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.12s, border-color 0.12s; font-family: inherit; background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-primary); }
+  .bulk-btn:hover { background: var(--surface-3); }
+  .bulk-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .bulk-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .bulk-btn svg { width: 12px; height: 12px; }
+
   /* DRAWER */
   .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 90; }
   .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
@@ -320,11 +363,11 @@
       <span class="bc-current">Asset Manager</span>
     </div>
     <div class="topbar-right">
-      <button class="btn btn-ghost">
+      <button class="btn btn-ghost" onclick="uploadAsset()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Upload
       </button>
-      <button class="btn btn-ghost">
+      <button class="btn btn-ghost" onclick="downloadSelected()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 8V2M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Download selected
       </button>
@@ -379,11 +422,16 @@
 
       <!-- Filter row -->
       <div class="filter-bar">
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Status</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Campaign</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Format</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="asset-search">
+          <svg class="asset-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <input id="assetSearch" type="text" placeholder="Search assets, briefs, campaigns…" oninput="onSearchInput()" autocomplete="off">
+        </div>
+        <button class="filter-dropdown" onclick="cycleFilter('status')"><span class="filter-dropdown-label">Status</span><span id="fStatus">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="cycleFilter('campaign')"><span class="filter-dropdown-label">Campaign</span><span id="fCampaign">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="cycleFilter('format')"><span class="filter-dropdown-label">Format</span><span id="fFormat">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" id="selectModeBtn" onclick="toggleSelectMode()"><svg class="filter-chev" viewBox="0 0 12 12" fill="none" style="width:12px;height:12px;"><path d="M2 6l2.5 2.5L10 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="selectModeLabel">Select</span></button>
         <div class="filter-spacer"></div>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Newest</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="cycleFilter('sort')"><span class="filter-dropdown-label">Sort</span><span id="fSort">Newest</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <span class="filter-count" id="filterCount">20 assets</span>
       </div>
 
@@ -410,6 +458,22 @@
   <div class="drawer-body" id="drawerBody"></div>
   <div class="drawer-footer" id="drawerFooter"></div>
 </aside>
+
+<!-- Bulk action bar -->
+<div class="bulk-bar" id="bulkBar">
+  <div>
+    <span class="bulk-count" id="bulkCount">0 selected</span>
+    <span class="bulk-sub" id="bulkSub"></span>
+  </div>
+  <div class="bulk-spacer"></div>
+  <button class="bulk-btn" onclick="bulkSelectAll()" id="bulkSelectAllBtn">Select all</button>
+  <button class="bulk-btn" onclick="bulkClear()">Clear</button>
+  <button class="bulk-btn" onclick="bulkDownload()"><svg viewBox="0 0 12 12" fill="none"><path d="M6 8V2M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Download</button>
+  <button class="bulk-btn" onclick="bulkAddToSelects()"><svg viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Add to Selects</button>
+  <button class="bulk-btn" onclick="bulkArchive()"><svg viewBox="0 0 12 12" fill="none"><rect x="1.5" y="2" width="9" height="2.5" rx="0.5" stroke="currentColor" stroke-width="1.1"/><path d="M2.5 4.5v5h7v-5M4.5 6.5h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>Archive</button>
+  <button class="bulk-btn" onclick="bulkApprove()"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve</button>
+  <button class="bulk-btn primary" onclick="bulkShareSelects()"><svg viewBox="0 0 12 12" fill="none"><circle cx="3" cy="6" r="1.5" stroke="currentColor" stroke-width="1.1"/><circle cx="9" cy="3" r="1.5" stroke="currentColor" stroke-width="1.1"/><circle cx="9" cy="9" r="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M4.3 5.3L7.7 3.7M4.3 6.7L7.7 8.3" stroke="currentColor" stroke-width="1.1"/></svg>Share with client</button>
+</div>
 
 <script src="data.js"></script>
 <script>
@@ -452,9 +516,79 @@
     try { return new URLSearchParams(location.search).get('brief'); } catch (e) { return null; }
   }
 
+  // --- Toast (non-destructive confirmations) ---
+  function toast(msg) {
+    var t = document.getElementById('kkToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'kkToast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);' +
+        'background:var(--bg-elevated);border:1px solid var(--border-standard);color:var(--text-primary);' +
+        'padding:9px 16px;border-radius:8px;font-size:13px;font-weight:510;letter-spacing:-0.13px;' +
+        'box-shadow:0 8px 24px rgba(0,0,0,0.5);z-index:200;opacity:0;transition:opacity 0.18s, transform 0.18s;pointer-events:none;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    requestAnimationFrame(function () { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function () { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(8px)'; }, 2200);
+  }
+
+  // --- Search + multi-select state ---
+  var SEARCH = '';
+  var SELECT_MODE = false;
+  var SELECTED = {};                 // asset id -> true
+  var ARCHIVED_LOCAL = {};           // asset id -> true (local-only archive flag)
+  function onSearchInput() {
+    var el = document.getElementById('assetSearch');
+    SEARCH = (el ? el.value : '').trim().toLowerCase();
+    renderGrid();
+  }
+  function matchesSearch(a) {
+    if (!SEARCH) return true;
+    var hay = [a.name, a.brief, a.campaign, a.creator, a.format].join(' ').toLowerCase();
+    return hay.indexOf(SEARCH) >= 0;
+  }
+
+  // --- Filters / sort state (cycled via the dropdown buttons) ---
+  var FILTERS = {
+    status: { id: 'fStatus', i: 0, opts: ['All', 'Approved', 'In Review', 'In Production', 'Draft'] },
+    campaign: { id: 'fCampaign', i: 0, opts: ['All'] },  // populated from assets
+    format: { id: 'fFormat', i: 0, opts: ['All'] },      // populated from assets
+    sort: { id: 'fSort', i: 0, opts: ['Newest', 'Oldest', 'Brand fit (high→low)', 'Brand fit (low→high)'] }
+  };
+  function curVal(key) { var f = FILTERS[key]; return f.opts[f.i % f.opts.length]; }
+  var STATUS_VAL = { 'Approved': 'approved', 'In Review': 'review', 'In Production': 'production', 'Draft': 'draft' };
+  function createdRank(s) { var t = Date.parse(s); return isNaN(t) ? 0 : t; }
+  function refreshFilterOptions() {
+    var campaigns = ['All'], formats = ['All'];
+    assets.forEach(function (a) {
+      if (a.campaign && campaigns.indexOf(a.campaign) < 0) campaigns.push(a.campaign);
+      if (a.format && formats.indexOf(a.format) < 0) formats.push(a.format);
+    });
+    function reconcile(f, opts) {
+      var cur = f.opts[f.i % f.opts.length];
+      f.opts = opts; var ni = opts.indexOf(cur); f.i = ni >= 0 ? ni : 0;
+    }
+    reconcile(FILTERS.campaign, campaigns);
+    reconcile(FILTERS.format, formats);
+  }
+  function syncFilterLabels() {
+    ['status', 'campaign', 'format', 'sort'].forEach(function (key) {
+      var f = FILTERS[key], el = document.getElementById(f.id);
+      if (el) el.textContent = f.opts[f.i % f.opts.length];
+    });
+  }
+  function cycleFilter(key) {
+    var f = FILTERS[key];
+    f.i = (f.i + 1) % f.opts.length;
+    renderGrid();
+  }
+
   function renderGrid() {
     const grid = document.getElementById('assetGrid');
     const filterId = briefFilterId();
+    refreshFilterOptions();
     let list = assets.slice();
     if (filterId) {
       list = list.filter(function (a) { var l = liveStatus(a); return l.briefId === filterId; });
@@ -462,10 +596,28 @@
       var b = window.KK ? KK.brief(filterId) : null;
       if (fb && b) { fb.style.display = 'flex'; document.getElementById('briefFilterText').textContent = 'Showing assets for: ' + b.name; }
     }
+    var fStatus = curVal('status'), fCamp = curVal('campaign'), fFmt = curVal('format'), fSort = curVal('sort');
+    list = list.filter(function (a) {
+      if (ARCHIVED_LOCAL[a.id]) return false;
+      if (fStatus !== 'All' && liveStatus(a).status !== STATUS_VAL[fStatus]) return false;
+      if (fCamp !== 'All' && a.campaign !== fCamp) return false;
+      if (fFmt !== 'All' && a.format !== fFmt) return false;
+      if (!matchesSearch(a)) return false;
+      return true;
+    });
+    if (fSort === 'Newest') list.sort(function (x, y) { return createdRank(y.created) - createdRank(x.created); });
+    else if (fSort === 'Oldest') list.sort(function (x, y) { return createdRank(x.created) - createdRank(y.created); });
+    else if (fSort === 'Brand fit (high→low)') list.sort(function (x, y) { return (y.score || 0) - (x.score || 0); });
+    else if (fSort === 'Brand fit (low→high)') list.sort(function (x, y) { return (x.score || 0) - (y.score || 0); });
+    syncFilterLabels();
     grid.innerHTML = list.map(a => {
       const l = liveStatus(a);
+      const sel = !!SELECTED[a.id];
+      const cls = 'asset-tile' + (SELECT_MODE ? ' selectable' : '') + (sel ? ' selected' : '');
+      const click = SELECT_MODE ? `toggleSelect(${a.id})` : `openDrawer(${a.id})`;
       return `
-      <div class="asset-tile" onclick="openDrawer(${a.id})">
+      <div class="${cls}" onclick="${click}">
+        <div class="asset-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <img src="${a.img}" alt="${a.name}">
         <div class="asset-status-dot ${l.status}"></div>
         <div class="asset-format-badge">${a.format}</div>
@@ -477,8 +629,143 @@
     }).join('');
     var fc = document.getElementById('filterCount');
     if (fc) fc.textContent = list.length + ' asset' + (list.length === 1 ? '' : 's');
+    LAST_RENDERED = list;
+    updateBulkBar();
   }
+  var LAST_RENDERED = [];
   renderGrid();
+
+  /* Topbar / footer actions (prototype stubs — non-destructive) */
+  function uploadAsset() {
+    // Stub: add a placeholder asset to the currently-filtered campaign (or first).
+    var camp = curVal('campaign');
+    var template = assets.filter(function (a) { return camp === 'All' || a.campaign === camp; })[0] || assets[0];
+    var nextId = assets.reduce(function (m, a) { return Math.max(m, a.id); }, 0) + 1;
+    var imgN = ((nextId - 1) % 20) + 1;
+    assets.unshift({
+      id: nextId, img: 'images/' + imgN + '.jpg', name: 'Uploaded Asset ' + nextId,
+      brief: template.brief, campaign: template.campaign, status: 'draft', statusLabel: 'Draft',
+      format: template.format, created: 'Just now', creator: 'Kathy S.',
+      score: 0, visual: 0, tonal: 0, cultural: 0, audience: 0, usedIn: null
+    });
+    renderGrid();
+    toast('Asset uploaded to ' + template.campaign);
+  }
+  function downloadSelected() { toast('Preparing download…'); }
+  function downloadAsset(id) {
+    var a = assets.find(function (x) { return x.id === id; });
+    toast('Downloading ' + (a ? a.name : 'asset') + '…');
+  }
+  function publishAsset(briefId, id) {
+    if (window.KK && briefId && briefId !== 'null') { KK.approve(briefId); }
+    var a = assets.find(function (x) { return x.id === id; });
+    if (a) { a.usedIn = 'bape.com · Published just now'; a.usedIcon = 'web'; }
+    closeDrawer();
+    renderGrid();
+    toast('Published' + (a ? ' · ' + a.name : ''));
+  }
+
+  /* --- Multi-select mode + bulk actions --- */
+  function toggleSelectMode() {
+    SELECT_MODE = !SELECT_MODE;
+    if (!SELECT_MODE) SELECTED = {};
+    var btn = document.getElementById('selectModeBtn');
+    var lbl = document.getElementById('selectModeLabel');
+    if (btn) btn.classList.toggle('toggle-on', SELECT_MODE);
+    if (lbl) lbl.textContent = SELECT_MODE ? 'Selecting' : 'Select';
+    renderGrid();
+  }
+  function toggleSelect(id) {
+    if (SELECTED[id]) delete SELECTED[id]; else SELECTED[id] = true;
+    renderGrid();
+  }
+  function selectedIds() { return Object.keys(SELECTED).map(Number); }
+  function selectedAssets() {
+    return selectedIds().map(function (id) { return assets.find(function (a) { return a.id === id; }); }).filter(Boolean);
+  }
+  function updateBulkBar() {
+    var bar = document.getElementById('bulkBar');
+    if (!bar) return;
+    var n = selectedIds().length;
+    var open = SELECT_MODE;
+    bar.classList.toggle('open', open);
+    var cnt = document.getElementById('bulkCount');
+    var sub = document.getElementById('bulkSub');
+    if (cnt) cnt.textContent = n + ' selected';
+    if (sub) sub.textContent = n === 0 ? ' · pick assets to act on' : '';
+    var saBtn = document.getElementById('bulkSelectAllBtn');
+    if (saBtn) {
+      var allSel = LAST_RENDERED.length > 0 && LAST_RENDERED.every(function (a) { return SELECTED[a.id]; });
+      saBtn.textContent = allSel ? 'Deselect all' : 'Select all';
+    }
+  }
+  function bulkSelectAll() {
+    var allSel = LAST_RENDERED.length > 0 && LAST_RENDERED.every(function (a) { return SELECTED[a.id]; });
+    if (allSel) { SELECTED = {}; }
+    else { LAST_RENDERED.forEach(function (a) { SELECTED[a.id] = true; }); }
+    renderGrid();
+  }
+  function bulkClear() { SELECTED = {}; renderGrid(); }
+  function requireSelection() {
+    var sel = selectedAssets();
+    if (sel.length === 0) { toast('Select at least one asset first'); return null; }
+    return sel;
+  }
+  function bulkDownload() {
+    var sel = requireSelection(); if (!sel) return;
+    toast('Preparing download of ' + sel.length + ' asset' + (sel.length === 1 ? '' : 's') + '…');
+  }
+  function bulkAddToSelects() {
+    var sel = requireSelection(); if (!sel) return;
+    var added = 0;
+    sel.forEach(function (a) {
+      var b = liveStatus(a).briefId;
+      if (window.KK && b) { if (!KK.isFinal(b, a.img)) KK.toggleFinal(b, a.img); added++; }
+    });
+    toast(added > 0 ? ('Added ' + added + ' to Selects') : 'No mapped brief for these assets');
+  }
+  function bulkArchive() {
+    var sel = requireSelection(); if (!sel) return;
+    var n = 0;
+    sel.forEach(function (a) {
+      var b = liveStatus(a).briefId;
+      if (window.KK && b) { KK.toggleArchive(b); }
+      ARCHIVED_LOCAL[a.id] = true; n++;
+    });
+    SELECTED = {};
+    renderGrid();
+    toast('Archived ' + n + ' asset' + (n === 1 ? '' : 's'));
+  }
+  function bulkApprove() {
+    var sel = requireSelection(); if (!sel) return;
+    var n = 0;
+    sel.forEach(function (a) {
+      var b = liveStatus(a).briefId;
+      if (window.KK && b) { KK.approve(b); n++; }
+    });
+    SELECTED = {};
+    renderGrid();
+    toast(n > 0 ? ('Approved ' + n + ' brief asset' + (n === 1 ? '' : 's')) : 'No mapped brief to approve');
+  }
+  // Share the curated selects of a brief with the client.
+  // Uses the brief shared by the current selection (or the ?brief= filter).
+  function bulkShareSelects() {
+    var sel = selectedAssets();
+    var briefId = briefFilterId();
+    if (!briefId && sel.length) { briefId = liveStatus(sel[0]).briefId; }
+    if (!briefId) { toast('Select assets from a brief, or open a brief-filtered view first'); return; }
+    // Make sure the selected assets are part of the brief's final selects.
+    sel.forEach(function (a) {
+      var b = liveStatus(a).briefId;
+      if (window.KK && b === briefId && !KK.isFinal(b, a.img)) KK.toggleFinal(b, a.img);
+    });
+    if (!window.KK) { toast('Sharing unavailable'); return; }
+    var b = KK.brief(briefId);
+    var share = KK.exportSelects(briefId, (b ? b.name : 'Brief') + ' — Selects');
+    if (!share) { toast('Could not create share'); return; }
+    toast('Share link created for ' + (b ? b.name : 'brief'));
+    try { window.open(share.url, '_blank'); } catch (e) {}
+  }
 
   /* Drawer */
   function openDrawer(id) {
@@ -547,7 +834,7 @@
         </div>
       </div>
 
-      <div class="d-alignment">
+      <div class="d-alignment" style="display:none;">
         <div class="d-alignment-header">
           <div class="d-score-circle">${a.score}%</div>
           <div>
@@ -586,9 +873,9 @@
     let footer = '';
     if (live.status === 'approved') {
       footer = `
-        <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Publish</button>
+        <button class="d-btn primary" onclick="publishAsset('${live.briefId}', ${a.id})"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Publish</button>
         <button class="d-btn secondary" onclick="${studio}">Edit in Creator Studio</button>
-        <button class="d-btn secondary">Download</button>`;
+        <button class="d-btn secondary" onclick="downloadAsset(${a.id})">Download</button>`;
     } else if (live.status === 'review') {
       footer = `
         <button class="d-btn primary" onclick="${reviews}"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve in Reviews</button>

@@ -402,6 +402,12 @@
         <button class="filter-dropdown"><span class="filter-dropdown-label">Status</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="filter-dropdown"><span class="filter-dropdown-label">Campaign</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="filter-dropdown"><span class="filter-dropdown-label">Assignee</span><span>Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div id="viewSeg" style="display:flex; gap:2px; background:var(--surface-1); border:1px solid var(--border-standard); border-radius:7px; padding:2px;">
+          <button class="view-pill" data-view="active" onclick="setBriefView('active')" style="padding:4px 10px; border:none; border-radius:5px; background:var(--surface-3); color:var(--text-primary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Active</button>
+          <button class="view-pill" data-view="favourites" onclick="setBriefView('favourites')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">★ Favourites</button>
+          <button class="view-pill" data-view="archived" onclick="setBriefView('archived')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Archived</button>
+          <button class="view-pill" data-view="all" onclick="setBriefView('all')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">All</button>
+        </div>
         <div class="filter-spacer"></div>
         <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Status</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <span class="filter-count">12 briefs</span>
@@ -458,7 +464,7 @@
     <!-- Campaign selector -->
     <div style="margin-bottom: 20px;">
       <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Campaign</div>
-      <div style="padding: 8px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+      <div onclick="nbPickCampaign(event)" style="padding: 8px 12px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; position: relative;">
         <span id="nbCampaign" style="font-size: 13px; font-weight: 510; color: var(--text-quaternary);">Select a campaign...</span>
         <svg style="margin-left: auto; color: var(--text-tertiary);" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
@@ -509,18 +515,19 @@
     <div style="margin-bottom: 20px;">
       <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Reference Images</div>
       <div id="nbRefs" style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px;">
-        <div style="width: 64px; height: 64px; border-radius: 6px; border: 1.5px dashed var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-quaternary); cursor: pointer; flex-shrink: 0;">
+        <div onclick="nbAddRef()" id="nbRefAdd" style="width: 64px; height: 64px; border-radius: 6px; border: 1.5px dashed var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-quaternary); cursor: pointer; flex-shrink: 0;">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 3v8M3 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </div>
       </div>
       <div style="font-size: 11px; color: var(--text-quaternary); letter-spacing: -0.13px;">Pull from Visual Vault or upload your own</div>
+      <input id="nbFileInput" type="file" accept="image/*" style="display:none" onchange="nbUploadRef(event)">
     </div>
 
     <!-- Deliverables -->
     <div style="margin-bottom: 20px;">
       <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Deliverables</div>
       <div id="nbDeliverables" style="display: flex; flex-direction: column; gap: 6px;">
-        <div style="padding: 6px 10px; border: 1.5px dashed var(--border-standard); border-radius: 6px; text-align: center; font-size: 12px; font-weight: 510; color: var(--text-tertiary); cursor: pointer; letter-spacing: -0.13px;">+ Add deliverable</div>
+        <div id="nbAddDeliv" onclick="nbAddDeliverable()" style="padding: 6px 10px; border: 1.5px dashed var(--border-standard); border-radius: 6px; text-align: center; font-size: 12px; font-weight: 510; color: var(--text-tertiary); cursor: pointer; letter-spacing: -0.13px;">+ Add deliverable</div>
       </div>
     </div>
 
@@ -528,15 +535,13 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
       <div>
         <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Assign to</div>
-        <div id="nbAssignee" style="padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; font-size: 12px; color: var(--text-quaternary); cursor: pointer;">
+        <div id="nbAssignee" onclick="nbPickAssignee(event)" style="padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; font-size: 12px; color: var(--text-quaternary); cursor: pointer; position: relative;">
           Select assignee...
         </div>
       </div>
       <div>
         <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Due date</div>
-        <div id="nbDue" style="padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; font-size: 12px; color: var(--text-quaternary); cursor: pointer;">
-          Pick a date...
-        </div>
+        <input id="nbDue" type="text" placeholder="Pick a date..." style="width: 100%; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; font-size: 12px; color: var(--text-primary); cursor: text; outline: none; font-family: inherit;">
       </div>
     </div>
 
@@ -555,10 +560,10 @@
 
   <div class="drawer-footer" style="display: flex; gap: 6px;">
     <button class="d-btn secondary" onclick="closeNewBrief()" style="flex: 0;">Cancel</button>
-    <button class="d-btn secondary">Save draft</button>
-    <button class="d-btn primary">
+    <button id="nbBtnDraft" class="d-btn secondary" onclick="nbSave('draft')">Save draft</button>
+    <button id="nbBtnPrimary" class="d-btn primary" onclick="nbSave('production')">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Start production
+      <span id="nbBtnPrimaryLabel">Start production</span>
     </button>
   </div>
 </aside>
@@ -569,22 +574,50 @@
   function openStudio(id){ if(window.KK) KK.enterStudio(id); window.location.href='creator_studio.html?brief='+encodeURIComponent(id); }
 
   // Render table
+  let briefView = 'active'; // active | favourites | archived | all
+  function setBriefView(v) {
+    briefView = v;
+    document.querySelectorAll('#viewSeg .view-pill').forEach(p => {
+      const on = p.getAttribute('data-view') === v;
+      p.style.background = on ? 'var(--surface-3)' : 'transparent';
+      p.style.color = on ? 'var(--text-primary)' : 'var(--text-tertiary)';
+    });
+    renderTable();
+  }
+  function visibleBriefs() {
+    return briefs.filter(b => {
+      if (briefView === 'archived') return b.archived;
+      if (briefView === 'all') return true;
+      if (b.archived) return false; // active + favourites hide archived
+      if (briefView === 'favourites') return b.favourite;
+      return true; // active
+    });
+  }
+  function toggleBriefFav(id) { KK.toggleFavourite(id); renderTable(); }
+  function archiveBrief(id) { KK.toggleArchive(id); renderTable(); }
+
   function renderTable() {
     const list = document.getElementById('briefList');
-    list.innerHTML = briefs.map(b => {
+    const rows = visibleBriefs();
+    const countEl = document.querySelector('.filter-count');
+    if (countEl) countEl.textContent = rows.length + (rows.length === 1 ? ' brief' : ' briefs');
+    list.innerHTML = rows.map(b => {
       const assetsText = b.assetsDone + '/' + b.assetsTotal;
       const assetsMuted = b.assetsDone === 0 ? ' muted' : '';
       const studioBtn = (b.status === 'draft' || b.status === 'production')
         ? `<button class="row-studio" onclick="event.stopPropagation(); openStudio('${b.id}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>`
         : '';
+      const star = `<button title="Favourite" onclick="event.stopPropagation(); toggleBriefFav('${b.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:2px;color:${b.favourite ? 'var(--brand-accent)' : 'var(--text-quaternary)'};">${b.favourite ? '★' : '☆'}</button>`;
+      const arch = `<button title="${b.archived ? 'Unarchive' : 'Archive'}" onclick="event.stopPropagation(); archiveBrief('${b.id}')" style="background:none;border:none;cursor:pointer;padding:2px;color:var(--text-quaternary);display:flex;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v3H2z" stroke="currentColor" stroke-width="1.2"/><path d="M3 7v7h10V7M6.5 9.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>`;
       return `
-        <div class="brief-row" onclick="openDrawer('${b.id}')">
+        <div class="brief-row${b.archived ? ' archived' : ''}" onclick="openDrawer('${b.id}')" style="${b.archived ? 'opacity:0.55;' : ''}">
           <div class="brief-main">
             <div class="brief-status-dot ${b.status}"></div>
             <div class="brief-info">
               <div class="brief-name">${b.name}</div>
               <div class="brief-source">${b.campaign}</div>
             </div>
+            <div class="row-actions" style="margin-left:auto; display:flex; align-items:center; gap:2px;">${star}${arch}</div>
           </div>
           <div><span class="status-pill ${b.status}">${b.statusLabel}</span></div>
           <div class="cell-campaign">${b.campaign}</div>
@@ -595,12 +628,15 @@
         </div>`;
     }).join('');
   }
-  renderTable();
+  setBriefView('active');
 
   /* ═══ Drawer ═══ */
   function openDrawer(id) {
     const b = briefs.find(x => x.id === id);
     if (!b) return;
+    // Defensive: saved/legacy state may be missing array fields — never crash the drawer.
+    if (!Array.isArray(b.deliverables)) b.deliverables = [];
+    if (!Array.isArray(b.tiles)) b.tiles = [];
 
     document.getElementById('drawerTitle').textContent = b.name;
 
@@ -712,11 +748,11 @@
     if (b.status === 'draft') {
       footer = `
         <button class="d-btn primary" onclick="openStudio('${b.id}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>
-        <button class="d-btn secondary">Edit brief</button>`;
+        <button class="d-btn secondary" onclick="openEditBrief('${b.id}')">Edit brief</button>`;
     } else if (b.status === 'production') {
       footer = `
         <button class="d-btn primary" onclick="openStudio('${b.id}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>
-        <button class="d-btn secondary">Edit brief</button>`;
+        <button class="d-btn secondary" onclick="openEditBrief('${b.id}')">Edit brief</button>`;
     } else if (b.status === 'review') {
       footer = `
         <button class="d-btn primary" onclick="window.location.href='reviews.html'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 6l1.5 1.5 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Open in Reviews</button>
@@ -733,37 +769,252 @@
     document.getElementById('drawerBody').scrollTop = 0;
   }
 
+  /* ═══ New Brief form wiring ═══ */
+  var nbState = { campaign: null, assignee: null, refs: [] };
+  var NB_DIMS = { 'Instagram Post': '1080 × 1080', 'Instagram Story': '1080 × 1920', 'Web Banner': '1920 × 600', 'TikTok': '1080 × 1920', 'Print': 'A4 × 300dpi' };
+
+  function nbDelivRowHTML(name, dims, qty) {
+    var opts = ['Instagram Post', 'Instagram Story', 'Web Banner', 'TikTok', 'Print']
+      .map(function (o) { return '<option' + (o === name ? ' selected' : '') + '>' + o + '</option>'; }).join('');
+    return '<div class="nb-deliv-row" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--surface-1);border:1px solid var(--border-standard);border-radius:6px;">' +
+      '<select class="nb-d-name" onchange="nbDelivDims(this)" style="background:var(--bg-surface);border:1px solid var(--border-standard);border-radius:5px;padding:4px 6px;color:var(--text-primary);font-size:12px;font-family:inherit;outline:none;cursor:pointer;">' + opts + '</select>' +
+      '<input class="nb-d-dims" value="' + dims + '" style="width:96px;background:transparent;border:none;color:var(--text-tertiary);font-size:12px;outline:none;font-family:inherit;">' +
+      '<span style="color:var(--text-quaternary);font-size:12px;">×</span>' +
+      '<input class="nb-d-qty" type="number" min="1" value="' + qty + '" style="width:44px;background:var(--bg-surface);border:1px solid var(--border-standard);border-radius:5px;padding:4px 6px;color:var(--text-primary);font-size:12px;text-align:center;outline:none;font-family:inherit;">' +
+      '<button onclick="this.closest(\'.nb-deliv-row\').remove()" style="margin-left:auto;background:transparent;border:none;color:var(--text-quaternary);cursor:pointer;font-size:14px;">×</button></div>';
+  }
+  function nbDelivDims(sel) {
+    var dims = sel.closest('.nb-deliv-row').querySelector('.nb-d-dims');
+    if (NB_DIMS[sel.value]) dims.value = NB_DIMS[sel.value];
+  }
+  function nbAddDeliverable() {
+    document.getElementById('nbAddDeliv').insertAdjacentHTML('beforebegin', nbDelivRowHTML('Instagram Post', '1080 × 1080', 1));
+  }
+
+  function nbRenderRefs() {
+    var c = document.getElementById('nbRefs');
+    var tiles = nbState.refs.map(function (src, i) {
+      return '<div style="position:relative;width:64px;height:64px;border-radius:6px;border:1px solid var(--border-standard);background:url(\'' + src + '\') center/cover;flex-shrink:0;">' +
+        '<button onclick="nbRemoveRef(' + i + ')" style="position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,0.7);border:none;color:#fff;font-size:11px;line-height:1;cursor:pointer;">×</button></div>';
+    }).join('');
+    c.innerHTML = tiles + '<div onclick="nbOpenRefPicker(event)" id="nbRefAdd" style="width:64px;height:64px;border-radius:6px;border:1.5px dashed var(--border-standard);display:flex;align-items:center;justify-content:center;color:var(--text-quaternary);cursor:pointer;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 3v8M3 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
+  }
+  function nbRemoveRef(i) { nbState.refs.splice(i, 1); nbRenderRefs(); }
+
+  // Reference images are USER INPUT: pick from the Visual Vault or upload your own.
+  function nbOpenRefPicker(e) {
+    if (e) e.stopPropagation();
+    nbCloseMenu();
+    var anchor = document.getElementById('nbRefAdd');
+    var r = anchor.getBoundingClientRect();
+    var m = document.createElement('div');
+    m.id = 'nbMenu';
+    m.style.cssText = 'position:fixed;z-index:9999;background:var(--bg-elevated);border:1px solid var(--border-standard);border-radius:8px;padding:10px;width:248px;box-shadow:0 8px 24px rgba(0,0,0,0.5);left:' + Math.min(r.left, window.innerWidth - 268) + 'px;top:' + (r.bottom + 6) + 'px;';
+    var label = document.createElement('div');
+    label.textContent = 'Visual Vault';
+    label.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-quaternary);margin-bottom:8px;';
+    m.appendChild(label);
+    var grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;';
+    for (var i = 1; i <= 9; i++) {
+      (function (src) {
+        var t = document.createElement('div');
+        t.style.cssText = 'width:100%;aspect-ratio:1;border-radius:5px;background:url(\'' + src + '\') center/cover;cursor:pointer;border:1px solid var(--border-standard);';
+        t.title = src;
+        t.onclick = function (ev) {
+          ev.stopPropagation();
+          if (nbState.refs.indexOf(src) < 0) nbState.refs.push(src);
+          nbRenderRefs();
+          nbCloseMenu();
+        };
+        grid.appendChild(t);
+      })('images/' + i + '.jpg');
+    }
+    m.appendChild(grid);
+    var up = document.createElement('button');
+    up.textContent = '⤓  Upload your own';
+    up.style.cssText = 'width:100%;padding:8px;border-radius:6px;border:1px solid var(--border-standard);background:var(--surface-1);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;';
+    up.onclick = function (ev) { ev.stopPropagation(); document.getElementById('nbFileInput').click(); };
+    m.appendChild(up);
+    document.body.appendChild(m);
+    setTimeout(function () { document.addEventListener('click', nbCloseMenu, { once: true }); }, 0);
+  }
+  function nbUploadRef(e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () { nbState.refs.push(reader.result); nbRenderRefs(); };
+    reader.readAsDataURL(f);
+    e.target.value = '';
+    nbCloseMenu();
+  }
+
+  function nbSetCampaign(name) {
+    nbState.campaign = name || null;
+    var el = document.getElementById('nbCampaign');
+    el.textContent = name || 'No campaign (standalone)';
+    el.style.color = name ? 'var(--text-primary)' : 'var(--text-quaternary)';
+  }
+  function nbSetAssignee(name) {
+    nbState.assignee = name || null;
+    var m = KK.team().filter(function (t) { return t.name === name; })[0];
+    var el = document.getElementById('nbAssignee');
+    if (m) {
+      el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><div style="width:22px;height:22px;border-radius:50%;background:var(--brand);color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:590;">' + m.initial + '</div><span style="font-size:12px;font-weight:510;color:var(--text-primary);">' + m.name + '</span><span style="font-size:11px;color:var(--text-tertiary);">' + m.role + '</span></div>';
+    } else {
+      el.textContent = 'Select assignee...';
+    }
+  }
+
+  function nbCloseMenu() { var m = document.getElementById('nbMenu'); if (m) m.remove(); }
+  function nbMenu(anchorEl, items, onPick) {
+    nbCloseMenu();
+    var r = anchorEl.getBoundingClientRect();
+    var m = document.createElement('div');
+    m.id = 'nbMenu';
+    m.style.cssText = 'position:fixed;z-index:9999;background:var(--bg-elevated);border:1px solid var(--border-standard);border-radius:6px;padding:4px;min-width:' + Math.max(180, r.width) + 'px;box-shadow:0 8px 24px rgba(0,0,0,0.5);max-height:240px;overflow:auto;left:' + r.left + 'px;top:' + (r.bottom + 4) + 'px;';
+    items.forEach(function (it) {
+      var row = document.createElement('div');
+      row.textContent = it;
+      row.style.cssText = 'padding:6px 10px;font-size:13px;color:var(--text-secondary);border-radius:4px;cursor:pointer;letter-spacing:-0.13px;';
+      row.onmouseenter = function () { row.style.background = 'var(--surface-2)'; };
+      row.onmouseleave = function () { row.style.background = 'transparent'; };
+      row.onclick = function (e) { e.stopPropagation(); nbCloseMenu(); onPick(it); };
+      m.appendChild(row);
+    });
+    document.body.appendChild(m);
+    setTimeout(function () { document.addEventListener('click', nbCloseMenu, { once: true }); }, 0);
+  }
+  function nbPickCampaign(e) {
+    e.stopPropagation();
+    var items = KK.campaigns().concat(['+ New campaign…', 'No campaign (standalone)']);
+    nbMenu(e.currentTarget, items, function (it) {
+      if (it === '+ New campaign…') { var n = prompt('New campaign name:'); if (n && n.trim()) nbSetCampaign(n.trim()); }
+      else if (it === 'No campaign (standalone)') nbSetCampaign(null);
+      else nbSetCampaign(it);
+    });
+  }
+  function nbPickAssignee(e) {
+    e.stopPropagation();
+    nbMenu(e.currentTarget, KK.team().map(function (m) { return m.name; }), function (name) { nbSetAssignee(name); });
+  }
+
+  function nbReadDeliverables() {
+    return Array.prototype.slice.call(document.querySelectorAll('#nbDeliverables .nb-deliv-row')).map(function (row) {
+      return {
+        name: row.querySelector('.nb-d-name').value,
+        spec: row.querySelector('.nb-d-dims').value,
+        qty: parseInt(row.querySelector('.nb-d-qty').value, 10) || 1
+      };
+    });
+  }
+  var nbEditId = null; // when set, the form edits an existing brief instead of creating
+
+  function nbSave(mode) {
+    var name = document.getElementById('nbTitle').value.trim();
+    if (!name) { document.getElementById('nbTitle').focus(); document.getElementById('nbTitle').placeholder = 'Brief title is required...'; return; }
+    var payload = {
+      name: name,
+      campaign: nbState.campaign,
+      desc: document.getElementById('nbDesc').value.trim(),
+      assignee: nbState.assignee,
+      due: document.getElementById('nbDue').value.trim(),
+      deliverables: nbReadDeliverables(),
+      refs: nbState.refs.slice()
+    };
+    if (nbEditId) {
+      KK.updateBrief(nbEditId, payload);
+      closeNewBrief();
+      renderTable();
+      return;
+    }
+    payload.status = mode === 'production' ? 'production' : 'draft';
+    var brief = KK.createBrief(payload);
+    if (mode === 'production') { openStudio(brief.id); return; }
+    closeNewBrief();
+    renderTable();
+  }
+
+  function openEditBrief(id) {
+    var b = KK.brief(id);
+    if (!b) return;
+    closeDrawer();
+    nbResetForm();
+    nbEditId = id;
+    document.querySelector('#newBriefDrawer .drawer-eyebrow').textContent = 'Edit Brief';
+    document.querySelector('#newBriefDrawer .drawer-title').textContent = 'Edit brief';
+    document.getElementById('demoHelper').style.display = 'none';
+    document.getElementById('nbBtnDraft').style.display = 'none';
+    document.getElementById('nbBtnPrimaryLabel').textContent = 'Save changes';
+    document.getElementById('nbTitle').value = b.name || '';
+    document.getElementById('nbDesc').value = b.desc || '';
+    document.getElementById('nbDue').value = (b.due && b.due !== 'TBD') ? b.due : '';
+    if (b.campaign && b.campaign !== 'Standalone') nbSetCampaign(b.campaign); else nbSetCampaign(null);
+    if (b.assignee && b.assignee !== 'Unassigned') nbSetAssignee(b.assignee);
+    nbState.refs = (b.refs || []).slice();
+    nbRenderRefs();
+    nbPrefillDeliverables(b.deliverables || []);
+    document.getElementById('newBriefDrawer').classList.add('open');
+    document.getElementById('newBriefBackdrop').classList.add('open');
+  }
+
+  function nbPrefillDeliverables(list) {
+    Array.prototype.slice.call(document.querySelectorAll('#nbDeliverables .nb-deliv-row')).forEach(function (r) { r.remove(); });
+    var add = document.getElementById('nbAddDeliv');
+    list.forEach(function (d) {
+      var spec = d.spec || '';
+      var m = /×\s*(\d+)\s*$/.exec(spec);
+      var qty = m ? m[1] : 1;
+      var dims = m ? spec.slice(0, m.index).trim() : spec;
+      add.insertAdjacentHTML('beforebegin', nbDelivRowHTML(d.name, dims, qty));
+    });
+  }
+
+  function nbResetForm() {
+    nbState = { campaign: null, assignee: null, refs: [] };
+    nbEditId = null;
+    document.querySelector('#newBriefDrawer .drawer-eyebrow').textContent = 'New Brief';
+    document.querySelector('#newBriefDrawer .drawer-title').textContent = 'Create a brief';
+    document.getElementById('nbBtnDraft').style.display = '';
+    document.getElementById('nbBtnPrimaryLabel').textContent = 'Start production';
+    document.getElementById('nbTitle').value = '';
+    document.getElementById('nbTitle').placeholder = 'Brief title...';
+    document.getElementById('nbDesc').value = '';
+    document.getElementById('nbDue').value = '';
+    document.getElementById('nbCampaign').textContent = 'Select a campaign...';
+    document.getElementById('nbCampaign').style.color = 'var(--text-quaternary)';
+    document.getElementById('nbAssignee').textContent = 'Select assignee...';
+    document.getElementById('nbAssignee').style.color = 'var(--text-quaternary)';
+    Array.prototype.slice.call(document.querySelectorAll('#nbDeliverables .nb-deliv-row')).forEach(function (r) { r.remove(); });
+    nbRenderRefs();
+    document.getElementById('demoHelper').style.display = 'flex';
+  }
+
   function loadExample() {
-    document.getElementById('nbCampaign').textContent = 'SS26 · Hana Matsuri';
-    document.getElementById('nbCampaign').style.color = 'var(--text-primary)';
+    nbSetCampaign('SS26 · Hana Matsuri');
     document.getElementById('nbTitle').value = 'Sakura Camo · Social Launch Kit';
     document.getElementById('nbDesc').value = 'Social-first launch kit for the Sakura-dyed ABC Camo capsule. 3 Instagram posts, 2 stories, 1 hero web banner. Emphasize sakura pink + pale gold colorway while preserving ABC camo geometry. Tie to Shibuya flagship reopening April 22.';
-    document.getElementById('nbRefs').innerHTML = `
-      <div style="width: 64px; height: 64px; border-radius: 6px; border: 1px solid var(--border-standard); background: url('images/5.jpg') center/cover; flex-shrink: 0;"></div>
-      <div style="width: 64px; height: 64px; border-radius: 6px; border: 1px solid var(--border-standard); background: url('images/9.jpg') center/cover; flex-shrink: 0;"></div>
-      <div style="width: 64px; height: 64px; border-radius: 6px; border: 1px solid var(--border-standard); background: url('images/7.jpg') center/cover; flex-shrink: 0;"></div>
-      <div style="width: 64px; height: 64px; border-radius: 6px; border: 1px solid var(--border-standard); background: url('images/1.jpg') center/cover; flex-shrink: 0;"></div>
-      <div style="width: 64px; height: 64px; border-radius: 6px; border: 1.5px dashed var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-quaternary); cursor: pointer; flex-shrink: 0;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 3v8M3 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>`;
-    document.getElementById('nbDeliverables').innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 12px; letter-spacing: -0.13px;"><span style="color: var(--text-primary); font-weight: 510; width: 130px;">Instagram Post</span><span style="color: var(--text-tertiary);">1080 × 1080</span><span style="margin-left: auto; color: var(--text-primary); font-weight: 510;">× 3</span></div>
-      <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 12px; letter-spacing: -0.13px;"><span style="color: var(--text-primary); font-weight: 510; width: 130px;">Instagram Story</span><span style="color: var(--text-tertiary);">1080 × 1920</span><span style="margin-left: auto; color: var(--text-primary); font-weight: 510;">× 2</span></div>
-      <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 12px; letter-spacing: -0.13px;"><span style="color: var(--text-primary); font-weight: 510; width: 130px;">Web Banner</span><span style="color: var(--text-tertiary);">1920 × 600</span><span style="margin-left: auto; color: var(--text-primary); font-weight: 510;">× 1</span></div>
-      <div style="padding: 6px 10px; border: 1.5px dashed var(--border-standard); border-radius: 6px; text-align: center; font-size: 12px; font-weight: 510; color: var(--text-tertiary); cursor: pointer; letter-spacing: -0.13px;">+ Add deliverable</div>`;
-    document.getElementById('nbAssignee').innerHTML = '<div style="display: flex; align-items: center; gap: 8px;"><div style="width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 590;">K</div><span style="font-size: 12px; font-weight: 510; color: var(--text-primary);">Kathy S.</span><span style="font-size: 11px; color: var(--text-tertiary);">CMO</span></div>';
-    document.getElementById('nbDue').innerHTML = '<div style="font-size: 12px; font-weight: 510; color: var(--text-primary);">May 15, 2026</div><div style="font-size: 10px; color: var(--text-tertiary); margin-top: 2px;">29 days from today</div>';
-    document.getElementById('nbScore').style.background = 'rgba(16,185,129,0.06)';
-    document.getElementById('nbScore').style.borderColor = 'rgba(16,185,129,0.25)';
-    document.getElementById('nbScore').innerHTML = '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;"><div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(16,185,129,0.14); border: 1.5px solid rgba(16,185,129,0.4); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 11px; font-weight: 590; flex-shrink: 0;">78%</div><div><div style="font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px;">This brief scores 78% against Brand DNA</div><div style="font-size: 11px; color: var(--text-tertiary); margin-top: 1px;">Based on description + references vs Current Brand</div></div></div><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;"><div style="text-align: center;"><div style="font-size: 12px; font-weight: 590; color: var(--text-primary);">72</div><div style="font-size: 9px; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px;">Visual</div></div><div style="text-align: center;"><div style="font-size: 12px; font-weight: 590; color: var(--text-primary);">85</div><div style="font-size: 9px; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px;">Tonal</div></div><div style="text-align: center;"><div style="font-size: 12px; font-weight: 590; color: #10b981;">92</div><div style="font-size: 9px; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px;">Cultural</div></div><div style="text-align: center;"><div style="font-size: 12px; font-weight: 590; color: #10b981;">88</div><div style="font-size: 9px; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.4px;">Audience</div></div></div>';
+    nbState.refs = ['images/5.jpg', 'images/9.jpg', 'images/7.jpg', 'images/1.jpg'];
+    nbRenderRefs();
+    Array.prototype.slice.call(document.querySelectorAll('#nbDeliverables .nb-deliv-row')).forEach(function (r) { r.remove(); });
+    var add = document.getElementById('nbAddDeliv');
+    add.insertAdjacentHTML('beforebegin', nbDelivRowHTML('Instagram Post', '1080 × 1080', 3));
+    add.insertAdjacentHTML('beforebegin', nbDelivRowHTML('Instagram Story', '1080 × 1920', 2));
+    add.insertAdjacentHTML('beforebegin', nbDelivRowHTML('Web Banner', '1920 × 600', 1));
+    nbSetAssignee('Kathy S.');
+    document.getElementById('nbDue').value = 'May 15, 2026';
     document.getElementById('demoHelper').style.display = 'none';
   }
 
   function openNewBrief() {
     closeDrawer();
+    nbResetForm();
     document.getElementById('newBriefDrawer').classList.add('open');
     document.getElementById('newBriefBackdrop').classList.add('open');
   }
 
   function closeNewBrief() {
+    nbCloseMenu();
     document.getElementById('newBriefDrawer').classList.remove('open');
     document.getElementById('newBriefBackdrop').classList.remove('open');
   }

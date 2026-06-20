@@ -192,6 +192,25 @@
   .d-comment-input input::placeholder { color: var(--text-quaternary); }
   .d-comment-input button { padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 510; cursor: pointer; background: var(--surface-2); border: 1px solid var(--border-standard); color: var(--text-secondary); font-family: inherit; transition: background 0.12s; }
   .d-comment-input button:hover { background: var(--surface-3); color: var(--text-primary); }
+  .d-comment-replies { margin-top: 8px; margin-left: 16px; padding-left: 10px; border-left: 1px solid var(--border-standard); display: flex; flex-direction: column; gap: 6px; }
+  .d-reply { padding: 2px 0; }
+  .d-comment-foot { margin-top: 6px; }
+  .d-reply-link { font-size: 11px; font-weight: 510; color: var(--text-tertiary); letter-spacing: -0.13px; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; }
+  .d-reply-link:hover { color: var(--text-primary); }
+  .d-reply-input { display: none; gap: 8px; margin-top: 8px; }
+  .d-reply-input.open { display: flex; }
+
+  /* Bulk review */
+  .review-check { width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; accent-color: var(--brand); margin: 0; }
+  .filter-selectall { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; user-select: none; }
+  .filter-selectall:hover { background: var(--surface-3); color: var(--text-primary); }
+  .filter-selectall input { width: 14px; height: 14px; accent-color: var(--brand); cursor: pointer; margin: 0; }
+  .bulk-bar { position: fixed; left: 240px; right: 0; bottom: 0; z-index: 80; display: none; align-items: center; gap: 12px; padding: 12px 40px; background: var(--bg-surface); border-top: 1px solid var(--border-standard); box-shadow: 0 -8px 24px rgba(0,0,0,0.4); }
+  .bulk-bar.open { display: flex; }
+  .bulk-count { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; font-variant-numeric: tabular-nums; }
+  .bulk-spacer { flex: 1; }
+  .bulk-clear { font-size: 12px; font-weight: 510; color: var(--text-tertiary); background: none; border: none; cursor: pointer; font-family: inherit; padding: 6px 8px; border-radius: 6px; }
+  .bulk-clear:hover { color: var(--text-primary); background: var(--surface-2); }
 </style>
 </head>
 <body>
@@ -284,7 +303,7 @@
       <span class="bc-current">Reviews</span>
     </div>
     <div class="topbar-right">
-      <button class="btn btn-ghost">
+      <button class="btn btn-ghost" onclick="markAllRead()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Mark all read
       </button>
@@ -339,12 +358,13 @@
 
       <!-- Filter row -->
       <div class="filter-bar">
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Status</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Brief</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Reviewer</span><span>Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <label class="filter-selectall"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this.checked)"><span>Select all</span></label>
+        <button class="filter-dropdown" onclick="cycleFilter('status')"><span class="filter-dropdown-label">Status</span><span id="fStatus">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="cycleFilter('brief')"><span class="filter-dropdown-label">Brief</span><span id="fBrief">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="cycleFilter('reviewer')"><span class="filter-dropdown-label">Reviewer</span><span id="fReviewer">Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="filter-spacer"></div>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Newest</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <span class="filter-count">22 items</span>
+        <button class="filter-dropdown" onclick="cycleFilter('sort')"><span class="filter-dropdown-label">Sort</span><span id="fSort">Newest</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span class="filter-count" id="filterCount">22 items</span>
       </div>
 
       <!-- Review list -->
@@ -352,6 +372,15 @@
     </div>
   </div>
 </main>
+
+<!-- Bulk action bar -->
+<div class="bulk-bar" id="bulkBar">
+  <span class="bulk-count" id="bulkCount">0 selected</span>
+  <button class="bulk-clear" onclick="clearSelection()">Clear</button>
+  <div class="bulk-spacer"></div>
+  <button class="btn-approve" onclick="bulkApprove()">Approve</button>
+  <button class="btn-changes" onclick="bulkChanges()">Request changes</button>
+</div>
 
 <!-- Drawer -->
 <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
@@ -395,8 +424,24 @@
     if (n.indexOf('Sakura Camo') === 0) return 'sakura-camo';
     return null;
   }
-  var rendered = [];
-  function buildList() {
+  // --- Filters / sort state (cycled via the dropdown buttons) ---
+  var FILTERS = {
+    status: { id: 'fStatus', i: 0, opts: ['All', 'Strong fit', 'Needs a look'] },
+    brief: { id: 'fBrief', i: 0, opts: ['All'] },           // populated from review briefs
+    reviewer: { id: 'fReviewer', i: 0, opts: ['Anyone'] },  // populated from submitters
+    sort: { id: 'fSort', i: 0, opts: ['Newest', 'Oldest', 'Brand fit (high→low)', 'Brand fit (low→high)'] }
+  };
+  function curVal(key) { var f = FILTERS[key]; return f.opts[f.i % f.opts.length]; }
+  // approx-ordering helper for "time ago" strings on static items
+  function timeRank(t) {
+    var s = String(t || '');
+    if (s.indexOf('just now') >= 0) return 0;
+    var m = s.match(/(\d+)\s*([hmd])/);
+    if (!m) return 9999;
+    var n = parseInt(m[1], 10), u = m[2];
+    return u === 'm' ? n / 60 : u === 'd' ? n * 24 : n;
+  }
+  function rawList() {
     var reviewIds = (window.KK ? KK.reviewBriefs() : []).map(function (b) { return b.id; });
     var list = [], covered = {};
     items.forEach(function (it) {
@@ -416,8 +461,56 @@
         }
       });
     }
+    return list;
+  }
+  // Keep Brief + Reviewer option lists in sync with what's actually in review.
+  function refreshFilterOptions(base) {
+    var briefs = ['All'], reviewers = ['Anyone'];
+    base.forEach(function (it) {
+      if (it.brief && briefs.indexOf(it.brief) < 0) briefs.push(it.brief);
+      if (it.submitter && reviewers.indexOf(it.submitter) < 0) reviewers.push(it.submitter);
+    });
+    function reconcile(f, opts) {
+      var cur = f.opts[f.i % f.opts.length];
+      f.opts = opts;
+      var ni = opts.indexOf(cur);
+      f.i = ni >= 0 ? ni : 0;
+    }
+    reconcile(FILTERS.brief, briefs);
+    reconcile(FILTERS.reviewer, reviewers);
+  }
+  var rendered = [];
+  var selected = {}; // set of selected briefIds
+  var currentBriefId = null; // brief shown in the open drawer
+  var COMMENT_AUTHOR = 'Sonia M.';
+  function buildList() {
+    var base = rawList();
+    refreshFilterOptions(base);
+    var status = curVal('status'), brief = curVal('brief'), reviewer = curVal('reviewer'), sort = curVal('sort');
+    var list = base.filter(function (it) {
+      if (status === 'Strong fit' && (it.score || 0) < 85) return false;
+      if (status === 'Needs a look' && (it.score || 0) >= 85) return false;
+      if (brief !== 'All' && it.brief !== brief) return false;
+      if (reviewer !== 'Anyone' && it.submitter !== reviewer) return false;
+      return true;
+    });
+    if (sort === 'Newest') list.sort(function (a, b) { return timeRank(a.time) - timeRank(b.time); });
+    else if (sort === 'Oldest') list.sort(function (a, b) { return timeRank(b.time) - timeRank(a.time); });
+    else if (sort === 'Brand fit (high→low)') list.sort(function (a, b) { return (b.score || 0) - (a.score || 0); });
+    else if (sort === 'Brand fit (low→high)') list.sort(function (a, b) { return (a.score || 0) - (b.score || 0); });
     rendered = list;
     return list;
+  }
+  function cycleFilter(key) {
+    var f = FILTERS[key];
+    f.i = (f.i + 1) % f.opts.length;
+    var el = document.getElementById(f.id);
+    if (el) el.textContent = f.opts[f.i];
+    renderList();
+  }
+  function markAllRead() {
+    var p = document.getElementById('statPending'); if (p) p.textContent = '0';
+    var nb = document.querySelector('.nav-badge'); if (nb) nb.textContent = '0';
   }
   function renderList() {
     const list = buildList();
@@ -429,8 +522,11 @@
     }
     el.innerHTML = list.map(it => {
       const tier = scoreTier(it.score);
+      const bid = it.briefId || '';
+      const checked = bid && selected[bid] ? 'checked' : '';
       return `
         <div class="review-item" onclick="openDrawer('${it.id}')">
+          <input type="checkbox" class="review-check" ${checked} ${bid ? '' : 'disabled'} aria-label="Select ${it.name}" onclick="event.stopPropagation()" onchange="toggleSelect('${bid}', this.checked)">
           <img class="review-thumb" src="${it.img}" alt="${it.name}">
           <div class="review-details">
             <div class="review-asset-name">${it.name}</div>
@@ -453,7 +549,80 @@
   }
   function updateStats() {
     var p = document.getElementById('statPending'); if (p) p.textContent = rendered.length;
+    var fc = document.getElementById('filterCount');
+    if (fc) fc.textContent = rendered.length + ' item' + (rendered.length === 1 ? '' : 's');
+    // keep dropdown labels in sync (option lists may have reconciled)
+    ['status', 'brief', 'reviewer', 'sort'].forEach(function (key) {
+      var f = FILTERS[key], el = document.getElementById(f.id);
+      if (el) el.textContent = f.opts[f.i % f.opts.length];
+    });
+    refreshBulkBar();
   }
+  // --- Bulk selection ---
+  function selectedIds() {
+    return Object.keys(selected).filter(function (k) { return selected[k]; });
+  }
+  function pruneSelection() {
+    // drop any selected briefId no longer in the rendered queue
+    var live = {};
+    rendered.forEach(function (it) { if (it.briefId) live[it.briefId] = true; });
+    Object.keys(selected).forEach(function (k) { if (!live[k]) delete selected[k]; });
+  }
+  function selectableIds() {
+    var ids = {};
+    rendered.forEach(function (it) { if (it.briefId) ids[it.briefId] = true; });
+    return Object.keys(ids);
+  }
+  function refreshBulkBar() {
+    pruneSelection();
+    var ids = selectedIds();
+    var bar = document.getElementById('bulkBar');
+    var cnt = document.getElementById('bulkCount');
+    if (cnt) cnt.textContent = ids.length + ' selected';
+    if (bar) bar.classList.toggle('open', ids.length > 0);
+    var all = document.getElementById('selectAll');
+    if (all) {
+      var sel = selectableIds();
+      all.checked = sel.length > 0 && sel.every(function (id) { return selected[id]; });
+      all.indeterminate = ids.length > 0 && !all.checked;
+    }
+  }
+  function toggleSelect(briefId, on) {
+    if (!briefId) return;
+    if (on) selected[briefId] = true; else delete selected[briefId];
+    refreshBulkBar();
+  }
+  function toggleSelectAll(on) {
+    selectableIds().forEach(function (id) { if (on) selected[id] = true; else delete selected[id]; });
+    renderList();
+  }
+  function clearSelection() {
+    selected = {};
+    renderList();
+  }
+  function bulkApprove() {
+    var ids = selectedIds();
+    if (!ids.length || !window.KK) return;
+    var a = document.getElementById('statApproved');
+    ids.forEach(function (id) {
+      KK.approve(id);
+      if (a) a.textContent = (parseInt(a.textContent, 10) || 0) + 1;
+    });
+    selected = {};
+    renderList();
+  }
+  function bulkChanges() {
+    var ids = selectedIds();
+    if (!ids.length || !window.KK) return;
+    var c = document.getElementById('statChanges');
+    ids.forEach(function (id) {
+      KK.requestChanges(id);
+      if (c) c.textContent = (parseInt(c.textContent, 10) || 0) + 1;
+    });
+    selected = {};
+    renderList();
+  }
+
   function approveBrief(id) {
     if (window.KK && id && id !== 'null') {
       KK.approve(id);
@@ -475,6 +644,7 @@
   function openDrawer(id) {
     const it = rendered.find(x => String(x.id) === String(id));
     if (!it) return;
+    currentBriefId = it.briefId || null;
 
     document.getElementById('drawerTitle').textContent = it.name;
 
@@ -492,8 +662,8 @@
         <span style="font-size: 12px; color: var(--text-tertiary); letter-spacing: -0.13px;">Submitted by ${it.submitter} &middot; ${it.time}</span>
       </div>
 
-      <!-- Brand Alignment -->
-      <div class="d-alignment">
+      <!-- Brand Alignment (fake scores hidden) -->
+      <div class="d-alignment" style="display:none;">
         <div class="d-alignment-header">
           <div class="d-score-circle ${tier}">${it.score}%</div>
           <div>
@@ -559,31 +729,16 @@
 
       <!-- Comments -->
       <div class="panel" style="margin-bottom: 0;">
-        <div class="panel-label">Comments <span class="panel-label-count">2</span></div>
-        <div class="d-comment">
-          <div class="d-comment-header">
-            <div class="d-comment-avatar">K</div>
-            <span class="d-comment-name">Kathy S.</span>
-            <span class="d-comment-role">&middot; CMO</span>
-            <span class="d-comment-time">1h ago</span>
-          </div>
-          <div class="d-comment-text">Make the shark-head more prominent in the top-left</div>
-        </div>
-        <div class="d-comment">
-          <div class="d-comment-header">
-            <div class="d-comment-avatar" style="background: #e8425c;">M</div>
-            <span class="d-comment-name">Maya T.</span>
-            <span class="d-comment-role">&middot; Creative</span>
-            <span class="d-comment-time">45m ago</span>
-          </div>
-          <div class="d-comment-text">Updated &mdash; see v2 attached</div>
-        </div>
+        <div class="panel-label">Comments <span class="panel-label-count" id="commentCount">0</span></div>
+        <div id="commentList"></div>
         <div class="d-comment-input">
-          <input type="text" placeholder="Add a comment...">
-          <button>Send</button>
+          <input type="text" id="commentInput" placeholder="Add a comment..." onkeydown="if(event.key==='Enter'){event.preventDefault();submitComment();}">
+          <button onclick="submitComment()">Send</button>
         </div>
       </div>
     `;
+
+    renderComments(it.briefId);
 
     document.getElementById('drawerFooter').innerHTML = `
       <button class="d-btn green" onclick="approveBrief('${it.briefId}')">
@@ -599,9 +754,84 @@
     document.getElementById('drawerBody').scrollTop = 0;
   }
 
+  // --- Threaded comments ---
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function relTime(iso) {
+    var t = Date.parse(iso);
+    if (isNaN(t)) return '';
+    var s = Math.max(0, Math.floor((Date.now() - t) / 1000));
+    if (s < 60) return 'just now';
+    var m = Math.floor(s / 60); if (m < 60) return m + 'm ago';
+    var h = Math.floor(m / 60); if (h < 24) return h + 'h ago';
+    var d = Math.floor(h / 24); return d + 'd ago';
+  }
+  function commentNode(c, isReply, parentId) {
+    var replies = (c.replies || []).map(function (r) { return commentNode(r, true, c.id); }).join('');
+    var foot = isReply ? '' :
+      '<div class="d-comment-foot">' +
+      '<button class="d-reply-link" onclick="toggleReply(\'' + c.id + '\')">Reply</button>' +
+      '<div class="d-reply-input" id="replyInput-' + c.id + '">' +
+      '<input type="text" placeholder="Reply..." onkeydown="if(event.key===\'Enter\'){event.preventDefault();submitReply(\'' + c.id + '\');}">' +
+      '<button onclick="submitReply(\'' + c.id + '\')">Reply</button>' +
+      '</div></div>';
+    return '<div class="d-comment ' + (isReply ? 'd-reply' : '') + '">' +
+      '<div class="d-comment-header">' +
+      '<div class="d-comment-avatar">' + esc(c.initial || (c.author || '?')[0]) + '</div>' +
+      '<span class="d-comment-name">' + esc(c.author) + '</span>' +
+      '<span class="d-comment-time">' + relTime(c.at) + '</span>' +
+      '</div>' +
+      '<div class="d-comment-text">' + esc(c.text) + '</div>' +
+      (replies ? '<div class="d-comment-replies">' + replies + '</div>' : '') +
+      foot +
+      '</div>';
+  }
+  function renderComments(briefId) {
+    var listEl = document.getElementById('commentList');
+    var countEl = document.getElementById('commentCount');
+    if (!listEl) return;
+    var comments = (window.KK && briefId) ? KK.comments(briefId) : [];
+    var total = comments.reduce(function (n, c) { return n + 1 + ((c.replies || []).length); }, 0);
+    if (countEl) countEl.textContent = total;
+    if (!comments.length) {
+      listEl.innerHTML = '<div style="font-size:12px;color:var(--text-quaternary);letter-spacing:-0.13px;padding:2px 0 6px;">No comments yet. Start the thread below.</div>';
+      return;
+    }
+    listEl.innerHTML = comments.map(function (c) { return commentNode(c, false); }).join('');
+  }
+  function submitComment() {
+    var input = document.getElementById('commentInput');
+    if (!input || !currentBriefId || !window.KK) return;
+    var text = input.value.trim();
+    if (!text) return;
+    KK.addComment(currentBriefId, text, COMMENT_AUTHOR);
+    input.value = '';
+    renderComments(currentBriefId);
+  }
+  function toggleReply(commentId) {
+    var box = document.getElementById('replyInput-' + commentId);
+    if (!box) return;
+    var willOpen = !box.classList.contains('open');
+    box.classList.toggle('open', willOpen);
+    if (willOpen) { var inp = box.querySelector('input'); if (inp) inp.focus(); }
+  }
+  function submitReply(commentId) {
+    var box = document.getElementById('replyInput-' + commentId);
+    if (!box || !currentBriefId || !window.KK) return;
+    var input = box.querySelector('input');
+    var text = input ? input.value.trim() : '';
+    if (!text) return;
+    KK.addReply(currentBriefId, commentId, text, COMMENT_AUTHOR);
+    renderComments(currentBriefId);
+  }
+
   function closeDrawer() {
     document.getElementById('drawer').classList.remove('open');
     document.getElementById('drawerBackdrop').classList.remove('open');
+    currentBriefId = null;
   }
 
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
