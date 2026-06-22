@@ -88,7 +88,7 @@
   /* Table header */
   .table-header {
     display: grid;
-    grid-template-columns: 1fr 100px 140px 110px 70px 80px;
+    grid-template-columns: 1fr 100px 140px 110px 70px;
     gap: 14px;
     padding: 8px 16px;
     border-bottom: 1px solid var(--border-subtle);
@@ -103,7 +103,7 @@
   .brief-list { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
   .brief-row {
     display: grid;
-    grid-template-columns: 1fr 100px 140px 110px 70px 80px;
+    grid-template-columns: 1fr 100px 140px 110px 70px;
     gap: 14px;
     padding: 14px 16px;
     background: transparent;
@@ -420,7 +420,6 @@
         <div>Campaign</div>
         <div>Assignee</div>
         <div class="th-right">Assets</div>
-        <div class="th-right">Due</div>
       </div>
       <div class="brief-list" id="briefList"></div>
     </div>
@@ -523,36 +522,11 @@
       <input id="nbFileInput" type="file" accept="image/*" style="display:none" onchange="nbUploadRef(event)">
     </div>
 
-    <!-- Deliverables -->
+    <!-- Assignment -->
     <div style="margin-bottom: 20px;">
-      <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Deliverables</div>
-      <div id="nbDeliverables" style="display: flex; flex-direction: column; gap: 6px;">
-        <div id="nbAddDeliv" onclick="nbAddDeliverable()" style="padding: 6px 10px; border: 1.5px dashed var(--border-standard); border-radius: 6px; text-align: center; font-size: 12px; font-weight: 510; color: var(--text-tertiary); cursor: pointer; letter-spacing: -0.13px;">+ Add deliverable</div>
-      </div>
-    </div>
-
-    <!-- Assignment & Timeline -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
-      <div>
-        <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Assign to</div>
-        <div id="nbAssignee" onclick="nbPickAssignee(event)" style="padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; font-size: 12px; color: var(--text-quaternary); cursor: pointer; position: relative;">
-          Select assignee...
-        </div>
-      </div>
-      <div>
-        <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Due date</div>
-        <input id="nbDue" type="text" placeholder="Pick a date..." style="width: 100%; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; font-size: 12px; color: var(--text-primary); cursor: text; outline: none; font-family: inherit;">
-      </div>
-    </div>
-
-    <!-- Brand Alignment Pre-score -->
-    <div id="nbScore" style="background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px;">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); border: 1.5px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-quaternary); font-size: 11px; font-weight: 590; flex-shrink: 0;">—</div>
-        <div>
-          <div style="font-size: 13px; font-weight: 510; color: var(--text-tertiary); letter-spacing: -0.13px;">Brand alignment score</div>
-          <div style="font-size: 11px; color: var(--text-quaternary); margin-top: 1px;">Add a description to see how this brief scores against your Brand DNA</div>
-        </div>
+      <div style="font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Assign to</div>
+      <div id="nbAssignee" onclick="nbPickAssignee(event)" style="padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 6px; font-size: 12px; color: var(--text-quaternary); cursor: pointer; position: relative;">
+        Select assignee...
       </div>
     </div>
 
@@ -623,7 +597,6 @@
           <div class="cell-campaign">${b.campaign}</div>
           <div class="cell-assignee"><div class="cell-assignee-avatar">${b.initial}</div>${b.assignee}</div>
           <div class="cell-assets${assetsMuted}">${assetsText}</div>
-          <div class="cell-due">${b.due}</div>
           ${studioBtn}
         </div>`;
     }).join('');
@@ -635,7 +608,6 @@
     const b = briefs.find(x => x.id === id);
     if (!b) return;
     // Defensive: saved/legacy state may be missing array fields — never crash the drawer.
-    if (!Array.isArray(b.deliverables)) b.deliverables = [];
     if (!Array.isArray(b.tiles)) b.tiles = [];
 
     document.getElementById('drawerTitle').textContent = b.name;
@@ -692,20 +664,6 @@
         </div>
       </div>`;
 
-    // Deliverables
-    const delivIcon = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 11l3-3 2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    const delivHtml = `
-      <div class="panel">
-        <div class="panel-label">Deliverables <span class="panel-label-count">${b.deliverables.length}</span></div>
-        ${b.deliverables.map(d => `
-          <div class="deliverable-row">
-            <div class="deliverable-icon">${delivIcon}</div>
-            <span class="deliverable-name">${d.name}</span>
-            <span class="deliverable-spec">${d.spec}</span>
-          </div>
-        `).join('')}
-      </div>`;
-
     // Assets produced
     let assetsHtml = '';
     if (b.tiles.length > 0) {
@@ -733,13 +691,11 @@
         <div class="d-hero-stats">
           <div class="d-stat"><div class="d-stat-value">${b.assignee}</div><div class="d-stat-label">Assignee</div></div>
           <div class="d-stat"><div class="d-stat-value">${b.assetsDone}/${b.assetsTotal}</div><div class="d-stat-label">Assets</div></div>
-          <div class="d-stat"><div class="d-stat-value">${b.due}</div><div class="d-stat-label">Due</div></div>
         </div>
       </div>
 
       ${brandContextHtml}
       ${refHtml}
-      ${delivHtml}
       ${assetsHtml}
     `;
 
@@ -771,25 +727,6 @@
 
   /* ═══ New Brief form wiring ═══ */
   var nbState = { campaign: null, assignee: null, refs: [] };
-  var NB_DIMS = { 'Instagram Post': '1080 × 1080', 'Instagram Story': '1080 × 1920', 'Web Banner': '1920 × 600', 'TikTok': '1080 × 1920', 'Print': 'A4 × 300dpi' };
-
-  function nbDelivRowHTML(name, dims, qty) {
-    var opts = ['Instagram Post', 'Instagram Story', 'Web Banner', 'TikTok', 'Print']
-      .map(function (o) { return '<option' + (o === name ? ' selected' : '') + '>' + o + '</option>'; }).join('');
-    return '<div class="nb-deliv-row" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--surface-1);border:1px solid var(--border-standard);border-radius:6px;">' +
-      '<select class="nb-d-name" onchange="nbDelivDims(this)" style="background:var(--bg-surface);border:1px solid var(--border-standard);border-radius:5px;padding:4px 6px;color:var(--text-primary);font-size:12px;font-family:inherit;outline:none;cursor:pointer;">' + opts + '</select>' +
-      '<input class="nb-d-dims" value="' + dims + '" style="width:96px;background:transparent;border:none;color:var(--text-tertiary);font-size:12px;outline:none;font-family:inherit;">' +
-      '<span style="color:var(--text-quaternary);font-size:12px;">×</span>' +
-      '<input class="nb-d-qty" type="number" min="1" value="' + qty + '" style="width:44px;background:var(--bg-surface);border:1px solid var(--border-standard);border-radius:5px;padding:4px 6px;color:var(--text-primary);font-size:12px;text-align:center;outline:none;font-family:inherit;">' +
-      '<button onclick="this.closest(\'.nb-deliv-row\').remove()" style="margin-left:auto;background:transparent;border:none;color:var(--text-quaternary);cursor:pointer;font-size:14px;">×</button></div>';
-  }
-  function nbDelivDims(sel) {
-    var dims = sel.closest('.nb-deliv-row').querySelector('.nb-d-dims');
-    if (NB_DIMS[sel.value]) dims.value = NB_DIMS[sel.value];
-  }
-  function nbAddDeliverable() {
-    document.getElementById('nbAddDeliv').insertAdjacentHTML('beforebegin', nbDelivRowHTML('Instagram Post', '1080 × 1080', 1));
-  }
 
   function nbRenderRefs() {
     var c = document.getElementById('nbRefs');
@@ -899,15 +836,6 @@
     nbMenu(e.currentTarget, KK.team().map(function (m) { return m.name; }), function (name) { nbSetAssignee(name); });
   }
 
-  function nbReadDeliverables() {
-    return Array.prototype.slice.call(document.querySelectorAll('#nbDeliverables .nb-deliv-row')).map(function (row) {
-      return {
-        name: row.querySelector('.nb-d-name').value,
-        spec: row.querySelector('.nb-d-dims').value,
-        qty: parseInt(row.querySelector('.nb-d-qty').value, 10) || 1
-      };
-    });
-  }
   var nbEditId = null; // when set, the form edits an existing brief instead of creating
 
   function nbSave(mode) {
@@ -918,8 +846,6 @@
       campaign: nbState.campaign,
       desc: document.getElementById('nbDesc').value.trim(),
       assignee: nbState.assignee,
-      due: document.getElementById('nbDue').value.trim(),
-      deliverables: nbReadDeliverables(),
       refs: nbState.refs.slice()
     };
     if (nbEditId) {
@@ -948,26 +874,12 @@
     document.getElementById('nbBtnPrimaryLabel').textContent = 'Save changes';
     document.getElementById('nbTitle').value = b.name || '';
     document.getElementById('nbDesc').value = b.desc || '';
-    document.getElementById('nbDue').value = (b.due && b.due !== 'TBD') ? b.due : '';
     if (b.campaign && b.campaign !== 'Standalone') nbSetCampaign(b.campaign); else nbSetCampaign(null);
     if (b.assignee && b.assignee !== 'Unassigned') nbSetAssignee(b.assignee);
     nbState.refs = (b.refs || []).slice();
     nbRenderRefs();
-    nbPrefillDeliverables(b.deliverables || []);
     document.getElementById('newBriefDrawer').classList.add('open');
     document.getElementById('newBriefBackdrop').classList.add('open');
-  }
-
-  function nbPrefillDeliverables(list) {
-    Array.prototype.slice.call(document.querySelectorAll('#nbDeliverables .nb-deliv-row')).forEach(function (r) { r.remove(); });
-    var add = document.getElementById('nbAddDeliv');
-    list.forEach(function (d) {
-      var spec = d.spec || '';
-      var m = /×\s*(\d+)\s*$/.exec(spec);
-      var qty = m ? m[1] : 1;
-      var dims = m ? spec.slice(0, m.index).trim() : spec;
-      add.insertAdjacentHTML('beforebegin', nbDelivRowHTML(d.name, dims, qty));
-    });
   }
 
   function nbResetForm() {
@@ -980,12 +892,10 @@
     document.getElementById('nbTitle').value = '';
     document.getElementById('nbTitle').placeholder = 'Brief title...';
     document.getElementById('nbDesc').value = '';
-    document.getElementById('nbDue').value = '';
     document.getElementById('nbCampaign').textContent = 'Select a campaign...';
     document.getElementById('nbCampaign').style.color = 'var(--text-quaternary)';
     document.getElementById('nbAssignee').textContent = 'Select assignee...';
     document.getElementById('nbAssignee').style.color = 'var(--text-quaternary)';
-    Array.prototype.slice.call(document.querySelectorAll('#nbDeliverables .nb-deliv-row')).forEach(function (r) { r.remove(); });
     nbRenderRefs();
     document.getElementById('demoHelper').style.display = 'flex';
   }
@@ -993,16 +903,10 @@
   function loadExample() {
     nbSetCampaign('SS26 · Hana Matsuri');
     document.getElementById('nbTitle').value = 'Sakura Camo · Social Launch Kit';
-    document.getElementById('nbDesc').value = 'Social-first launch kit for the Sakura-dyed ABC Camo capsule. 3 Instagram posts, 2 stories, 1 hero web banner. Emphasize sakura pink + pale gold colorway while preserving ABC camo geometry. Tie to Shibuya flagship reopening April 22.';
+    document.getElementById('nbDesc').value = 'Social-first launch kit for the Sakura-dyed ABC Camo capsule. Emphasize sakura pink + pale gold colorway while preserving ABC camo geometry. Tie to Shibuya flagship reopening April 22.';
     nbState.refs = ['images/5.jpg', 'images/9.jpg', 'images/7.jpg', 'images/1.jpg'];
     nbRenderRefs();
-    Array.prototype.slice.call(document.querySelectorAll('#nbDeliverables .nb-deliv-row')).forEach(function (r) { r.remove(); });
-    var add = document.getElementById('nbAddDeliv');
-    add.insertAdjacentHTML('beforebegin', nbDelivRowHTML('Instagram Post', '1080 × 1080', 3));
-    add.insertAdjacentHTML('beforebegin', nbDelivRowHTML('Instagram Story', '1080 × 1920', 2));
-    add.insertAdjacentHTML('beforebegin', nbDelivRowHTML('Web Banner', '1920 × 600', 1));
     nbSetAssignee('Kathy S.');
-    document.getElementById('nbDue').value = 'May 15, 2026';
     document.getElementById('demoHelper').style.display = 'none';
   }
 

@@ -45,7 +45,6 @@ ok(w.nbState.refs.includes("images/2.jpg"), "reference is user-chosen, not auto"
 w.document.getElementById("nbTitle").value = "DOM Test Brief";
 w.nbSetCampaign("SS26 · Hana Matsuri");
 w.nbSetAssignee("Grace L.");
-w.nbAddDeliverable();
 w.nbSave("draft");
 ok(w.KK.briefs().length === 13 && w.document.querySelectorAll("#briefList .brief-row").length === 13, "create brief via form -> 13 rows");
 const created = w.KK.briefs()[0];
