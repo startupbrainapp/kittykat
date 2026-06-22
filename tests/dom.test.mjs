@@ -112,71 +112,39 @@ const rb = rw.KK.reviewBriefs()[0];
 if (rb && typeof rw.approveBrief === "function") { rw.approveBrief(rb.id); ok(rw.KK.brief(rb.id).status === "shipped", "approve -> shipped"); }
 else ok(false, "approveBrief available");
 
-// ---- asset_manager.html ----
-console.log("asset_manager.html");
+// ---- asset_manager.html (Shortlisted) ----
+console.log("asset_manager.html (Shortlisted)");
 const a = loadPage("asset_manager.html");
 const aw = a.dom.window;
 ok(a.errors.length === 0, "loads with no script errors" + (a.errors[0] ? " -> " + a.errors[0] : ""));
-ok(aw.document.querySelectorAll("#campaignFolders .campaign-folder").length > 0, "campaign folders render by default");
-ok(![...aw.document.querySelectorAll("#campaignFolders .folder-name")].some((n) => n.textContent === "All assets"), "no 'All assets' folder");
-aw.openCampaign("Tokyo After Dark");
-ok(aw.document.querySelectorAll("#assetGrid .asset-tile").length === 4, "opening a campaign folder shows its assets");
-ok(aw.document.querySelectorAll("#assetGrid .brief-subheader").length === 0 && !!aw.document.getElementById("fBrief"), "campaign view is a flat grid with a Brief filter");
-aw.backToFolders();
-ok(aw.document.getElementById("campaignFolders").style.display !== "none", "breadcrumb returns to folder view");
-// asset drawer uses the aligned per-brief actions (no old "Open in Creator Studio" wording)
-aw.openDrawer(13); // a production-status asset
-const amFooter = aw.document.getElementById("drawerFooter").textContent;
-ok(/Submit to Reviews/.test(amFooter) && /Edit more/.test(amFooter) && !/Open in Creator Studio/.test(amFooter), "asset drawer footer matches the per-brief model");
+ok(aw.document.querySelectorAll("#assetGrid .asset-tile").length > 0, "renders a flat shortlist grid");
+ok(aw.document.getElementById("campaignFolders") === null, "no folder view — flat list only");
+ok(/shortlisted/.test(aw.document.getElementById("filterCount").textContent), "count reads 'N shortlisted'");
+ok(!!aw.document.getElementById("fCampaign") && aw.document.getElementById("fBrief") === null, "Campaign filter present, Brief filter gone");
+// removing from the shortlist drops the tile
+const beforeCount = aw.document.querySelectorAll("#assetGrid .asset-tile").length;
+aw.unshortlist(aw.LAST_RENDERED[0].id);
+ok(aw.document.querySelectorAll("#assetGrid .asset-tile").length === beforeCount - 1, "un-shortlisting removes the asset from the list");
 
-const a2 = loadPage("asset_manager.html", { query: "?brief=neon-abc" });
-const a2w = a2.dom.window;
-ok(a2w.document.getElementById("assetsView").style.display !== "none" && a2w.document.querySelectorAll("#assetGrid .asset-tile").length > 0, "Studio deep-link drills into the brief's campaign folder");
-ok(a2w.document.getElementById("amBreadcrumbCurrent").textContent === "Tokyo After Dark", "deep-link breadcrumb shows the brief's campaign");
-
-// Studio -> Asset Manager loop: a brief generated in Studio (tiles) shows up here
-const loopState = {
+// Only Studio-hearted assets are shortlisted; raw un-hearted generations are excluded
+const slState = {
   briefs: [{
-    id: "loop-test", name: "Loop Test Brief", status: "production", statusLabel: "In Production",
-    campaign: "Loop Test Campaign", assignee: "Grace L.", initial: "G",
-    assetsDone: 0, assetsTotal: 8, due: "TBD", desc: "", deliverables: [],
-    tiles: [1, 2, 3, 4, 5, 6, 7, 8], finalSelects: [],
-  }],
-  customCampaigns: [],
-};
-const a3 = loadPage("asset_manager.html", { seedState: loopState });
-const a3w = a3.dom.window;
-const loopFolders = [...a3w.document.querySelectorAll("#campaignFolders .folder-name")].map((n) => n.textContent);
-ok(loopFolders.includes("Loop Test Campaign"), "Studio-generated brief surfaces as a campaign folder (loop closed)");
-a3w.openCampaign("Loop Test Campaign");
-ok(a3w.document.querySelectorAll("#assetGrid .asset-tile").length === 8, "generated tiles appear as assets under the brief");
-ok(a3w.document.querySelectorAll("#assetGrid .brief-subheader").length === 0, "campaign drill-in is a flat grid (no sub-folders)");
-a3w.submitBrief("loop-test");
-ok(a3w.KK.brief("loop-test").status === "review", "submitting from Asset Manager moves the brief into review");
-
-// Final-select markers are visible + Submit is count-aware
-const selState = {
-  briefs: [{
-    id: "sel-test", name: "Sel Test", status: "production", statusLabel: "In Production",
-    campaign: "Sel Camp", assignee: "Grace L.", initial: "G", assetsDone: 0, assetsTotal: 8,
+    id: "sl-test", name: "SL Test", status: "production", statusLabel: "In Production",
+    campaign: "SL Camp", assignee: "Grace L.", initial: "G", assetsDone: 0, assetsTotal: 8,
     due: "TBD", desc: "", deliverables: [], tiles: [1, 2, 3, 4, 5, 6, 7, 8],
-    finalSelects: ["images/1.jpg", "images/2.jpg"],
+    finalSelects: ["images/1.jpg", "images/2.jpg", "images/3.jpg"],
   }],
   customCampaigns: [],
 };
-const a4w = loadPage("asset_manager.html", { query: "?brief=sel-test", seedState: selState }).dom.window;
-ok(a4w.document.querySelectorAll("#assetGrid .asset-fav.on").length === 2, "selected assets show a filled heart in the Asset Manager");
-const selBar = a4w.document.getElementById("briefBar");
-ok(selBar && selBar.style.display !== "none" && /Submit 2 selects to Reviews/.test(selBar.textContent), "campaign submit bar shows the select count");
+const slw = loadPage("asset_manager.html", { seedState: slState }).dom.window;
+const slTiles = [...slw.document.querySelectorAll("#assetGrid .asset-overlay-name")].filter((n) => /SL Test/.test(n.textContent));
+ok(slTiles.length === 3, "only the 3 hearted Studio assets are shortlisted (raw generations excluded)");
 
-// "+N new" badge on campaign folders for freshly generated assets, clears on open
-const badgeW = loadPage("asset_manager.html", { seedState: loopState }).dom.window;
-const lc = [...badgeW.document.querySelectorAll("#campaignFolders .campaign-folder")].find((c) => c.querySelector(".folder-name").textContent === "Loop Test Campaign");
-ok(lc && /\+8 new/.test(lc.textContent), "campaign folder shows '+N new' for freshly generated assets");
-badgeW.openCampaign("Loop Test Campaign");
-badgeW.backToFolders();
-const lc2 = [...badgeW.document.querySelectorAll("#campaignFolders .campaign-folder")].find((c) => c.querySelector(".folder-name").textContent === "Loop Test Campaign");
-ok(lc2 && !/new/.test(lc2.textContent), "'+N new' badge clears after opening the campaign");
+// batch Send to Reviews submits the selected briefs
+slw.toggleSelectMode();
+slw.bulkSelectAll();
+slw.sendSelectedToReviews();
+ok(slw.KK.brief("sl-test").status === "review", "batch Send to Reviews moves the brief(s) into review");
 
 console.log(`\n${pass} passed, ${fail.length} failed`);
 if (fail.length) { console.log("FAILED: " + fail.join(" | ")); process.exit(1); }
