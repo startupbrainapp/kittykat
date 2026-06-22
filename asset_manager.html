@@ -408,6 +408,7 @@
 
   <div class="content">
     <div class="content-max">
+      <div id="amHeader">
       <div class="page-eyebrow">Execution &middot; Asset Manager</div>
       <h1 class="page-title">Production assets for BAPE</h1>
       <p class="page-desc">Every asset produced from briefs &mdash; organized by campaign, status, and format. Search by keyword or visual similarity. Assets flow here from Creator Studio and move to Reviews for approval.</p>
@@ -451,6 +452,7 @@
           </div>
         </div>
       </div>
+      </div><!-- /amHeader -->
 
       <!-- Campaign folders (default browse) + breadcrumb -->
       <div id="amBreadcrumb" class="am-breadcrumb" style="display:none; align-items:center; gap:8px; margin-bottom:16px; font-size:13px; color:var(--text-tertiary); letter-spacing:-0.13px;">
@@ -808,6 +810,7 @@
   }
   function showFolderView() {
     FOLDER_VIEW = true;
+    var h = document.getElementById('amHeader'); if (h) h.style.display = '';
     document.getElementById('assetsView').style.display = 'none';
     document.getElementById('amBreadcrumb').style.display = 'none';
     document.getElementById('campaignFolders').style.display = '';
@@ -815,6 +818,7 @@
   }
   function showAssetsView(campName) {
     FOLDER_VIEW = false;
+    var h = document.getElementById('amHeader'); if (h) h.style.display = 'none';
     document.getElementById('campaignFolders').style.display = 'none';
     document.getElementById('assetsView').style.display = '';
     var bc = document.getElementById('amBreadcrumb');
