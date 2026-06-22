@@ -121,7 +121,7 @@ ok(aw.document.querySelectorAll("#campaignFolders .campaign-folder").length > 0,
 ok(![...aw.document.querySelectorAll("#campaignFolders .folder-name")].some((n) => n.textContent === "All assets"), "no 'All assets' folder");
 aw.openCampaign("Tokyo After Dark");
 ok(aw.document.querySelectorAll("#assetGrid .asset-tile").length === 4, "opening a campaign folder shows its assets");
-ok(aw.document.querySelectorAll("#assetGrid .brief-subheader").length === 2, "campaign assets group under brief sub-folders");
+ok(aw.document.querySelectorAll("#assetGrid .brief-subheader").length === 0 && !!aw.document.getElementById("fBrief"), "campaign view is a flat grid with a Brief filter");
 aw.backToFolders();
 ok(aw.document.getElementById("campaignFolders").style.display !== "none", "breadcrumb returns to folder view");
 // asset drawer uses the aligned per-brief actions (no old "Open in Creator Studio" wording)
@@ -150,8 +150,7 @@ const loopFolders = [...a3w.document.querySelectorAll("#campaignFolders .folder-
 ok(loopFolders.includes("Loop Test Campaign"), "Studio-generated brief surfaces as a campaign folder (loop closed)");
 a3w.openCampaign("Loop Test Campaign");
 ok(a3w.document.querySelectorAll("#assetGrid .asset-tile").length === 8, "generated tiles appear as assets under the brief");
-const loopSub = a3w.document.querySelector("#assetGrid .brief-subheader .bsub-actions");
-ok(loopSub && /Submit to Reviews/.test(loopSub.innerHTML), "Asset Manager offers Submit to Reviews per brief");
+ok(a3w.document.querySelectorAll("#assetGrid .brief-subheader").length === 0, "campaign drill-in is a flat grid (no sub-folders)");
 a3w.submitBrief("loop-test");
 ok(a3w.KK.brief("loop-test").status === "review", "submitting from Asset Manager moves the brief into review");
 
@@ -167,8 +166,8 @@ const selState = {
 };
 const a4w = loadPage("asset_manager.html", { query: "?brief=sel-test", seedState: selState }).dom.window;
 ok(a4w.document.querySelectorAll("#assetGrid .asset-fav.on").length === 2, "selected assets show a filled heart in the Asset Manager");
-const selSub = a4w.document.querySelector("#assetGrid .brief-subheader .bsub-actions");
-ok(selSub && /Submit 2 selects to Reviews/.test(selSub.textContent), "brief sub-folder Submit shows the select count");
+const selBar = a4w.document.getElementById("briefBar");
+ok(selBar && selBar.style.display !== "none" && /Submit 2 selects to Reviews/.test(selBar.textContent), "campaign submit bar shows the select count");
 
 // "+N new" badge on campaign folders for freshly generated assets, clears on open
 const badgeW = loadPage("asset_manager.html", { seedState: loopState }).dom.window;

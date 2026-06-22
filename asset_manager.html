@@ -454,7 +454,7 @@
 
       <!-- Campaign folders (default browse) + breadcrumb -->
       <div id="amBreadcrumb" class="am-breadcrumb" style="display:none; align-items:center; gap:8px; margin-bottom:16px; font-size:13px; color:var(--text-tertiary); letter-spacing:-0.13px;">
-        <a onclick="backToFolders()" style="cursor:pointer; color:var(--text-tertiary); text-decoration:none;">All campaigns</a>
+        <a onclick="backToFolders()" style="cursor:pointer; color:var(--brand-accent); text-decoration:none; font-weight:510;">&lsaquo; All campaigns</a>
         <span style="color:var(--text-quaternary);">&rsaquo;</span>
         <span id="amBreadcrumbCurrent" style="color:var(--text-primary); font-weight:510;"></span>
       </div>
@@ -468,7 +468,7 @@
           <input id="assetSearch" type="text" placeholder="Search assets, briefs, campaigns…" oninput="onSearchInput()" autocomplete="off">
         </div>
         <button class="filter-dropdown" onclick="cycleFilter('status')"><span class="filter-dropdown-label">Status</span><span id="fStatus">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="filter-dropdown" onclick="cycleFilter('campaign')"><span class="filter-dropdown-label">Campaign</span><span id="fCampaign">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="cycleFilter('brief')"><span class="filter-dropdown-label">Brief</span><span id="fBrief">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="filter-dropdown" onclick="cycleFilter('format')"><span class="filter-dropdown-label">Format</span><span id="fFormat">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="filter-dropdown" id="selectModeBtn" onclick="toggleSelectMode()"><svg class="filter-chev" viewBox="0 0 12 12" fill="none" style="width:12px;height:12px;"><path d="M2 6l2.5 2.5L10 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="selectModeLabel">Select</span></button>
         <div class="filter-spacer"></div>
@@ -476,6 +476,11 @@
         <span class="filter-count" id="filterCount">20 assets</span>
       </div>
 
+      <!-- Per-brief / campaign submit bar -->
+      <div id="briefBar" style="display:none; align-items:center; gap:10px; margin-bottom:14px; padding:9px 13px; background:rgba(113,112,255,0.08); border:1px solid rgba(113,112,255,0.28); border-radius:8px; font-size:12px; color:#cdd2ff; letter-spacing:-0.13px;">
+        <span id="briefBarText"></span>
+        <span id="briefBarActions" style="margin-left:auto; display:flex; gap:6px;"></span>
+      </div>
       <!-- Asset grid -->
       <div class="asset-grid" id="assetGrid"></div>
       </div><!-- /assetsView -->
@@ -616,7 +621,8 @@
   // --- Filters / sort state (cycled via the dropdown buttons) ---
   var FILTERS = {
     status: { id: 'fStatus', i: 0, opts: ['All', 'Approved', 'In Review', 'In Production', 'Draft'] },
-    campaign: { id: 'fCampaign', i: 0, opts: ['All'] },  // populated from assets
+    campaign: { id: 'fCampaign', i: 0, opts: ['All'] },  // internal: which campaign you drilled into
+    brief: { id: 'fBrief', i: 0, opts: ['All'] },        // visible pill: briefs within that campaign
     format: { id: 'fFormat', i: 0, opts: ['All'] },      // populated from assets
     sort: { id: 'fSort', i: 0, opts: ['Newest', 'Oldest'] }
   };
@@ -624,10 +630,12 @@
   var STATUS_VAL = { 'Approved': 'approved', 'In Review': 'review', 'In Production': 'production', 'Draft': 'draft' };
   function createdRank(s) { var t = Date.parse(s); return isNaN(t) ? 0 : t; }
   function refreshFilterOptions() {
-    var campaigns = ['All'], formats = ['All'];
+    var campaigns = ['All'], formats = ['All'], briefs = ['All'];
+    var curCamp = FILTERS.campaign.opts[FILTERS.campaign.i % FILTERS.campaign.opts.length];
     liveAssets().forEach(function (a) {
       if (a.campaign && campaigns.indexOf(a.campaign) < 0) campaigns.push(a.campaign);
       if (a.format && formats.indexOf(a.format) < 0) formats.push(a.format);
+      if ((curCamp === 'All' || a.campaign === curCamp) && a.brief && briefs.indexOf(a.brief) < 0) briefs.push(a.brief);
     });
     function reconcile(f, opts) {
       var cur = f.opts[f.i % f.opts.length];
@@ -635,9 +643,10 @@
     }
     reconcile(FILTERS.campaign, campaigns);
     reconcile(FILTERS.format, formats);
+    reconcile(FILTERS.brief, briefs);
   }
   function syncFilterLabels() {
-    ['status', 'campaign', 'format', 'sort'].forEach(function (key) {
+    ['status', 'brief', 'format', 'sort'].forEach(function (key) {
       var f = FILTERS[key], el = document.getElementById(f.id);
       if (el) el.textContent = f.opts[f.i % f.opts.length];
     });
@@ -702,28 +711,56 @@
         </div>
       </div>`;
   }
-  // Within a campaign, briefs act as sub-folders: group tiles under brief sub-headers.
-  function groupTilesByBrief(list) {
-    var order = [], groups = {};
-    list.forEach(function (a) { var b = a.brief || 'No brief'; if (!groups[b]) { groups[b] = []; order.push(b); } groups[b].push(a); });
-    return order.map(function (b) {
-      var ls = liveStatus(groups[b][0]);
-      var actions = briefActionsHTML(ls.briefId, ls.status);
-      return '<div class="brief-subheader" style="grid-column:1/-1;"><span>' + b + '</span>'
-        + '<span class="brief-subheader-count">' + groups[b].length + '</span>'
-        + (actions ? '<span class="bsub-actions">' + actions + '</span>' : '') + '</div>'
-        + groups[b].map(assetTileHTML).join('');
-    }).join('');
+  // Submit bar: per-brief when a brief is filtered, else campaign-wide for any production selects.
+  function campaignProductionSelects(camp) {
+    var ids = [], n = 0;
+    (window.KK ? KK.briefs() : []).forEach(function (b) {
+      if ((b.campaign || '') === camp && b.status === 'production') {
+        var s = KK.finalSelects(b.id).length;
+        if (s > 0) { n += s; ids.push(b.id); }
+      }
+    });
+    return { count: n, ids: ids };
+  }
+  function submitCampaign(camp) {
+    var info = campaignProductionSelects(camp);
+    info.ids.forEach(function (id) { KK.submitReview(id); });
+    renderGrid();
+    toast(info.count ? ('Submitted ' + info.count + ' selects to Reviews') : 'No selects to submit');
+  }
+  function renderBriefBar(camp, fBrief) {
+    var bb = document.getElementById('briefBar');
+    if (!bb) return;
+    if (fBrief && fBrief !== 'All') {
+      var b = (window.KK ? KK.briefs() : []).find(function (x) { return x.name === fBrief && (camp === 'All' || (x.campaign || '') === camp); });
+      if (b) {
+        var ns = KK.finalSelects(b.id).length;
+        bb.style.display = 'flex';
+        document.getElementById('briefBarText').textContent = b.name + ' · ' + ns + (ns === 1 ? ' select' : ' selects');
+        document.getElementById('briefBarActions').innerHTML = briefActionsHTML(b.id, b.status);
+        return;
+      }
+    } else if (camp && camp !== 'All') {
+      var info = campaignProductionSelects(camp);
+      if (info.count > 0) {
+        bb.style.display = 'flex';
+        document.getElementById('briefBarText').textContent = camp + ' · ' + info.count + ' selects ready to review';
+        document.getElementById('briefBarActions').innerHTML = '<button class="bsub-btn primary" onclick="submitCampaign(\'' + camp.replace(/'/g, "\\'") + '\')">Submit ' + info.count + ' selects to Reviews</button>';
+        return;
+      }
+    }
+    bb.style.display = 'none';
   }
   function renderGrid() {
     const grid = document.getElementById('assetGrid');
     refreshFilterOptions();
     let list = liveAssets();
-    var fStatus = curVal('status'), fCamp = curVal('campaign'), fFmt = curVal('format'), fSort = curVal('sort');
+    var fStatus = curVal('status'), fCamp = curVal('campaign'), fBrief = curVal('brief'), fFmt = curVal('format'), fSort = curVal('sort');
     list = list.filter(function (a) {
       if (ARCHIVED_LOCAL[a.id]) return false;
       if (fStatus !== 'All' && liveStatus(a).status !== STATUS_VAL[fStatus]) return false;
       if (fCamp !== 'All' && a.campaign !== fCamp) return false;
+      if (fBrief !== 'All' && a.brief !== fBrief) return false;
       if (fFmt !== 'All' && a.format !== fFmt) return false;
       if (!matchesSearch(a)) return false;
       return true;
@@ -731,7 +768,8 @@
     if (fSort === 'Newest') list.sort(function (x, y) { return createdRank(y.created) - createdRank(x.created); });
     else if (fSort === 'Oldest') list.sort(function (x, y) { return createdRank(x.created) - createdRank(y.created); });
     syncFilterLabels();
-    grid.innerHTML = (fCamp !== 'All') ? groupTilesByBrief(list) : list.map(assetTileHTML).join('');
+    grid.innerHTML = list.map(assetTileHTML).join('');
+    renderBriefBar(fCamp, fBrief);
     var fc = document.getElementById('filterCount');
     if (fc) fc.textContent = list.length + ' asset' + (list.length === 1 ? '' : 's');
     LAST_RENDERED = list;
@@ -789,6 +827,7 @@
     refreshFilterOptions();
     var i = FILTERS.campaign.opts.indexOf(name);
     FILTERS.campaign.i = i >= 0 ? i : 0;
+    FILTERS.brief.i = 0; // start at "All briefs" within the campaign
     showAssetsView(name);
   }
   function backToFolders() { FILTERS.campaign.i = 0; showFolderView(); }
