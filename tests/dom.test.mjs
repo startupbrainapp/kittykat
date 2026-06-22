@@ -170,5 +170,14 @@ ok(a4w.document.querySelectorAll("#assetGrid .asset-fav.on").length === 2, "sele
 const selSub = a4w.document.querySelector("#assetGrid .brief-subheader .bsub-actions");
 ok(selSub && /Submit 2 selects to Reviews/.test(selSub.textContent), "brief sub-folder Submit shows the select count");
 
+// "+N new" badge on campaign folders for freshly generated assets, clears on open
+const badgeW = loadPage("asset_manager.html", { seedState: loopState }).dom.window;
+const lc = [...badgeW.document.querySelectorAll("#campaignFolders .campaign-folder")].find((c) => c.querySelector(".folder-name").textContent === "Loop Test Campaign");
+ok(lc && /\+8 new/.test(lc.textContent), "campaign folder shows '+N new' for freshly generated assets");
+badgeW.openCampaign("Loop Test Campaign");
+badgeW.backToFolders();
+const lc2 = [...badgeW.document.querySelectorAll("#campaignFolders .campaign-folder")].find((c) => c.querySelector(".folder-name").textContent === "Loop Test Campaign");
+ok(lc2 && !/new/.test(lc2.textContent), "'+N new' badge clears after opening the campaign");
+
 console.log(`\n${pass} passed, ${fail.length} failed`);
 if (fail.length) { console.log("FAILED: " + fail.join(" | ")); process.exit(1); }

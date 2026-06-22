@@ -91,7 +91,8 @@
   .campaign-folders { display: grid; grid-template-columns: repeat(auto-fill, minmax(212px, 1fr)); gap: 14px; }
   .campaign-folder { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color .12s, transform .12s; }
   .campaign-folder:hover { border-color: var(--brand); transform: translateY(-2px); }
-  .folder-cover { aspect-ratio: 4 / 3; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; background: var(--bg-surface); }
+  .folder-cover { position: relative; aspect-ratio: 4 / 3; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; background: var(--bg-surface); }
+  .folder-badge { position: absolute; top: 8px; right: 8px; z-index: 2; background: var(--brand); color: #fff; font-size: 10px; font-weight: 590; padding: 2px 8px; border-radius: 9999px; letter-spacing: -0.13px; box-shadow: 0 1px 4px rgba(0,0,0,0.45); }
   .folder-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .folder-cover .single { grid-column: 1 / span 2; grid-row: 1 / span 2; }
   .folder-meta { padding: 11px 13px; }
@@ -647,6 +648,20 @@
     renderGrid();
   }
 
+  // "New since you last looked" tracking for the campaign-folder badges.
+  var AM_SEEN_KEY = 'kk_am_seen_v1';
+  function assetKey(a) { return (a.brief || '') + '::' + (a.name || ''); }
+  function seenMap() { try { return JSON.parse(localStorage.getItem(AM_SEEN_KEY)) || {}; } catch (e) { return {}; } }
+  function saveSeen(m) { try { localStorage.setItem(AM_SEEN_KEY, JSON.stringify(m)); } catch (e) {} }
+  // First ever load: treat existing (seed) assets as already seen, so only
+  // assets newly generated in Studio afterwards show up as "new".
+  (function () { if (!localStorage.getItem(AM_SEEN_KEY)) { var m = {}; assets.forEach(function (a) { m[assetKey(a)] = 1; }); saveSeen(m); } })();
+  function isNewAsset(a) { return !seenMap()[assetKey(a)]; }
+  function markCampaignSeen(name) {
+    var m = seenMap();
+    liveAssets().forEach(function (a) { if ((a.campaign || 'Uncategorized') === name) m[assetKey(a)] = 1; });
+    saveSeen(m);
+  }
   function goEdit(bid) { if (bid) window.location.href = 'creator_studio.html?brief=' + encodeURIComponent(bid); }
   function submitBrief(bid) { if (window.KK && bid) { KK.submitReview(bid); } renderGrid(); toast('Submitted to Reviews'); }
   // Toggle an asset's "select" (Final Select) — same list Studio hearts feed.
@@ -743,8 +758,10 @@
     });
     function card(name, items, onclick) {
       var approved = items.filter(function (a) { return liveStatus(a).status === 'approved'; }).length;
+      var fresh = items.filter(isNewAsset).length;
+      var badge = fresh ? '<div class="folder-badge">+' + fresh + ' new</div>' : '';
       return '<div class="campaign-folder" onclick="' + onclick + '">'
-        + '<div class="folder-cover">' + folderCover(items) + '</div>'
+        + '<div class="folder-cover">' + badge + folderCover(items) + '</div>'
         + '<div class="folder-meta"><div class="folder-name">' + name + '</div>'
         + '<div class="folder-count">' + items.length + ' asset' + (items.length === 1 ? '' : 's')
         + (approved ? ' &middot; ' + approved + ' approved' : '') + '</div></div></div>';
@@ -768,6 +785,7 @@
     renderGrid();
   }
   function openCampaign(name) {
+    markCampaignSeen(name);
     refreshFilterOptions();
     var i = FILTERS.campaign.opts.indexOf(name);
     FILTERS.campaign.i = i >= 0 ? i : 0;
