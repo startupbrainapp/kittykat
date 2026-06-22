@@ -133,6 +133,10 @@ const loopFolders = [...a3w.document.querySelectorAll("#campaignFolders .folder-
 ok(loopFolders.includes("Loop Test Campaign"), "Studio-generated brief surfaces as a campaign folder (loop closed)");
 a3w.openCampaign("Loop Test Campaign");
 ok(a3w.document.querySelectorAll("#assetGrid .asset-tile").length === 8, "generated tiles appear as assets under the brief");
+const loopSub = a3w.document.querySelector("#assetGrid .brief-subheader .bsub-actions");
+ok(loopSub && /Submit to Reviews/.test(loopSub.innerHTML), "Asset Manager offers Submit to Reviews per brief");
+a3w.submitBrief("loop-test");
+ok(a3w.KK.brief("loop-test").status === "review", "submitting from Asset Manager moves the brief into review");
 
 console.log(`\n${pass} passed, ${fail.length} failed`);
 if (fail.length) { console.log("FAILED: " + fail.join(" | ")); process.exit(1); }

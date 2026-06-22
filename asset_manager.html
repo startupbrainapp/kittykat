@@ -102,6 +102,11 @@
   .brief-subheader { display: flex; align-items: center; gap: 8px; padding: 15px 2px 5px; font-size: 11px; font-weight: 590; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-top: 1px solid var(--border-subtle); margin-top: 8px; }
   .brief-subheader:first-child { border-top: none; margin-top: 0; padding-top: 2px; }
   .brief-subheader-count { font-weight: 510; color: var(--text-quaternary); letter-spacing: 0; text-transform: none; }
+  .brief-subheader .bsub-actions { margin-left: auto; display: flex; gap: 6px; }
+  .bsub-btn { font-family: inherit; font-size: 11px; font-weight: 510; text-transform: none; letter-spacing: -0.13px; padding: 3px 9px; border-radius: 5px; border: 1px solid var(--border-standard); background: var(--surface-1); color: var(--text-secondary); cursor: pointer; }
+  .bsub-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+  .bsub-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .bsub-btn.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
   .asset-tile {
     aspect-ratio: 1;
     border-radius: 8px;
@@ -462,7 +467,8 @@
       <!-- Asset grid -->
       <div id="briefFilter" style="display:none; align-items:center; gap:10px; margin-bottom:14px; padding:9px 13px; background:rgba(113,112,255,0.08); border:1px solid rgba(113,112,255,0.28); border-radius:8px; font-size:12px; color:#cdd2ff; letter-spacing:-0.13px;">
         <span id="briefFilterText"></span>
-        <a href="asset_manager.html" style="margin-left:auto; color:var(--text-tertiary); text-decoration:none;">Clear ✕</a>
+        <span id="briefFilterActions" style="margin-left:auto; display:flex; gap:6px;"></span>
+        <a href="asset_manager.html" style="margin-left:10px; color:var(--text-tertiary); text-decoration:none;">Clear ✕</a>
       </div>
       <div class="asset-grid" id="assetGrid"></div>
       </div><!-- /assetsView -->
@@ -635,6 +641,17 @@
     renderGrid();
   }
 
+  function goEdit(bid) { if (bid) window.location.href = 'creator_studio.html?brief=' + encodeURIComponent(bid); }
+  function submitBrief(bid) { if (window.KK && bid) { KK.submitReview(bid); } renderGrid(); toast('Submitted to Reviews'); }
+  // Per-brief actions surfaced in the Asset Manager (Studio makes, Asset Manager decides).
+  function briefActionsHTML(bid, status) {
+    if (!bid) return '';
+    var edit = '<button class="bsub-btn" onclick="event.stopPropagation(); goEdit(\'' + bid + '\')">Edit more</button>';
+    var next = '';
+    if (status === 'production') next = '<button class="bsub-btn primary" onclick="event.stopPropagation(); submitBrief(\'' + bid + '\')">Submit to Reviews</button>';
+    else if (status === 'review') next = '<button class="bsub-btn" onclick="event.stopPropagation(); window.location.href=\'reviews.html\'">View in Reviews</button>';
+    return edit + next;
+  }
   function assetTileHTML(a) {
     const l = liveStatus(a);
     const sel = !!SELECTED[a.id];
@@ -657,8 +674,11 @@
     var order = [], groups = {};
     list.forEach(function (a) { var b = a.brief || 'No brief'; if (!groups[b]) { groups[b] = []; order.push(b); } groups[b].push(a); });
     return order.map(function (b) {
+      var ls = liveStatus(groups[b][0]);
+      var actions = briefActionsHTML(ls.briefId, ls.status);
       return '<div class="brief-subheader" style="grid-column:1/-1;"><span>' + b + '</span>'
-        + '<span class="brief-subheader-count">' + groups[b].length + '</span></div>'
+        + '<span class="brief-subheader-count">' + groups[b].length + '</span>'
+        + (actions ? '<span class="bsub-actions">' + actions + '</span>' : '') + '</div>'
         + groups[b].map(assetTileHTML).join('');
     }).join('');
   }
@@ -671,7 +691,11 @@
       list = list.filter(function (a) { var l = liveStatus(a); return l.briefId === filterId; });
       var fb = document.getElementById('briefFilter');
       var b = window.KK ? KK.brief(filterId) : null;
-      if (fb && b) { fb.style.display = 'flex'; document.getElementById('briefFilterText').textContent = 'Showing assets for: ' + b.name; }
+      if (fb && b) {
+        fb.style.display = 'flex';
+        document.getElementById('briefFilterText').textContent = 'Showing assets for: ' + b.name;
+        document.getElementById('briefFilterActions').innerHTML = briefActionsHTML(b.id, b.status);
+      }
     }
     var fStatus = curVal('status'), fCamp = curVal('campaign'), fFmt = curVal('format'), fSort = curVal('sort');
     list = list.filter(function (a) {
