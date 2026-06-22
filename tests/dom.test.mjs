@@ -117,5 +117,22 @@ ok(aw.document.getElementById("campaignFolders").style.display !== "none", "brea
 const a2 = loadPage("asset_manager.html", { query: "?brief=neon-abc" });
 ok(a2.dom.window.document.querySelectorAll("#assetGrid .asset-tile").length > 0, "brief deep-link lands straight on filtered assets");
 
+// Studio -> Asset Manager loop: a brief generated in Studio (tiles) shows up here
+const loopState = {
+  briefs: [{
+    id: "loop-test", name: "Loop Test Brief", status: "production", statusLabel: "In Production",
+    campaign: "Loop Test Campaign", assignee: "Grace L.", initial: "G",
+    assetsDone: 0, assetsTotal: 8, due: "TBD", desc: "", deliverables: [],
+    tiles: [1, 2, 3, 4, 5, 6, 7, 8], finalSelects: [],
+  }],
+  customCampaigns: [],
+};
+const a3 = loadPage("asset_manager.html", { seedState: loopState });
+const a3w = a3.dom.window;
+const loopFolders = [...a3w.document.querySelectorAll("#campaignFolders .folder-name")].map((n) => n.textContent);
+ok(loopFolders.includes("Loop Test Campaign"), "Studio-generated brief surfaces as a campaign folder (loop closed)");
+a3w.openCampaign("Loop Test Campaign");
+ok(a3w.document.querySelectorAll("#assetGrid .asset-tile").length === 8, "generated tiles appear as assets under the brief");
+
 console.log(`\n${pass} passed, ${fail.length} failed`);
 if (fail.length) { console.log("FAILED: " + fail.join(" | ")); process.exit(1); }

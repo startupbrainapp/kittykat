@@ -541,6 +541,31 @@
     try { return new URLSearchParams(location.search).get('brief'); } catch (e) { return null; }
   }
 
+  // Studio -> Asset Manager bridge: surface each brief's generated assets (its
+  // tiles) so work made in Creator Studio actually lands here under its campaign
+  // and brief. Seed briefs keep their richer static assets; briefs without static
+  // coverage (e.g. new briefs generated in Studio) show their produced tiles.
+  function liveAssets() {
+    var list = assets.slice();
+    if (!window.KK) return list;
+    var covered = {};
+    assets.forEach(function (a) { if (a.brief) covered[a.brief] = true; });
+    var nextId = assets.reduce(function (m, a) { return Math.max(m, a.id); }, 0) + 1;
+    KK.briefs().forEach(function (b) {
+      if (covered[b.name]) return;
+      (b.tiles || []).forEach(function (n, i) {
+        list.push({
+          id: nextId++, img: 'images/' + n + '.jpg',
+          name: b.name + ' · Asset ' + (i + 1),
+          brief: b.name, campaign: b.campaign || 'Standalone',
+          status: b.status, statusLabel: b.statusLabel,
+          format: '—', created: 'Recent', creator: b.assignee || 'Unassigned'
+        });
+      });
+    });
+    return list;
+  }
+
   // --- Toast (non-destructive confirmations) ---
   function toast(msg) {
     var t = document.getElementById('kkToast');
@@ -587,7 +612,7 @@
   function createdRank(s) { var t = Date.parse(s); return isNaN(t) ? 0 : t; }
   function refreshFilterOptions() {
     var campaigns = ['All'], formats = ['All'];
-    assets.forEach(function (a) {
+    liveAssets().forEach(function (a) {
       if (a.campaign && campaigns.indexOf(a.campaign) < 0) campaigns.push(a.campaign);
       if (a.format && formats.indexOf(a.format) < 0) formats.push(a.format);
     });
@@ -641,7 +666,7 @@
     const grid = document.getElementById('assetGrid');
     const filterId = briefFilterId();
     refreshFilterOptions();
-    let list = assets.slice();
+    let list = liveAssets();
     if (filterId) {
       list = list.filter(function (a) { var l = liveStatus(a); return l.briefId === filterId; });
       var fb = document.getElementById('briefFilter');
@@ -678,13 +703,14 @@
   function renderFolders() {
     var cont = document.getElementById('campaignFolders');
     var order = [], groups = {};
-    assets.forEach(function (a) {
+    var all = liveAssets();
+    all.forEach(function (a) {
       if (ARCHIVED_LOCAL[a.id]) return;
       var c = a.campaign || 'Uncategorized';
       if (!groups[c]) { groups[c] = []; order.push(c); }
       groups[c].push(a);
     });
-    var total = assets.filter(function (a) { return !ARCHIVED_LOCAL[a.id]; });
+    var total = all.filter(function (a) { return !ARCHIVED_LOCAL[a.id]; });
     function card(name, items, onclick) {
       var approved = items.filter(function (a) { return liveStatus(a).status === 'approved'; }).length;
       return '<div class="campaign-folder" onclick="' + onclick + '">'
@@ -742,12 +768,12 @@
   }
   function downloadSelected() { toast('Preparing download…'); }
   function downloadAsset(id) {
-    var a = assets.find(function (x) { return x.id === id; });
+    var a = liveAssets().find(function (x) { return x.id === id; });
     toast('Downloading ' + (a ? a.name : 'asset') + '…');
   }
   function publishAsset(briefId, id) {
     if (window.KK && briefId && briefId !== 'null') { KK.approve(briefId); }
-    var a = assets.find(function (x) { return x.id === id; });
+    var a = liveAssets().find(function (x) { return x.id === id; });
     closeDrawer();
     renderGrid();
     toast('Published' + (a ? ' · ' + a.name : ''));
@@ -857,7 +883,7 @@
 
   /* Drawer */
   function openDrawer(id) {
-    const a = assets.find(x => x.id === id);
+    const a = liveAssets().find(x => x.id === id);
     if (!a) return;
     const live = liveStatus(a);
 
