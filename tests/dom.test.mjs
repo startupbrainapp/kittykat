@@ -105,8 +105,16 @@ else ok(false, "approveBrief available");
 // ---- asset_manager.html ----
 console.log("asset_manager.html");
 const a = loadPage("asset_manager.html");
+const aw = a.dom.window;
 ok(a.errors.length === 0, "loads with no script errors" + (a.errors[0] ? " -> " + a.errors[0] : ""));
-ok(a.dom.window.document.querySelectorAll("#assetGrid > *").length > 0, "asset grid renders");
+ok(aw.document.querySelectorAll("#campaignFolders .campaign-folder").length > 0, "campaign folders render by default");
+aw.openCampaign("Tokyo After Dark");
+ok(aw.document.querySelectorAll("#assetGrid .asset-tile").length === 4, "opening a campaign folder shows its assets");
+aw.backToFolders();
+ok(aw.document.getElementById("campaignFolders").style.display !== "none", "breadcrumb returns to folder view");
+
+const a2 = loadPage("asset_manager.html", { query: "?brief=neon-abc" });
+ok(a2.dom.window.document.querySelectorAll("#assetGrid .asset-tile").length > 0, "brief deep-link lands straight on filtered assets");
 
 console.log(`\n${pass} passed, ${fail.length} failed`);
 if (fail.length) { console.log("FAILED: " + fail.join(" | ")); process.exit(1); }

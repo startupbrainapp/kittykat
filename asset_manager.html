@@ -87,6 +87,17 @@
 
   /* Asset grid */
   .asset-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  /* Campaign folder browse */
+  .campaign-folders { display: grid; grid-template-columns: repeat(auto-fill, minmax(212px, 1fr)); gap: 14px; }
+  .campaign-folder { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color .12s, transform .12s; }
+  .campaign-folder:hover { border-color: var(--brand); transform: translateY(-2px); }
+  .folder-cover { aspect-ratio: 4 / 3; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; background: var(--bg-surface); }
+  .folder-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .folder-cover .single { grid-column: 1 / span 2; grid-row: 1 / span 2; }
+  .folder-meta { padding: 11px 13px; }
+  .folder-name { font-size: 13px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.13px; margin-bottom: 3px; }
+  .folder-count { font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; }
+  .am-breadcrumb a:hover { color: var(--text-primary); }
   .asset-tile {
     aspect-ratio: 1;
     border-radius: 8px;
@@ -420,6 +431,15 @@
         </div>
       </div>
 
+      <!-- Campaign folders (default browse) + breadcrumb -->
+      <div id="amBreadcrumb" class="am-breadcrumb" style="display:none; align-items:center; gap:8px; margin-bottom:16px; font-size:13px; color:var(--text-tertiary); letter-spacing:-0.13px;">
+        <a onclick="backToFolders()" style="cursor:pointer; color:var(--text-tertiary); text-decoration:none;">All campaigns</a>
+        <span style="color:var(--text-quaternary);">&rsaquo;</span>
+        <span id="amBreadcrumbCurrent" style="color:var(--text-primary); font-weight:510;"></span>
+      </div>
+      <div id="campaignFolders" class="campaign-folders"></div>
+
+      <div id="assetsView" style="display:none;">
       <!-- Filter row -->
       <div class="filter-bar">
         <div class="asset-search">
@@ -441,6 +461,7 @@
         <a href="asset_manager.html" style="margin-left:auto; color:var(--text-tertiary); text-decoration:none;">Clear ✕</a>
       </div>
       <div class="asset-grid" id="assetGrid"></div>
+      </div><!-- /assetsView -->
     </div>
   </div>
 </main>
@@ -633,7 +654,63 @@
     updateBulkBar();
   }
   var LAST_RENDERED = [];
-  renderGrid();
+
+  /* --- Campaign folder browse --- */
+  var FOLDER_VIEW = false;
+  function folderCover(items) {
+    var imgs = items.slice(0, 4);
+    if (imgs.length <= 1) return '<img class="single" src="' + (imgs[0] ? imgs[0].img : '') + '" alt="">';
+    return imgs.map(function (it) { return '<img src="' + it.img + '" alt="">'; }).join('');
+  }
+  function renderFolders() {
+    var cont = document.getElementById('campaignFolders');
+    var order = [], groups = {};
+    assets.forEach(function (a) {
+      if (ARCHIVED_LOCAL[a.id]) return;
+      var c = a.campaign || 'Uncategorized';
+      if (!groups[c]) { groups[c] = []; order.push(c); }
+      groups[c].push(a);
+    });
+    var total = assets.filter(function (a) { return !ARCHIVED_LOCAL[a.id]; });
+    function card(name, items, onclick) {
+      var approved = items.filter(function (a) { return liveStatus(a).status === 'approved'; }).length;
+      return '<div class="campaign-folder" onclick="' + onclick + '">'
+        + '<div class="folder-cover">' + folderCover(items) + '</div>'
+        + '<div class="folder-meta"><div class="folder-name">' + name + '</div>'
+        + '<div class="folder-count">' + items.length + ' asset' + (items.length === 1 ? '' : 's')
+        + (approved ? ' &middot; ' + approved + ' approved' : '') + '</div></div></div>';
+    }
+    var html = card('All assets', total, 'openAll()');
+    html += order.map(function (c) { return card(c, groups[c], "openCampaign('" + c.replace(/'/g, "\\'") + "')"); }).join('');
+    cont.innerHTML = html;
+  }
+  function showFolderView() {
+    FOLDER_VIEW = true;
+    document.getElementById('assetsView').style.display = 'none';
+    document.getElementById('amBreadcrumb').style.display = 'none';
+    document.getElementById('campaignFolders').style.display = '';
+    renderFolders();
+  }
+  function showAssetsView(campName) {
+    FOLDER_VIEW = false;
+    document.getElementById('campaignFolders').style.display = 'none';
+    document.getElementById('assetsView').style.display = '';
+    var bc = document.getElementById('amBreadcrumb');
+    if (campName) { bc.style.display = 'flex'; document.getElementById('amBreadcrumbCurrent').textContent = campName; }
+    else { bc.style.display = 'none'; }
+    renderGrid();
+  }
+  function openCampaign(name) {
+    refreshFilterOptions();
+    var i = FILTERS.campaign.opts.indexOf(name);
+    FILTERS.campaign.i = i >= 0 ? i : 0;
+    showAssetsView(name);
+  }
+  function openAll() { FILTERS.campaign.i = 0; showAssetsView(null); }
+  function backToFolders() { FILTERS.campaign.i = 0; showFolderView(); }
+
+  // Default to campaign-folder browse; deep-links from a brief jump straight to assets.
+  if (briefFilterId()) { showAssetsView(null); } else { showFolderView(); }
 
   /* Topbar / footer actions (prototype stubs — non-destructive) */
   function uploadAsset() {
