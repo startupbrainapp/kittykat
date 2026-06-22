@@ -152,5 +152,19 @@ ok(loopSub && /Submit to Reviews/.test(loopSub.innerHTML), "Asset Manager offers
 a3w.submitBrief("loop-test");
 ok(a3w.KK.brief("loop-test").status === "review", "submitting from Asset Manager moves the brief into review");
 
+// Final-select markers are visible + Submit is count-aware
+const selState = {
+  briefs: [{
+    id: "sel-test", name: "Sel Test", status: "production", statusLabel: "In Production",
+    campaign: "Sel Camp", assignee: "Grace L.", initial: "G", assetsDone: 0, assetsTotal: 8,
+    due: "TBD", desc: "", deliverables: [], tiles: [1, 2, 3, 4, 5, 6, 7, 8],
+    finalSelects: ["images/1.jpg", "images/2.jpg"],
+  }],
+  customCampaigns: [],
+};
+const a4w = loadPage("asset_manager.html", { query: "?brief=sel-test", seedState: selState }).dom.window;
+ok(a4w.document.querySelectorAll("#assetGrid .asset-fav.on").length === 2, "selected assets show a filled heart in the Asset Manager");
+ok(/Submit 2 selects to Reviews/.test(a4w.document.getElementById("briefFilterActions").textContent), "Submit button shows the select count");
+
 console.log(`\n${pass} passed, ${fail.length} failed`);
 if (fail.length) { console.log("FAILED: " + fail.join(" | ")); process.exit(1); }

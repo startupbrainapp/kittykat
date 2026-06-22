@@ -135,9 +135,20 @@
   .asset-status-dot.production { background: var(--brand-accent); }
   .asset-status-dot.draft { background: var(--text-tertiary); }
 
+  /* Select heart (Final Selects — same list Studio hearts feed) */
+  .asset-fav {
+    position: absolute; top: 8px; right: 8px; z-index: 3;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+    color: rgba(255,255,255,0.65); font-size: 12px; line-height: 1; cursor: pointer;
+    border: none; font-family: inherit; transition: all 0.12s;
+  }
+  .asset-fav:hover { color: #fff; }
+  .asset-fav.on { background: var(--brand); color: #fff; }
   /* Format badge */
   .asset-format-badge {
-    position: absolute; top: 8px; right: 8px;
+    position: absolute; top: 8px; right: 36px;
     font-size: 10px; font-weight: 510;
     color: rgba(255,255,255,0.85);
     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
@@ -643,26 +654,38 @@
 
   function goEdit(bid) { if (bid) window.location.href = 'creator_studio.html?brief=' + encodeURIComponent(bid); }
   function submitBrief(bid) { if (window.KK && bid) { KK.submitReview(bid); } renderGrid(); toast('Submitted to Reviews'); }
+  // Toggle an asset's "select" (Final Select) — same list Studio hearts feed.
+  function toggleAssetFav(bid, src) { if (window.KK && bid) { KK.toggleFinal(bid, src); } renderGrid(); }
   // Per-brief actions surfaced in the Asset Manager (Studio makes, Asset Manager decides).
   function briefActionsHTML(bid, status) {
     if (!bid) return '';
+    var n = (window.KK ? KK.finalSelects(bid).length : 0);
     var edit = '<button class="bsub-btn" onclick="event.stopPropagation(); goEdit(\'' + bid + '\')">Edit more</button>';
     var next = '';
-    if (status === 'production') next = '<button class="bsub-btn primary" onclick="event.stopPropagation(); submitBrief(\'' + bid + '\')">Submit to Reviews</button>';
-    else if (status === 'review') next = '<button class="bsub-btn" onclick="event.stopPropagation(); window.location.href=\'reviews.html\'">View in Reviews</button>';
+    if (status === 'production') {
+      next = n > 0
+        ? '<button class="bsub-btn primary" onclick="event.stopPropagation(); submitBrief(\'' + bid + '\')">Submit ' + n + ' select' + (n === 1 ? '' : 's') + ' to Reviews</button>'
+        : '<button class="bsub-btn" disabled title="Heart the keepers first" style="opacity:0.5;cursor:not-allowed;">Submit to Reviews</button>';
+    } else if (status === 'review') {
+      next = '<button class="bsub-btn" onclick="event.stopPropagation(); window.location.href=\'reviews.html\'">View in Reviews</button>';
+    }
     return edit + next;
   }
   function assetTileHTML(a) {
     const l = liveStatus(a);
     const sel = !!SELECTED[a.id];
+    const isFav = !!(window.KK && l.briefId && KK.isFinal(l.briefId, a.img));
     const cls = 'asset-tile' + (SELECT_MODE ? ' selectable' : '') + (sel ? ' selected' : '');
     const click = SELECT_MODE ? `toggleSelect(${a.id})` : `openDrawer(${a.id})`;
+    const favBtn = l.briefId ? `<button class="asset-fav${isFav ? ' on' : ''}" title="${isFav ? 'In selects — click to remove' : 'Add to selects'}" onclick="event.stopPropagation(); toggleAssetFav('${l.briefId}', '${a.img}')">♥</button>` : '';
+    const fmtBadge = (a.format && a.format !== '—') ? `<div class="asset-format-badge">${a.format}</div>` : '';
     return `
       <div class="${cls}" onclick="${click}">
         <div class="asset-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        ${favBtn}
         <img src="${a.img}" alt="${a.name}">
         <div class="asset-status-dot ${l.status}"></div>
-        <div class="asset-format-badge">${a.format}</div>
+        ${fmtBadge}
         <div class="asset-overlay">
           <div class="asset-overlay-name">${a.name}</div>
           <div class="asset-overlay-brief">${a.brief}</div>
@@ -693,7 +716,8 @@
       var b = window.KK ? KK.brief(filterId) : null;
       if (fb && b) {
         fb.style.display = 'flex';
-        document.getElementById('briefFilterText').textContent = 'Showing assets for: ' + b.name;
+        var nSel = window.KK ? KK.finalSelects(b.id).length : 0;
+        document.getElementById('briefFilterText').textContent = b.name + ' · ' + nSel + ' of these ' + (nSel === 1 ? 'asset is a select' : 'assets are selects');
         document.getElementById('briefFilterActions').innerHTML = briefActionsHTML(b.id, b.status);
       }
     }
