@@ -35,7 +35,8 @@ console.log("briefs.html");
 const b = loadPage("briefs.html");
 const w = b.dom.window;
 ok(b.errors.length === 0, "loads with no script errors" + (b.errors[0] ? " -> " + b.errors[0] : ""));
-ok(w.document.querySelectorAll("#briefList .brief-row").length === 12, "renders 12 seed briefs");
+ok(w.KK.briefs().length === 12, "12 seed briefs loaded");
+ok(w.document.querySelectorAll("#briefList .brief-row").length === w.KK.briefs().filter((x) => x.status !== "shipped" && !x.archived).length, "Active view shows in-flight briefs (shipped excluded)");
 w.openNewBrief();
 w.nbOpenRefPicker();
 const thumb = w.document.querySelector('#nbMenu div[title="images/2.jpg"]');
@@ -46,7 +47,8 @@ w.document.getElementById("nbTitle").value = "DOM Test Brief";
 w.nbSetCampaign("SS26 · Hana Matsuri");
 w.nbSetAssignee("Grace L.");
 w.nbSave("draft");
-ok(w.KK.briefs().length === 13 && w.document.querySelectorAll("#briefList .brief-row").length === 13, "create brief via form -> 13 rows");
+ok(w.KK.briefs().length === 13, "create brief via form adds a 13th brief");
+ok(w.document.querySelectorAll("#briefList .brief-row").length === w.KK.briefs().filter((x) => x.status !== "shipped" && !x.archived).length, "new draft brief appears in the Active view");
 const created = w.KK.briefs()[0];
 const createdState = JSON.parse(w.localStorage.getItem("kk_state_v1"));
 
@@ -68,6 +70,14 @@ w.archiveBrief(created.id);
 w.setBriefView("active");
 const archivedShows = Array.from(w.document.querySelectorAll("#briefList .brief-name")).some((n) => n.textContent === "Edited Title");
 ok(!archivedShows, "archived brief is hidden from the Active view");
+
+// Active excludes shipped; the Shipped pill lists only shipped
+const shippedExpected = w.KK.briefs().filter((x) => x.status === "shipped" && !x.archived).length;
+w.setBriefView("shipped");
+ok(shippedExpected > 0 && w.document.querySelectorAll("#briefList .brief-row").length === shippedExpected, "Shipped pill lists only shipped briefs");
+w.setBriefView("active");
+const activeExpected = w.KK.briefs().filter((x) => x.status !== "shipped" && !x.archived).length;
+ok(w.document.querySelectorAll("#briefList .brief-row").length === activeExpected, "Active view excludes shipped briefs");
 w.setBriefView("active"); // reset view
 
 // ---- creator_studio.html ----

@@ -404,6 +404,7 @@
         <button class="filter-dropdown"><span class="filter-dropdown-label">Assignee</span><span>Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div id="viewSeg" style="display:flex; gap:2px; background:var(--surface-1); border:1px solid var(--border-standard); border-radius:7px; padding:2px;">
           <button class="view-pill" data-view="active" onclick="setBriefView('active')" style="padding:4px 10px; border:none; border-radius:5px; background:var(--surface-3); color:var(--text-primary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Active</button>
+          <button class="view-pill" data-view="shipped" onclick="setBriefView('shipped')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Shipped</button>
           <button class="view-pill" data-view="favourites" onclick="setBriefView('favourites')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">★ Favourites</button>
           <button class="view-pill" data-view="archived" onclick="setBriefView('archived')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Archived</button>
           <button class="view-pill" data-view="all" onclick="setBriefView('all')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">All</button>
@@ -577,9 +578,10 @@
     return briefs.filter(b => {
       if (briefView === 'archived') return b.archived;
       if (briefView === 'all') return true;
-      if (b.archived) return false; // active + favourites hide archived
+      if (b.archived) return false; // active / favourites / shipped hide archived
       if (briefView === 'favourites') return b.favourite;
-      return true; // active
+      if (briefView === 'shipped') return b.status === 'shipped';
+      return b.status !== 'shipped'; // active = in-flight only (draft / production / review)
     });
   }
   function toggleBriefFav(id) { KK.toggleFavourite(id); renderTable(); }
