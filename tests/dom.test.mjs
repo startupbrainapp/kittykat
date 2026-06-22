@@ -118,6 +118,7 @@ const a = loadPage("asset_manager.html");
 const aw = a.dom.window;
 ok(a.errors.length === 0, "loads with no script errors" + (a.errors[0] ? " -> " + a.errors[0] : ""));
 ok(aw.document.querySelectorAll("#campaignFolders .campaign-folder").length > 0, "campaign folders render by default");
+ok(![...aw.document.querySelectorAll("#campaignFolders .folder-name")].some((n) => n.textContent === "All assets"), "no 'All assets' folder");
 aw.openCampaign("Tokyo After Dark");
 ok(aw.document.querySelectorAll("#assetGrid .asset-tile").length === 4, "opening a campaign folder shows its assets");
 ok(aw.document.querySelectorAll("#assetGrid .brief-subheader").length === 2, "campaign assets group under brief sub-folders");
@@ -129,7 +130,9 @@ const amFooter = aw.document.getElementById("drawerFooter").textContent;
 ok(/Submit to Reviews/.test(amFooter) && /Edit more/.test(amFooter) && !/Open in Creator Studio/.test(amFooter), "asset drawer footer matches the per-brief model");
 
 const a2 = loadPage("asset_manager.html", { query: "?brief=neon-abc" });
-ok(a2.dom.window.document.querySelectorAll("#assetGrid .asset-tile").length > 0, "brief deep-link lands straight on filtered assets");
+const a2w = a2.dom.window;
+ok(a2w.document.getElementById("assetsView").style.display !== "none" && a2w.document.querySelectorAll("#assetGrid .asset-tile").length > 0, "Studio deep-link drills into the brief's campaign folder");
+ok(a2w.document.getElementById("amBreadcrumbCurrent").textContent === "Tokyo After Dark", "deep-link breadcrumb shows the brief's campaign");
 
 // Studio -> Asset Manager loop: a brief generated in Studio (tiles) shows up here
 const loopState = {
@@ -164,7 +167,8 @@ const selState = {
 };
 const a4w = loadPage("asset_manager.html", { query: "?brief=sel-test", seedState: selState }).dom.window;
 ok(a4w.document.querySelectorAll("#assetGrid .asset-fav.on").length === 2, "selected assets show a filled heart in the Asset Manager");
-ok(/Submit 2 selects to Reviews/.test(a4w.document.getElementById("briefFilterActions").textContent), "Submit button shows the select count");
+const selSub = a4w.document.querySelector("#assetGrid .brief-subheader .bsub-actions");
+ok(selSub && /Submit 2 selects to Reviews/.test(selSub.textContent), "brief sub-folder Submit shows the select count");
 
 console.log(`\n${pass} passed, ${fail.length} failed`);
 if (fail.length) { console.log("FAILED: " + fail.join(" | ")); process.exit(1); }

@@ -476,11 +476,6 @@
       </div>
 
       <!-- Asset grid -->
-      <div id="briefFilter" style="display:none; align-items:center; gap:10px; margin-bottom:14px; padding:9px 13px; background:rgba(113,112,255,0.08); border:1px solid rgba(113,112,255,0.28); border-radius:8px; font-size:12px; color:#cdd2ff; letter-spacing:-0.13px;">
-        <span id="briefFilterText"></span>
-        <span id="briefFilterActions" style="margin-left:auto; display:flex; gap:6px;"></span>
-        <a href="asset_manager.html" style="margin-left:10px; color:var(--text-tertiary); text-decoration:none;">Clear ✕</a>
-      </div>
       <div class="asset-grid" id="assetGrid"></div>
       </div><!-- /assetsView -->
     </div>
@@ -707,20 +702,8 @@
   }
   function renderGrid() {
     const grid = document.getElementById('assetGrid');
-    const filterId = briefFilterId();
     refreshFilterOptions();
     let list = liveAssets();
-    if (filterId) {
-      list = list.filter(function (a) { var l = liveStatus(a); return l.briefId === filterId; });
-      var fb = document.getElementById('briefFilter');
-      var b = window.KK ? KK.brief(filterId) : null;
-      if (fb && b) {
-        fb.style.display = 'flex';
-        var nSel = window.KK ? KK.finalSelects(b.id).length : 0;
-        document.getElementById('briefFilterText').textContent = b.name + ' · ' + nSel + ' of these ' + (nSel === 1 ? 'asset is a select' : 'assets are selects');
-        document.getElementById('briefFilterActions').innerHTML = briefActionsHTML(b.id, b.status);
-      }
-    }
     var fStatus = curVal('status'), fCamp = curVal('campaign'), fFmt = curVal('format'), fSort = curVal('sort');
     list = list.filter(function (a) {
       if (ARCHIVED_LOCAL[a.id]) return false;
@@ -758,7 +741,6 @@
       if (!groups[c]) { groups[c] = []; order.push(c); }
       groups[c].push(a);
     });
-    var total = all.filter(function (a) { return !ARCHIVED_LOCAL[a.id]; });
     function card(name, items, onclick) {
       var approved = items.filter(function (a) { return liveStatus(a).status === 'approved'; }).length;
       return '<div class="campaign-folder" onclick="' + onclick + '">'
@@ -767,9 +749,7 @@
         + '<div class="folder-count">' + items.length + ' asset' + (items.length === 1 ? '' : 's')
         + (approved ? ' &middot; ' + approved + ' approved' : '') + '</div></div></div>';
     }
-    var html = card('All assets', total, 'openAll()');
-    html += order.map(function (c) { return card(c, groups[c], "openCampaign('" + c.replace(/'/g, "\\'") + "')"); }).join('');
-    cont.innerHTML = html;
+    cont.innerHTML = order.map(function (c) { return card(c, groups[c], "openCampaign('" + c.replace(/'/g, "\\'") + "')"); }).join('');
   }
   function showFolderView() {
     FOLDER_VIEW = true;
@@ -793,11 +773,15 @@
     FILTERS.campaign.i = i >= 0 ? i : 0;
     showAssetsView(name);
   }
-  function openAll() { FILTERS.campaign.i = 0; showAssetsView(null); }
   function backToFolders() { FILTERS.campaign.i = 0; showFolderView(); }
 
-  // Default to campaign-folder browse; deep-links from a brief jump straight to assets.
-  if (briefFilterId()) { showAssetsView(null); } else { showFolderView(); }
+  // Folder view is the only experience. Deep-links from Studio (?brief=) drill
+  // straight into that brief's campaign folder; everything else lands on folders.
+  (function () {
+    var bid = briefFilterId();
+    var b = (bid && window.KK) ? KK.brief(bid) : null;
+    if (b) { openCampaign(b.campaign || 'Uncategorized'); } else { showFolderView(); }
+  })();
 
   /* Topbar / footer actions (prototype stubs — non-destructive) */
   function uploadAsset() {
