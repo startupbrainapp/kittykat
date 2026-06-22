@@ -580,7 +580,7 @@
     status: { id: 'fStatus', i: 0, opts: ['All', 'Approved', 'In Review', 'In Production', 'Draft'] },
     campaign: { id: 'fCampaign', i: 0, opts: ['All'] },  // populated from assets
     format: { id: 'fFormat', i: 0, opts: ['All'] },      // populated from assets
-    sort: { id: 'fSort', i: 0, opts: ['Newest', 'Oldest', 'Brand fit (high→low)', 'Brand fit (low→high)'] }
+    sort: { id: 'fSort', i: 0, opts: ['Newest', 'Oldest'] }
   };
   function curVal(key) { var f = FILTERS[key]; return f.opts[f.i % f.opts.length]; }
   var STATUS_VAL = { 'Approved': 'approved', 'In Review': 'review', 'In Production': 'production', 'Draft': 'draft' };
@@ -659,8 +659,6 @@
     });
     if (fSort === 'Newest') list.sort(function (x, y) { return createdRank(y.created) - createdRank(x.created); });
     else if (fSort === 'Oldest') list.sort(function (x, y) { return createdRank(x.created) - createdRank(y.created); });
-    else if (fSort === 'Brand fit (high→low)') list.sort(function (x, y) { return (y.score || 0) - (x.score || 0); });
-    else if (fSort === 'Brand fit (low→high)') list.sort(function (x, y) { return (x.score || 0) - (y.score || 0); });
     syncFilterLabels();
     grid.innerHTML = (fCamp !== 'All') ? groupTilesByBrief(list) : list.map(assetTileHTML).join('');
     var fc = document.getElementById('filterCount');
@@ -923,22 +921,6 @@
         <div class="d-meta-cell">
           <div class="d-meta-key">Creator</div>
           <div class="d-meta-val">${a.creator}</div>
-        </div>
-      </div>
-
-      <div class="d-alignment" style="display:none;">
-        <div class="d-alignment-header">
-          <div class="d-score-circle">${a.score}%</div>
-          <div>
-            <div class="d-alignment-label">Brand alignment score</div>
-            <div class="d-alignment-sub">Scored against BAPE Brand DNA</div>
-          </div>
-        </div>
-        <div class="d-bars">
-          <div class="d-bar-row"><span class="d-bar-key">Visual</span><div class="d-bar"><div class="d-bar-fill ${barColor(a.visual)}" style="width:${a.visual}%"></div></div><span class="d-bar-val">${a.visual}</span></div>
-          <div class="d-bar-row"><span class="d-bar-key">Tonal</span><div class="d-bar"><div class="d-bar-fill ${barColor(a.tonal)}" style="width:${a.tonal}%"></div></div><span class="d-bar-val">${a.tonal}</span></div>
-          <div class="d-bar-row"><span class="d-bar-key">Cultural</span><div class="d-bar"><div class="d-bar-fill ${barColor(a.cultural)}" style="width:${a.cultural}%"></div></div><span class="d-bar-val">${a.cultural}</span></div>
-          <div class="d-bar-row"><span class="d-bar-key">Audience</span><div class="d-bar"><div class="d-bar-fill ${barColor(a.audience)}" style="width:${a.audience}%"></div></div><span class="d-bar-val">${a.audience}</span></div>
         </div>
       </div>
 
