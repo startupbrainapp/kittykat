@@ -824,12 +824,48 @@
   }
   function nbPickCampaign(e) {
     e.stopPropagation();
-    var items = KK.campaigns().concat(['+ New campaign…', 'No campaign (standalone)']);
-    nbMenu(e.currentTarget, items, function (it) {
-      if (it === '+ New campaign…') { var n = prompt('New campaign name:'); if (n && n.trim()) nbSetCampaign(n.trim()); }
-      else if (it === 'No campaign (standalone)') nbSetCampaign(null);
-      else nbSetCampaign(it);
-    });
+    nbCloseMenu();
+    var r = e.currentTarget.getBoundingClientRect();
+    var m = document.createElement('div');
+    m.id = 'nbMenu';
+    m.style.cssText = 'position:fixed;z-index:9999;background:var(--bg-elevated);border:1px solid var(--border-standard);border-radius:6px;padding:4px;min-width:' + Math.max(200, r.width) + 'px;box-shadow:0 8px 24px rgba(0,0,0,0.5);max-height:280px;overflow:auto;left:' + r.left + 'px;top:' + (r.bottom + 4) + 'px;';
+    function addRow(label, onClick, css) {
+      var row = document.createElement('div');
+      row.textContent = label;
+      row.style.cssText = css || 'padding:6px 10px;font-size:13px;color:var(--text-secondary);border-radius:4px;cursor:pointer;letter-spacing:-0.13px;';
+      row.onmouseenter = function () { row.style.background = 'var(--surface-2)'; };
+      row.onmouseleave = function () { row.style.background = 'transparent'; };
+      row.onclick = function (ev) { ev.stopPropagation(); onClick(); };
+      m.appendChild(row);
+    }
+    // Inline create: swap the menu for a name field (no browser prompt)
+    function showCreate() {
+      m.innerHTML = '';
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'padding:6px;display:flex;gap:6px;align-items:center;';
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.placeholder = 'New campaign name…';
+      inp.style.cssText = 'flex:1;background:var(--surface-1);border:1px solid var(--border-standard);border-radius:5px;padding:6px 8px;color:var(--text-primary);font-size:13px;outline:none;font-family:inherit;';
+      var btn = document.createElement('button');
+      btn.textContent = 'Create';
+      btn.style.cssText = 'background:var(--brand);border:none;color:#fff;border-radius:5px;padding:7px 11px;font-size:12px;font-weight:510;cursor:pointer;font-family:inherit;flex-shrink:0;';
+      function commit() { var n = inp.value.trim(); if (!n) { inp.focus(); return; } KK.addCampaign(n); nbCloseMenu(); nbSetCampaign(n); }
+      inp.onclick = function (ev) { ev.stopPropagation(); };
+      inp.onkeydown = function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); commit(); } else if (ev.key === 'Escape') { nbCloseMenu(); } };
+      btn.onclick = function (ev) { ev.stopPropagation(); commit(); };
+      wrap.appendChild(inp); wrap.appendChild(btn);
+      m.appendChild(wrap);
+      inp.focus();
+    }
+    // + New campaign at the TOP, styled as a create action
+    addRow('＋ New campaign', showCreate, 'padding:7px 10px;font-size:13px;font-weight:510;color:var(--brand-accent);border-radius:4px;cursor:pointer;letter-spacing:-0.13px;');
+    var divider = document.createElement('div');
+    divider.style.cssText = 'height:1px;background:var(--border-subtle);margin:4px 2px;';
+    m.appendChild(divider);
+    KK.campaigns().forEach(function (c) { addRow(c, function () { nbCloseMenu(); nbSetCampaign(c); }); });
+    addRow('No campaign (standalone)', function () { nbCloseMenu(); nbSetCampaign(null); }, 'padding:6px 10px;font-size:13px;color:var(--text-quaternary);border-radius:4px;cursor:pointer;letter-spacing:-0.13px;');
+    document.body.appendChild(m);
+    setTimeout(function () { document.addEventListener('click', nbCloseMenu, { once: true }); }, 0);
   }
   function nbPickAssignee(e) {
     e.stopPropagation();
