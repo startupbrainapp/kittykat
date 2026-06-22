@@ -110,6 +110,7 @@ ok(a.errors.length === 0, "loads with no script errors" + (a.errors[0] ? " -> " 
 ok(aw.document.querySelectorAll("#campaignFolders .campaign-folder").length > 0, "campaign folders render by default");
 aw.openCampaign("Tokyo After Dark");
 ok(aw.document.querySelectorAll("#assetGrid .asset-tile").length === 4, "opening a campaign folder shows its assets");
+ok(aw.document.querySelectorAll("#assetGrid .brief-subheader").length === 2, "campaign assets group under brief sub-folders");
 aw.backToFolders();
 ok(aw.document.getElementById("campaignFolders").style.display !== "none", "breadcrumb returns to folder view");
 

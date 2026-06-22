@@ -98,6 +98,10 @@
   .folder-name { font-size: 13px; font-weight: 590; color: var(--text-primary); letter-spacing: -0.13px; margin-bottom: 3px; }
   .folder-count { font-size: 11px; color: var(--text-tertiary); letter-spacing: -0.13px; }
   .am-breadcrumb a:hover { color: var(--text-primary); }
+  /* Brief sub-folders within a campaign */
+  .brief-subheader { display: flex; align-items: center; gap: 8px; padding: 15px 2px 5px; font-size: 11px; font-weight: 590; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-top: 1px solid var(--border-subtle); margin-top: 8px; }
+  .brief-subheader:first-child { border-top: none; margin-top: 0; padding-top: 2px; }
+  .brief-subheader-count { font-weight: 510; color: var(--text-quaternary); letter-spacing: 0; text-transform: none; }
   .asset-tile {
     aspect-ratio: 1;
     border-radius: 8px;
@@ -606,6 +610,33 @@
     renderGrid();
   }
 
+  function assetTileHTML(a) {
+    const l = liveStatus(a);
+    const sel = !!SELECTED[a.id];
+    const cls = 'asset-tile' + (SELECT_MODE ? ' selectable' : '') + (sel ? ' selected' : '');
+    const click = SELECT_MODE ? `toggleSelect(${a.id})` : `openDrawer(${a.id})`;
+    return `
+      <div class="${cls}" onclick="${click}">
+        <div class="asset-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <img src="${a.img}" alt="${a.name}">
+        <div class="asset-status-dot ${l.status}"></div>
+        <div class="asset-format-badge">${a.format}</div>
+        <div class="asset-overlay">
+          <div class="asset-overlay-name">${a.name}</div>
+          <div class="asset-overlay-brief">${a.brief}</div>
+        </div>
+      </div>`;
+  }
+  // Within a campaign, briefs act as sub-folders: group tiles under brief sub-headers.
+  function groupTilesByBrief(list) {
+    var order = [], groups = {};
+    list.forEach(function (a) { var b = a.brief || 'No brief'; if (!groups[b]) { groups[b] = []; order.push(b); } groups[b].push(a); });
+    return order.map(function (b) {
+      return '<div class="brief-subheader" style="grid-column:1/-1;"><span>' + b + '</span>'
+        + '<span class="brief-subheader-count">' + groups[b].length + '</span></div>'
+        + groups[b].map(assetTileHTML).join('');
+    }).join('');
+  }
   function renderGrid() {
     const grid = document.getElementById('assetGrid');
     const filterId = briefFilterId();
@@ -631,23 +662,7 @@
     else if (fSort === 'Brand fit (high→low)') list.sort(function (x, y) { return (y.score || 0) - (x.score || 0); });
     else if (fSort === 'Brand fit (low→high)') list.sort(function (x, y) { return (x.score || 0) - (y.score || 0); });
     syncFilterLabels();
-    grid.innerHTML = list.map(a => {
-      const l = liveStatus(a);
-      const sel = !!SELECTED[a.id];
-      const cls = 'asset-tile' + (SELECT_MODE ? ' selectable' : '') + (sel ? ' selected' : '');
-      const click = SELECT_MODE ? `toggleSelect(${a.id})` : `openDrawer(${a.id})`;
-      return `
-      <div class="${cls}" onclick="${click}">
-        <div class="asset-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <img src="${a.img}" alt="${a.name}">
-        <div class="asset-status-dot ${l.status}"></div>
-        <div class="asset-format-badge">${a.format}</div>
-        <div class="asset-overlay">
-          <div class="asset-overlay-name">${a.name}</div>
-          <div class="asset-overlay-brief">${a.brief}</div>
-        </div>
-      </div>`;
-    }).join('');
+    grid.innerHTML = (fCamp !== 'All') ? groupTilesByBrief(list) : list.map(assetTileHTML).join('');
     var fc = document.getElementById('filterCount');
     if (fc) fc.textContent = list.length + ' asset' + (list.length === 1 ? '' : 's');
     LAST_RENDERED = list;
