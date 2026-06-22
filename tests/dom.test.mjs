@@ -123,6 +123,10 @@ ok(aw.document.querySelectorAll("#assetGrid .asset-tile").length === 4, "opening
 ok(aw.document.querySelectorAll("#assetGrid .brief-subheader").length === 2, "campaign assets group under brief sub-folders");
 aw.backToFolders();
 ok(aw.document.getElementById("campaignFolders").style.display !== "none", "breadcrumb returns to folder view");
+// asset drawer uses the aligned per-brief actions (no old "Open in Creator Studio" wording)
+aw.openDrawer(13); // a production-status asset
+const amFooter = aw.document.getElementById("drawerFooter").textContent;
+ok(/Submit to Reviews/.test(amFooter) && /Edit more/.test(amFooter) && !/Open in Creator Studio/.test(amFooter), "asset drawer footer matches the per-brief model");
 
 const a2 = loadPage("asset_manager.html", { query: "?brief=neon-abc" });
 ok(a2.dom.window.document.querySelectorAll("#assetGrid .asset-tile").length > 0, "brief deep-link lands straight on filtered assets");
