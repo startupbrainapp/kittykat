@@ -408,6 +408,10 @@
           <button class="view-pill" data-view="archived" onclick="setBriefView('archived')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Archived</button>
           <button class="view-pill" data-view="all" onclick="setBriefView('all')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">All</button>
         </div>
+        <button id="groupToggle" onclick="toggleGroupByCampaign()" style="display:flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--border-standard); border-radius:7px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+          Group by campaign
+        </button>
         <div class="filter-spacer"></div>
         <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Status</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <span class="filter-count">12 briefs</span>
@@ -549,6 +553,17 @@
 
   // Render table
   let briefView = 'active'; // active | favourites | archived | all
+  let groupByCampaign = false;
+  function toggleGroupByCampaign() {
+    groupByCampaign = !groupByCampaign;
+    const btn = document.getElementById('groupToggle');
+    if (btn) {
+      btn.style.background = groupByCampaign ? 'var(--brand)' : 'transparent';
+      btn.style.borderColor = groupByCampaign ? 'var(--brand)' : 'var(--border-standard)';
+      btn.style.color = groupByCampaign ? '#fff' : 'var(--text-tertiary)';
+    }
+    renderTable();
+  }
   function setBriefView(v) {
     briefView = v;
     document.querySelectorAll('#viewSeg .view-pill').forEach(p => {
@@ -575,15 +590,18 @@
     const rows = visibleBriefs();
     const countEl = document.querySelector('.filter-count');
     if (countEl) countEl.textContent = rows.length + (rows.length === 1 ? ' brief' : ' briefs');
-    list.innerHTML = rows.map(b => {
-      const assetsText = b.assetsDone + '/' + b.assetsTotal;
-      const assetsMuted = b.assetsDone === 0 ? ' muted' : '';
-      const studioBtn = (b.status === 'draft' || b.status === 'production')
-        ? `<button class="row-studio" onclick="event.stopPropagation(); openStudio('${b.id}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>`
-        : '';
-      const star = `<button title="Favourite" onclick="event.stopPropagation(); toggleBriefFav('${b.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:2px;color:${b.favourite ? 'var(--brand-accent)' : 'var(--text-quaternary)'};">${b.favourite ? '★' : '☆'}</button>`;
-      const arch = `<button title="${b.archived ? 'Unarchive' : 'Archive'}" onclick="event.stopPropagation(); archiveBrief('${b.id}')" style="background:none;border:none;cursor:pointer;padding:2px;color:var(--text-quaternary);display:flex;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v3H2z" stroke="currentColor" stroke-width="1.2"/><path d="M3 7v7h10V7M6.5 9.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>`;
-      return `
+    list.innerHTML = groupByCampaign ? groupRowsByCampaign(rows) : rows.map(renderRow).join('');
+  }
+
+  function renderRow(b) {
+    const assetsText = b.assetsDone + '/' + b.assetsTotal;
+    const assetsMuted = b.assetsDone === 0 ? ' muted' : '';
+    const studioBtn = (b.status === 'draft' || b.status === 'production')
+      ? `<button class="row-studio" onclick="event.stopPropagation(); openStudio('${b.id}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>`
+      : '';
+    const star = `<button title="Favourite" onclick="event.stopPropagation(); toggleBriefFav('${b.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:2px;color:${b.favourite ? 'var(--brand-accent)' : 'var(--text-quaternary)'};">${b.favourite ? '★' : '☆'}</button>`;
+    const arch = `<button title="${b.archived ? 'Unarchive' : 'Archive'}" onclick="event.stopPropagation(); archiveBrief('${b.id}')" style="background:none;border:none;cursor:pointer;padding:2px;color:var(--text-quaternary);display:flex;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v3H2z" stroke="currentColor" stroke-width="1.2"/><path d="M3 7v7h10V7M6.5 9.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>`;
+    return `
         <div class="brief-row${b.archived ? ' archived' : ''}" onclick="openDrawer('${b.id}')" style="${b.archived ? 'opacity:0.55;' : ''}">
           <div class="brief-main">
             <div class="brief-status-dot ${b.status}"></div>
@@ -599,7 +617,17 @@
           <div class="cell-assets${assetsMuted}">${assetsText}</div>
           ${studioBtn}
         </div>`;
-    }).join('');
+  }
+
+  function groupRowsByCampaign(rows) {
+    const order = [], groups = {};
+    rows.forEach(b => { const c = b.campaign || 'Standalone'; if (!groups[c]) { groups[c] = []; order.push(c); } groups[c].push(b); });
+    return order.map((c, i) =>
+      `<div class="campaign-group-header" style="display:flex;align-items:center;gap:8px;padding:16px 16px 7px;${i ? 'border-top:1px solid var(--border-subtle);margin-top:4px;' : ''}">
+         <span style="font-size:11px;font-weight:590;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">${c}</span>
+         <span style="font-size:11px;font-weight:510;color:var(--text-quaternary);">${groups[c].length}</span>
+       </div>` + groups[c].map(renderRow).join('')
+    ).join('');
   }
   setBriefView('active');
 
