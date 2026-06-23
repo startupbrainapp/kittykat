@@ -129,7 +129,12 @@
   if (!state.shares) state.shares = [];
   // last-touched time so lists can sort by latest updated
   function now() { return Date.now(); }
-  (function () { var s = state.briefs.length; state.briefs.forEach(function (b) { if (b.updatedAt == null) b.updatedAt = s--; }); })();
+  (function () {
+    // Demo recency so an un-edited list reads as a genuine "latest updated" mix (not clustered
+    // by seed order). Real edits use Date.now() (> 1e6) and always sort above these.
+    var demo = { 'sakura-camo': 120, 'abc-ss26': 115, 'shibuya-3am': 110, 'chrome-milo': 105, 'neomax-retail': 100, 'jjk-milo': 95, 'flagship-film': 90, 'neon-abc': 85, 'green-camo': 60, 'adidas-drop3': 55, 'archive-reissue': 50, 'hero-film': 45 };
+    state.briefs.forEach(function (b) { if (b.updatedAt == null || b.updatedAt < 1e6) b.updatedAt = (demo[b.id] != null ? demo[b.id] : 70); });
+  })();
 
   var seq = 1;
   function newId(prefix) { return prefix + '-' + Date.now().toString(36) + '-' + (seq++); }
