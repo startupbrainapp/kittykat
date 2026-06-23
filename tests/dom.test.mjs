@@ -90,6 +90,10 @@ ok(/Standalone Test Camp/.test(listHtml) && /No briefs yet/.test(listHtml), "a b
 const hdr = [...w.document.querySelectorAll(".table-header > div")].map((d) => d.textContent);
 ok(hdr[0] === "Campaign" && hdr[1] === "Brief", "Campaign is the first column, then Brief");
 ok(w.document.querySelectorAll("#briefList .campaign-group-header").length === 0, "no campaign grouping headers");
+// list sorts by latest updated — editing a brief bubbles it to the top
+w.KK.updateBrief("chrome-milo", { desc: "touched" });
+w.renderTable();
+ok(/Chrome Milo/.test(w.document.querySelector("#briefList .brief-row .brief-name").textContent), "editing a brief sorts it to the top (latest updated)");
 
 // ---- creator_studio.html ----
 console.log("creator_studio.html");

@@ -414,7 +414,7 @@
           <button class="view-pill" data-view="all" onclick="setBriefView('all')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">All</button>
         </div>
         <div class="filter-spacer"></div>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Status</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Latest updated</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <span class="filter-count">12 briefs</span>
       </div>
 
@@ -596,7 +596,7 @@
   }
   function renderTable() {
     const list = document.getElementById('briefList');
-    const rows = visibleBriefs();
+    const rows = visibleBriefs().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
     const countEl = document.querySelector('.filter-count');
     if (countEl) countEl.textContent = rows.length + (rows.length === 1 ? ' brief' : ' briefs');
     let html = rows.map(renderRow).join('');

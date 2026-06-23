@@ -127,6 +127,9 @@
   var state = read() || JSON.parse(JSON.stringify(SEED));
   if (!state.customCampaigns) state.customCampaigns = [];
   if (!state.shares) state.shares = [];
+  // last-touched time so lists can sort by latest updated
+  function now() { return Date.now(); }
+  (function () { var s = state.briefs.length; state.briefs.forEach(function (b) { if (b.updatedAt == null) b.updatedAt = s--; }); })();
 
   var seq = 1;
   function newId(prefix) { return prefix + '-' + Date.now().toString(36) + '-' + (seq++); }
@@ -205,7 +208,8 @@
         deliverables: deliverables,
         refs: input.refs || [],
         tiles: [],
-        finalSelects: []
+        finalSelects: [],
+        updatedAt: now()
       };
       state.briefs.unshift(brief);
       save();
@@ -226,6 +230,7 @@
       }
       b.assetsDone = Math.min(b.tiles.length, b.assetsTotal || b.tiles.length);
       if (b.status === 'draft') { b.status = 'production'; b.statusLabel = STATUS_LABEL.production; }
+      b.updatedAt = now();
       save();
       return added;
     },
@@ -246,13 +251,14 @@
       if (patch.deliverables) {
         b.assetsTotal = patch.deliverables.reduce(function (n, d) { return n + (parseInt(d.qty, 10) || 1); }, 0) || b.assetsTotal;
       }
+      b.updatedAt = now();
       save();
       return b;
     },
 
     // favourite / archive
-    toggleFavourite: function (id) { var b = this.brief(id); if (b) { b.favourite = !b.favourite; save(); } return !!(b && b.favourite); },
-    toggleArchive: function (id) { var b = this.brief(id); if (b) { b.archived = !b.archived; save(); } return !!(b && b.archived); },
+    toggleFavourite: function (id) { var b = this.brief(id); if (b) { b.favourite = !b.favourite; b.updatedAt = now(); save(); } return !!(b && b.favourite); },
+    toggleArchive: function (id) { var b = this.brief(id); if (b) { b.archived = !b.archived; b.updatedAt = now(); save(); } return !!(b && b.archived); },
     isFavourite: function (id) { var b = this.brief(id); return !!(b && b.favourite); },
     isArchived: function (id) { var b = this.brief(id); return !!(b && b.archived); },
 
@@ -295,7 +301,7 @@
     // writes
     setStatus: function (id, status) {
       var b = this.brief(id);
-      if (b && STATUS_LABEL[status]) { b.status = status; b.statusLabel = STATUS_LABEL[status]; save(); }
+      if (b && STATUS_LABEL[status]) { b.status = status; b.statusLabel = STATUS_LABEL[status]; b.updatedAt = now(); save(); }
       return b;
     },
     // open the studio for a brief: a draft brief moves into production
@@ -319,6 +325,7 @@
       if (!b.finalSelects) b.finalSelects = [];
       var i = b.finalSelects.indexOf(src);
       if (i >= 0) { b.finalSelects.splice(i, 1); } else { b.finalSelects.push(src); }
+      b.updatedAt = now();
       save();
       return b.finalSelects.indexOf(src) >= 0;
     },
@@ -329,17 +336,17 @@
     },
     submitReview: function (id) {
       var b = this.brief(id);
-      if (b) { b.status = 'review'; b.statusLabel = STATUS_LABEL.review; save(); }
+      if (b) { b.status = 'review'; b.statusLabel = STATUS_LABEL.review; b.updatedAt = now(); save(); }
       return b;
     },
     approve: function (id) {
       var b = this.brief(id);
-      if (b) { b.status = 'shipped'; b.statusLabel = STATUS_LABEL.shipped; b.assetsDone = b.assetsTotal; save(); }
+      if (b) { b.status = 'shipped'; b.statusLabel = STATUS_LABEL.shipped; b.assetsDone = b.assetsTotal; b.updatedAt = now(); save(); }
       return b;
     },
     requestChanges: function (id, notes) {
       var b = this.brief(id);
-      if (b) { b.status = 'production'; b.statusLabel = STATUS_LABEL.production; if (notes) b.reviewNotes = notes; save(); }
+      if (b) { b.status = 'production'; b.statusLabel = STATUS_LABEL.production; if (notes) b.reviewNotes = notes; b.updatedAt = now(); save(); }
       return b;
     },
 
