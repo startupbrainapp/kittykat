@@ -391,10 +391,49 @@
       return b;
     },
 
+    // ---- Roles (prototype: single seat, switchable) ----
+    // 'creator' = worker bee (makes + submits, no Reviews). 'approver' = lead/brand/admin (approves).
+    role: function () { try { return localStorage.getItem('kk_role_v1') || 'approver'; } catch (e) { return 'approver'; } },
+    setRole: function (r) { try { localStorage.setItem('kk_role_v1', r); } catch (e) {} },
+    canApprove: function () { return this.role() === 'approver'; },
+    isCreator: function () { return this.role() === 'creator'; },
+
     // maintenance
     save: save,
     reset: function () { state = JSON.parse(JSON.stringify(SEED)); state.customCampaigns = []; state.shares = []; save(); return state; }
   };
+
+  // Apply role to the shared chrome on every page: hide Reviews for creators,
+  // bounce creators off the Reviews page, and wire the user chip as a role switcher.
+  function applyRoleUI() {
+    if (!window.KK) return;
+    var isCreator = window.KK.isCreator();
+    document.querySelectorAll('a.nav-item[href$="reviews.html"]').forEach(function (a) {
+      a.style.display = isCreator ? 'none' : '';
+    });
+    if (isCreator && /reviews\.html(?:$|[?#])/.test(location.pathname + location.search)) {
+      location.replace('briefs.html');
+      return;
+    }
+    document.querySelectorAll('.user-item').forEach(function (item) {
+      item.style.cursor = 'pointer';
+      item.title = 'Switch role (demo)';
+      if (!item.dataset.roleWired) {
+        item.dataset.roleWired = '1';
+        item.addEventListener('click', function () {
+          window.KK.setRole(window.KK.isCreator() ? 'approver' : 'creator');
+          location.reload();
+        });
+      }
+      var roleEl = item.querySelector('.user-role');
+      if (roleEl) roleEl.innerHTML = (isCreator ? 'Creator' : 'Approver · CMO') + ' <span style="opacity:0.55;">⇅</span>';
+    });
+  }
+  window.KK._applyRoleUI = applyRoleUI;
+  if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', applyRoleUI);
+    if (document.body) applyRoleUI(); // data.js loads at end of body — apply now
+  }
 
   // Seed localStorage on first ever load so later pages share the same state.
   if (!hadSaved) save();

@@ -1078,8 +1078,9 @@
         <button class="d-btn secondary" onclick="${editMore}">Edit more</button>
         <button class="d-btn secondary" onclick="downloadAsset(${a.id})">Download</button>`;
     } else if (live.status === 'review') {
-      footer = `
-        <button class="d-btn primary" onclick="window.location.href='reviews.html'">${checkIcon}View in Reviews</button>`;
+      footer = (window.KK && KK.isCreator())
+        ? `<button class="d-btn secondary" disabled style="opacity:0.7;cursor:default;">${checkIcon}In review — awaiting approval</button>`
+        : `<button class="d-btn primary" onclick="window.location.href='reviews.html'">${checkIcon}View in Reviews</button>`;
     } else if (live.status === 'production') {
       footer = `
         <button class="d-btn primary" onclick="closeDrawer(); submitBrief('${live.briefId}')">${checkIcon}Submit to Reviews</button>

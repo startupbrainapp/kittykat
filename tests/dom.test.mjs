@@ -102,6 +102,18 @@ w.KK.updateBrief("chrome-milo", { desc: "touched" });
 w.renderTable();
 ok(/Chrome Milo/.test(w.document.querySelector("#briefList .brief-row .brief-name").textContent), "editing a brief sorts it to the top (latest updated)");
 
+// ---- roles: creator (worker bee) vs approver ----
+console.log("roles");
+const apprPage = loadPage("briefs.html");
+ok(apprPage.dom.window.KK.canApprove() && apprPage.dom.window.document.querySelector('a.nav-item[href$="reviews.html"]').style.display !== "none", "approver (default) sees the Reviews tab + can approve");
+const creatorPage = loadPage("briefs.html", { seedState: createdState }).dom.window;
+creatorPage.KK.setRole("creator");
+creatorPage.KK._applyRoleUI();
+ok(creatorPage.KK.isCreator() && !creatorPage.KK.canApprove(), "creator role cannot approve");
+ok(creatorPage.document.querySelector('a.nav-item[href$="reviews.html"]').style.display === "none", "creator does not see the Reviews tab");
+ok(creatorPage.document.querySelector(".user-item").style.cursor === "pointer", "user chip is wired as a role switcher");
+creatorPage.KK.setRole("approver"); // reset so later pages default correctly
+
 // ---- creator_studio.html ----
 console.log("creator_studio.html");
 const s = loadPage("creator_studio.html", { query: `?brief=${created.id}`, seedState: createdState });

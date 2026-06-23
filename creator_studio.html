@@ -577,7 +577,7 @@
         return;
       }
       KK.submitReview(BRIEF_ID);
-      window.location.href = 'reviews.html';
+      window.location.href = KK.isCreator() ? 'briefs.html' : 'reviews.html';
     } else {
       window.location.href = 'reviews.html';
     }
