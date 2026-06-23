@@ -460,7 +460,6 @@
   <button class="bulk-btn" onclick="bulkDownload()"><svg viewBox="0 0 12 12" fill="none"><path d="M6 8V2M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Download</button>
   <button class="bulk-btn primary" onclick="sendSelectedToReviews()"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Send to Reviews</button>
   <button class="bulk-btn" onclick="bulkArchive()"><svg viewBox="0 0 12 12" fill="none"><rect x="1.5" y="2" width="9" height="2.5" rx="0.5" stroke="currentColor" stroke-width="1.1"/><path d="M2.5 4.5v5h7v-5M4.5 6.5h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>Archive</button>
-  <button class="bulk-btn" onclick="bulkApprove()"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve</button>
   <button class="bulk-btn" onclick="bulkShareSelects()"><svg viewBox="0 0 12 12" fill="none"><circle cx="3" cy="6" r="1.5" stroke="currentColor" stroke-width="1.1"/><circle cx="9" cy="3" r="1.5" stroke="currentColor" stroke-width="1.1"/><circle cx="9" cy="9" r="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M4.3 5.3L7.7 3.7M4.3 6.7L7.7 8.3" stroke="currentColor" stroke-width="1.1"/></svg>Share with client</button>
 </div>
 
@@ -659,7 +658,9 @@
         ? '<button class="bsub-btn primary" onclick="event.stopPropagation(); submitBrief(\'' + bid + '\')">Submit ' + n + ' select' + (n === 1 ? '' : 's') + ' to Reviews</button>'
         : '<button class="bsub-btn" disabled title="Heart the keepers first" style="opacity:0.5;cursor:not-allowed;">Submit to Reviews</button>';
     } else if (status === 'review') {
-      next = '<button class="bsub-btn" onclick="event.stopPropagation(); window.location.href=\'reviews.html\'">View in Reviews</button>';
+      next = (window.KK && KK.isCreator())
+        ? '<button class="bsub-btn" disabled style="opacity:0.6;cursor:default;">In review</button>'
+        : '<button class="bsub-btn" onclick="event.stopPropagation(); window.location.href=\'reviews.html\'">View in Reviews</button>';
     }
     return edit + next;
   }

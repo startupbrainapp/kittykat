@@ -850,13 +850,14 @@
       ${perfHtml}
     `;
 
-    // Footer actions change per role + status
+    // Footer actions change per role + status. KK creators never get approve actions.
     let footer = '';
-    if (currentRole === 'regional' && c.pendingFor.includes('cmo')) {
+    var isKKCreator = !!(window.KK && KK.isCreator());
+    if (!isKKCreator && currentRole === 'regional' && c.pendingFor.includes('cmo')) {
       footer = `
         <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 6l2.5 2.5L9 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve for your region</button>
         <button class="d-btn secondary">Request changes</button>`;
-    } else if (currentRole === 'cmo' && c.pendingFor.includes('cmo')) {
+    } else if (!isKKCreator && currentRole === 'cmo' && c.pendingFor.includes('cmo')) {
       footer = `
         <button class="d-btn primary"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 6l2.5 2.5L9 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve campaign</button>
         <button class="d-btn secondary">Request changes</button>

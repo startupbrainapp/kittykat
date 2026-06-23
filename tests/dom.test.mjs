@@ -113,6 +113,15 @@ ok(creatorPage.KK.isCreator() && !creatorPage.KK.canApprove(), "creator role can
 ok(creatorPage.document.querySelector('a.nav-item[href$="reviews.html"]').style.display === "none", "creator does not see the Reviews tab");
 ok(creatorPage.document.querySelector(".user-item").style.cursor === "pointer", "user chip is wired as a role switcher");
 creatorPage.KK.setRole("approver"); // reset so later pages default correctly
+// approval actions don't leak: no bulk Approve in Shortlisted; Home approval widget hides for creators
+const slBulk = loadPage("asset_manager.html").dom.window;
+ok(![...slBulk.document.querySelectorAll(".bulk-btn")].some((b) => b.textContent.trim() === "Approve"), "Shortlisted has no bulk Approve (approval only happens in Reviews)");
+const homeCreator = loadPage("home.html").dom.window;
+homeCreator.KK.setRole("creator");
+homeCreator.KK._applyRoleUI();
+const apprWidgets = [...homeCreator.document.querySelectorAll("[data-approver-only]")];
+ok(apprWidgets.length > 0 && apprWidgets.every((el) => el.style.display === "none"), "Home 'Pending My Approval' widget hides for creators");
+homeCreator.KK.setRole("approver");
 
 // ---- creator_studio.html ----
 console.log("creator_studio.html");

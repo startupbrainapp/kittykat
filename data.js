@@ -411,6 +411,10 @@
     document.querySelectorAll('a.nav-item[href$="reviews.html"]').forEach(function (a) {
       a.style.display = isCreator ? 'none' : '';
     });
+    // Any approver-only chrome (approval widgets/buttons) hides for creators.
+    document.querySelectorAll('[data-approver-only]').forEach(function (el) {
+      el.style.display = isCreator ? 'none' : '';
+    });
     if (isCreator && /reviews\.html(?:$|[?#])/.test(location.pathname + location.search)) {
       location.replace('briefs.html');
       return;
