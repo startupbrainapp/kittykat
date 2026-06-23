@@ -228,6 +228,9 @@
   .ref-tile { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-standard); }
   .ref-tile img { width: 100%; height: 100%; object-fit: cover; }
   .ref-tile .lock { position: absolute; left: 6px; top: 6px; font-size: 8px; font-weight: 510; color: #fff; background: rgba(94,106,210,0.9); border-radius: 4px; padding: 1px 6px; }
+  .ref-tile .ref-x { position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: rgba(8,9,10,0.62); color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity 0.12s; }
+  .ref-tile:hover .ref-x { opacity: 1; }
+  .ref-tile .ref-x:hover { background: rgba(8,9,10,0.85); }
   .ref-add { aspect-ratio: 1; border-radius: 8px; border: 1px dashed var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--text-quaternary); cursor: pointer; }
   .ref-add:hover { color: var(--text-secondary); border-color: rgba(255,255,255,0.18); }
   .blk-desc { width: 100%; background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 10px 12px; color: var(--text-secondary); font-size: 13px; resize: none; min-height: 64px; font-family: inherit; letter-spacing: -0.13px; }
@@ -334,7 +337,7 @@
             <div class="pill" id="pill-environment" onclick="openBlock('environment')">
               <span class="lock open"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 014.85-.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="lock closed"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>Environment
             </div>
-            <div class="pill set" id="pill-person" onclick="openBlock('person')">
+            <div class="pill" id="pill-person" onclick="openBlock('person')">
               <span class="lock open"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 014.85-.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="lock closed"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>Person
             </div>
             <div class="pill" id="pill-products" onclick="openBlock('products')">
@@ -390,33 +393,24 @@
     <div class="blk-content" id="blk-environment">
       <div class="sub">Set the scene the agent places the subject in — location, lighting, mood.</div>
       <div class="blk-label">Scene references</div>
-      <div class="ref-tiles">
-        <div class="ref-tile"><img src="images/11.jpg"></div>
-        <div class="ref-tile"><img src="images/16.jpg"></div>
-        <div class="ref-tile"><img src="images/18.jpg"></div>
-        <div class="ref-add"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-      </div>
+      <div class="ref-tiles" id="envRefs"></div>
       <div class="blk-label">Describe the scene</div>
-      <textarea class="blk-desc">Outdoor warehouse car park, overcast daylight, urban streetwear mood.</textarea>
+      <textarea class="blk-desc" id="envDesc" placeholder="e.g. Outdoor warehouse car park, overcast daylight, urban streetwear mood." oninput="blockDirty('environment')"></textarea>
     </div>
     <!-- person -->
     <div class="blk-content blk-hide" id="blk-person">
       <div class="sub">Lock the model so the same face carries across every version.</div>
       <div class="blk-label">Face reference</div>
-      <div class="ref-tiles">
-        <div class="ref-tile"><span class="lock">Locked</span><img src="images/c1.jpg"></div>
-        <div class="ref-add"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-      </div>
+      <div class="ref-tiles" id="personRefs"></div>
       <div class="blk-label">Describe the model</div>
-      <textarea class="blk-desc">High-end model, late 20s, blonde, confident posture.</textarea>
+      <textarea class="blk-desc" id="personDesc" placeholder="e.g. Late 20s, confident posture, natural expression." oninput="blockDirty('person')"></textarea>
     </div>
     <!-- products -->
     <div class="blk-content blk-hide" id="blk-products">
       <div class="sub">Add the exact products to place in the shot. References keep logos and shapes accurate.</div>
       <div class="blk-label">Products in shot</div>
-      <div class="prod-row"><img src="images/3.jpg"><div class="pn">Sakura camo hoodie<small>product reference</small></div><span class="rm">✕</span></div>
-      <div class="prod-row"><img src="images/c5.jpg"><div class="pn">Grey shark cap<small>product reference</small></div><span class="rm">✕</span></div>
-      <div class="prod-row"><img src="images/7.jpg"><div class="pn">ABC camo bracelet<small>product reference</small></div><span class="rm">✕</span></div>
+      <div id="prodList"></div>
+      <div class="ref-add" style="aspect-ratio:auto;padding:9px;margin-top:2px;gap:6px;" onclick="addProduct()"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Add a product</div>
     </div>
   </div>
   <div class="block-foot">
@@ -505,7 +499,24 @@
     if (BRIEF_ID && window.KK) {
       KK.generate(BRIEF_ID, 8);
       renderTiles();
+      noteGeneration();
     }
+  }
+  // Make the locked controls visible in chat — what actually fed this batch.
+  function noteGeneration() {
+    var msgs = document.getElementById('chatMsgs');
+    if (!msgs || !(BRIEF_ID && window.KK)) return;
+    var bl = KK.getBlocks(BRIEF_ID);
+    var parts = [];
+    if (blockHasContent('environment', bl.environment)) parts.push('scene');
+    if (blockHasContent('person', bl.person)) parts.push('person');
+    if (blockHasContent('products', bl.products)) parts.push('product refs');
+    var scene = bl.environment && bl.environment.desc && bl.environment.desc.trim();
+    var line = parts.length
+      ? 'Generated 8 more using your locked ' + parts.join(' + ') + (scene ? ' — “' + scene + '”' : '') + '.'
+      : 'Generated 8 more concepts. Lock an Environment, Person, or Products below to steer the next batch.';
+    msgs.insertAdjacentHTML('beforeend', '<div class="m a"><div class="who">KittyKat</div><div class="bubble">' + line + '</div></div>');
+    msgs.scrollTop = msgs.scrollHeight;
   }
 
   function studioOpening(b) {
@@ -528,6 +539,7 @@
           document.title = 'KittyKat — ' + b.name;
           renderTiles();
           studioOpening(KK.brief(id));
+          refreshPills();
         }
       }
     } catch (e) {}
@@ -553,18 +565,93 @@
     person: { title: 'Person', icon: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 13c0-2.5 2-4.2 4.5-4.2s4.5 1.7 4.5 4.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' },
     products: { title: 'Products', icon: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 5l5-2.5L13 5v6l-5 2.5L3 11z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' }
   };
+  // ---- Generation controls: Environment / Person / Products (per-brief) ----
+  var REF_POOL = ['images/11.jpg', 'images/12.jpg', 'images/13.jpg', 'images/14.jpg', 'images/15.jpg', 'images/16.jpg', 'images/17.jpg', 'images/18.jpg'];
+  var FACE_POOL = ['images/c1.jpg', 'images/c3.jpg', 'images/c5.jpg', 'images/9.jpg', 'images/10.jpg'];
+  var PROD_POOL = [
+    { img: 'images/3.jpg', name: 'Sakura camo hoodie' },
+    { img: 'images/c5.jpg', name: 'Grey shark cap' },
+    { img: 'images/7.jpg', name: 'ABC camo bracelet' },
+    { img: 'images/2.jpg', name: 'Star court sneaker' },
+    { img: 'images/5.jpg', name: 'Shark full-zip' }
+  ];
   var currentBlock = null;
-  function confirmBlock() {
-    if (currentBlock) document.getElementById('pill-' + currentBlock).classList.add('set');
-    closeBlock();
+  var blockDraft = null; // working copy for the open panel, saved on Done
+
+  function blankBlocks() {
+    var bl = (BRIEF_ID && window.KK) ? KK.getBlocks(BRIEF_ID) : {};
+    return {
+      environment: { refs: (bl.environment && bl.environment.refs || []).slice(), desc: (bl.environment && bl.environment.desc) || '' },
+      person: { refs: (bl.person && bl.person.refs || []).slice(), desc: (bl.person && bl.person.desc) || '' },
+      products: { items: (bl.products && bl.products.items || []).slice() }
+    };
+  }
+  function blockHasContent(name, data) {
+    if (!data) return false;
+    if (name === 'products') return (data.items || []).length > 0;
+    return (data.refs || []).length > 0 || !!(data.desc && data.desc.trim());
+  }
+  // reflect each block's saved set-state on its pill
+  function refreshPills() {
+    if (!(BRIEF_ID && window.KK)) return;
+    var bl = KK.getBlocks(BRIEF_ID);
+    ['environment', 'person', 'products'].forEach(function (name) {
+      document.getElementById('pill-' + name).classList.toggle('set', blockHasContent(name, bl[name]));
+    });
+  }
+  function renderRefs(name) {
+    var wrap = document.getElementById(name === 'environment' ? 'envRefs' : 'personRefs');
+    if (!wrap) return;
+    wrap.innerHTML = blockDraft[name].refs.map(function (src, i) {
+      return '<div class="ref-tile"><img src="' + src + '"><span class="ref-x" onclick="removeRef(\'' + name + '\',' + i + ')">✕</span></div>';
+    }).join('') +
+    '<div class="ref-add" onclick="addRef(\'' + name + '\')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>';
+  }
+  function renderProducts() {
+    var wrap = document.getElementById('prodList');
+    if (!wrap) return;
+    wrap.innerHTML = blockDraft.products.items.map(function (p, i) {
+      return '<div class="prod-row"><img src="' + p.img + '"><div class="pn">' + p.name + '<small>product reference</small></div><span class="rm" onclick="removeProduct(' + i + ')">✕</span></div>';
+    }).join('');
+  }
+  function addRef(name) {
+    var pool = name === 'person' ? FACE_POOL : REF_POOL;
+    var refs = blockDraft[name].refs;
+    var next = pool.filter(function (s) { return refs.indexOf(s) === -1; })[0] || pool[refs.length % pool.length];
+    refs.push(next); renderRefs(name);
+  }
+  function removeRef(name, i) { blockDraft[name].refs.splice(i, 1); renderRefs(name); }
+  function addProduct() {
+    var items = blockDraft.products.items;
+    var used = items.map(function (p) { return p.img; });
+    var next = PROD_POOL.filter(function (p) { return used.indexOf(p.img) === -1; })[0] || PROD_POOL[items.length % PROD_POOL.length];
+    items.push({ img: next.img, name: next.name }); renderProducts();
+  }
+  function removeProduct(i) { blockDraft.products.items.splice(i, 1); renderProducts(); }
+  function blockDirty(name) {
+    if (!blockDraft) return;
+    if (name === 'environment') blockDraft.environment.desc = document.getElementById('envDesc').value;
+    if (name === 'person') blockDraft.person.desc = document.getElementById('personDesc').value;
   }
   function openBlock(name) {
     currentBlock = name;
-    document.querySelectorAll('.blk-content').forEach(c => c.classList.add('blk-hide'));
+    blockDraft = blankBlocks();
+    document.querySelectorAll('.blk-content').forEach(function (c) { c.classList.add('blk-hide'); });
     document.getElementById('blk-' + name).classList.remove('blk-hide');
     document.getElementById('blockTitle').textContent = blockMeta[name].title;
     document.getElementById('blockIc').innerHTML = blockMeta[name].icon;
+    if (name === 'environment') { document.getElementById('envDesc').value = blockDraft.environment.desc; renderRefs('environment'); }
+    if (name === 'person') { document.getElementById('personDesc').value = blockDraft.person.desc; renderRefs('person'); }
+    if (name === 'products') renderProducts();
     document.getElementById('blockModal').classList.add('show');
+  }
+  function confirmBlock() {
+    if (currentBlock && BRIEF_ID && window.KK) {
+      blockDirty(currentBlock);
+      KK.setBlock(BRIEF_ID, currentBlock, blockDraft[currentBlock]);
+      refreshPills();
+    }
+    closeBlock();
   }
   function closeBlock() { document.getElementById('blockModal').classList.remove('show'); }
 

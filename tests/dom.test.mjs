@@ -122,6 +122,17 @@ const focusFavBtn = sw.document.getElementById("focusFav");
 const selectsBefore = sw.KK.finalSelects(created.id).length;
 sw.focusFav();
 ok(!!focusFavBtn && sw.KK.finalSelects(created.id).length === selectsBefore + 1, "fullscreen heart favorites the viewed image");
+// Environment / Person / Products controls save real per-brief settings
+sw.backToTriage();
+sw.openBlock("environment");
+sw.addRef("environment");
+sw.document.getElementById("envDesc").value = "Neon Tokyo alley, rain-slick.";
+sw.confirmBlock();
+const savedEnv = sw.KK.getBlocks(created.id).environment;
+ok(savedEnv && savedEnv.refs.length === 1 && /Neon Tokyo/.test(savedEnv.desc), "Environment panel saves references + description to the brief");
+ok(sw.document.getElementById("pill-environment").classList.contains("set"), "a configured control marks its pill as set");
+sw.generateAssets();
+ok(sw.KK.history(created.id).slice(-1)[0].scene === savedEnv.desc, "generation records the locked scene that fed it");
 
 // ---- share.html (client-facing selects view) ----
 console.log("share.html");

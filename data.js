@@ -241,10 +241,27 @@
       b.assetsDone = Math.min(b.tiles.length, b.assetsTotal || b.tiles.length);
       if (b.status === 'draft') { b.status = 'production'; b.statusLabel = STATUS_LABEL.production; }
       if (!b.history) b.history = [];
-      b.history.push({ tiles: added.slice(), at: now() });
+      var env = b.blocks && b.blocks.environment;
+      b.history.push({ tiles: added.slice(), at: now(), scene: (env && env.desc) || '' });
       b.updatedAt = now();
       save();
       return added;
+    },
+
+    // Per-brief generation controls (Environment / Person / Products).
+    getBlocks: function (id) {
+      var b = this.brief(id);
+      if (!b) return {};
+      if (!b.blocks) b.blocks = {};
+      return b.blocks;
+    },
+    setBlock: function (id, name, data) {
+      var b = this.brief(id);
+      if (!b) return;
+      if (!b.blocks) b.blocks = {};
+      b.blocks[name] = data;
+      b.updatedAt = now();
+      save();
     },
 
     // Real generation history for a brief, oldest first. If a pre-existing
