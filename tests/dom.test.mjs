@@ -186,6 +186,21 @@ const slw = loadPage("asset_manager.html", { seedState: slState }).dom.window;
 const slTiles = [...slw.document.querySelectorAll("#assetGrid .asset-overlay-name")].filter((n) => /SL Test/.test(n.textContent));
 ok(slTiles.length === 3, "only the 3 hearted Studio assets are shortlisted (raw generations excluded)");
 
+// Duplicate stock images don't flood the shortlist — collapse to one per hearted image
+const dupTiles = [];
+for (let i = 0; i < 56; i++) dupTiles.push((i % 8) + 1);
+const dupState = {
+  briefs: [{
+    id: "dup", name: "Dup Brief", status: "production", statusLabel: "In Production",
+    campaign: "Dup Camp", assignee: "G", initial: "G", assetsTotal: 56,
+    tiles: dupTiles, finalSelects: ["images/1.jpg", "images/2.jpg"],
+  }],
+  customCampaigns: [],
+};
+const dupw = loadPage("asset_manager.html", { seedState: dupState }).dom.window;
+const dupShown = dupw.LAST_RENDERED.filter((a) => a.brief === "Dup Brief");
+ok(dupShown.length === 2, "shortlist collapses 56 duplicate tiles to 2 distinct hearted images");
+
 // batch Send to Reviews submits the selected briefs
 slw.toggleSelectMode();
 slw.bulkSelectAll();

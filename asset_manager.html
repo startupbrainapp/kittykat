@@ -763,6 +763,17 @@
       if (!matchesSearch(a)) return false;
       return true;
     });
+    // The prototype reuses 8 stock photos across many generated tiles, so a single
+    // hearted image can match dozens of tiles. Collapse to one card per distinct
+    // hearted image (per brief) so the shortlist matches the Studio "selects" count.
+    var seenImg = {};
+    list = list.filter(function (a) {
+      if (!a.derived) return true; // seed assets are already unique
+      var key = (liveStatus(a).briefId || a.brief) + '|' + a.img;
+      if (seenImg[key]) return false;
+      seenImg[key] = true;
+      return true;
+    });
     if (fSort === 'Newest') list.sort(function (x, y) { return createdRank(y.created) - createdRank(x.created); });
     else if (fSort === 'Oldest') list.sort(function (x, y) { return createdRank(x.created) - createdRank(y.created); });
     syncFilterLabels();
