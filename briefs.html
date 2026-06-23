@@ -344,6 +344,10 @@
       <span class="bc-current">Briefs</span>
     </div>
     <div class="topbar-right">
+      <button class="btn btn-ghost" onclick="newCampaign()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        New campaign
+      </button>
       <button class="btn btn-primary" onclick="openNewBrief()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         New brief
@@ -624,12 +628,60 @@
   function groupRowsByCampaign(rows) {
     const order = [], groups = {};
     rows.forEach(b => { const c = b.campaign || 'Standalone'; if (!groups[c]) { groups[c] = []; order.push(c); } groups[c].push(b); });
-    return order.map((c, i) =>
-      `<div class="campaign-group-header" style="display:flex;align-items:center;gap:8px;padding:16px 16px 7px;${i ? 'border-top:1px solid var(--border-subtle);margin-top:4px;' : ''}">
+    // surface campaigns that have no briefs yet (e.g. just created) so they're visible
+    const briefed = {};
+    (window.KK ? KK.briefs() : []).forEach(b => { if (b.campaign) briefed[b.campaign] = 1; });
+    (window.KK ? KK.campaigns() : []).forEach(c => { if (!briefed[c] && !groups[c]) { groups[c] = []; order.push(c); } });
+    return order.map((c, i) => {
+      const body = groups[c].length
+        ? groups[c].map(renderRow).join('')
+        : `<div style="padding:8px 16px 14px;color:var(--text-quaternary);font-size:12px;letter-spacing:-0.13px;">No briefs yet &middot; <a onclick="openNewBriefFor('${c.replace(/'/g, "\\'")}')" style="color:var(--brand-accent);cursor:pointer;">Create one</a></div>`;
+      return `<div class="campaign-group-header" style="display:flex;align-items:center;gap:8px;padding:16px 16px 7px;${i ? 'border-top:1px solid var(--border-subtle);margin-top:4px;' : ''}">
          <span style="font-size:11px;font-weight:590;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">${c}</span>
          <span style="font-size:11px;font-weight:510;color:var(--text-quaternary);">${groups[c].length}</span>
-       </div>` + groups[c].map(renderRow).join('')
-    ).join('');
+       </div>` + body;
+    }).join('');
+  }
+  function openNewBriefFor(c) { openNewBrief(); nbSetCampaign(c); }
+  function newCampaign() {
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;';
+    var box = document.createElement('div');
+    box.style.cssText = 'background:var(--bg-elevated);border:1px solid var(--border-standard);border-radius:10px;padding:18px;width:340px;box-shadow:0 12px 40px rgba(0,0,0,0.5);';
+    var title = document.createElement('div');
+    title.textContent = 'New campaign';
+    title.style.cssText = 'font-size:14px;font-weight:590;color:var(--text-primary);margin-bottom:4px;';
+    var sub = document.createElement('div');
+    sub.textContent = 'A bucket to group briefs and their assets.';
+    sub.style.cssText = 'font-size:12px;color:var(--text-tertiary);margin-bottom:14px;letter-spacing:-0.13px;';
+    var inp = document.createElement('input');
+    inp.type = 'text'; inp.placeholder = 'Campaign name…';
+    inp.style.cssText = 'width:100%;background:var(--surface-1);border:1px solid var(--border-standard);border-radius:6px;padding:9px 11px;color:var(--text-primary);font-size:13px;outline:none;font-family:inherit;margin-bottom:14px;';
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;';
+    var cancel = document.createElement('button');
+    cancel.className = 'btn btn-ghost'; cancel.textContent = 'Cancel';
+    var create = document.createElement('button');
+    create.className = 'btn btn-primary'; create.textContent = 'Create campaign';
+    function close() { ov.remove(); }
+    function commit() {
+      var n = inp.value.trim(); if (!n) { inp.focus(); return; }
+      KK.addCampaign(n);
+      close();
+      groupByCampaign = true;
+      var gt = document.getElementById('groupToggle');
+      if (gt) { gt.style.background = 'var(--brand)'; gt.style.borderColor = 'var(--brand)'; gt.style.color = '#fff'; }
+      renderTable();
+    }
+    cancel.onclick = close;
+    create.onclick = commit;
+    inp.onkeydown = function (e) { if (e.key === 'Enter') commit(); else if (e.key === 'Escape') close(); };
+    ov.onclick = function (e) { if (e.target === ov) close(); };
+    row.appendChild(cancel); row.appendChild(create);
+    box.appendChild(title); box.appendChild(sub); box.appendChild(inp); box.appendChild(row);
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+    inp.focus();
   }
   setBriefView('active');
 

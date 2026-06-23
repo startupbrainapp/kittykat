@@ -80,6 +80,12 @@ const activeExpected = w.KK.briefs().filter((x) => x.status !== "shipped" && !x.
 ok(w.document.querySelectorAll("#briefList .brief-row").length === activeExpected, "Active view excludes shipped briefs");
 w.setBriefView("active"); // reset view
 
+// Create a campaign on its own — shows (empty) in the group-by-campaign view
+ok(typeof w.newCampaign === "function" && [...w.document.querySelectorAll(".topbar-right button")].some((b) => /New campaign/.test(b.textContent)), "standalone New campaign action exists");
+w.KK.addCampaign("Standalone Test Camp");
+const groupedHtml = w.groupRowsByCampaign(w.visibleBriefs());
+ok(/Standalone Test Camp/.test(groupedHtml) && /No briefs yet/.test(groupedHtml), "a brief-less campaign appears in the group-by-campaign view");
+
 // ---- creator_studio.html ----
 console.log("creator_studio.html");
 const s = loadPage("creator_studio.html", { query: `?brief=${created.id}`, seedState: createdState });
