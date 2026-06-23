@@ -632,7 +632,16 @@
     if (src) { focusIndex = Math.max(0, focusList.indexOf(src)); document.getElementById('assetImg').src = src; }
     showFocus();
     syncFocusFav();
+    focusEditingChip();
     document.getElementById('branchBanner').classList.toggle('show', !!isBranch);
+  }
+  // In fullscreen the chat is scoped to the image you're viewing — show the
+  // "Editing this image" banner above the composer, tracking the current photo.
+  function focusEditingChip() {
+    var cur = focusList[focusIndex];
+    document.getElementById('ctxThumb').src = cur;
+    document.getElementById('ctxChip').style.display = 'flex';
+    document.querySelector('.composer-input').placeholder = 'Refine this image, or ask for variations…';
   }
   // Reflect the current image's favorite state on the fullscreen heart.
   function syncFocusFav() {
@@ -662,9 +671,9 @@
       img.style.opacity = '1';
     }, 200);
   }
-  function prevAsset() { focusIndex = (focusIndex - 1 + focusList.length) % focusList.length; slideTo(focusList[focusIndex], 'prev'); syncFocusFav(); }
-  function nextAsset() { focusIndex = (focusIndex + 1) % focusList.length; slideTo(focusList[focusIndex], 'next'); syncFocusFav(); }
-  function backToTriage() { setView(lastGrid); }
+  function prevAsset() { focusIndex = (focusIndex - 1 + focusList.length) % focusList.length; slideTo(focusList[focusIndex], 'prev'); syncFocusFav(); focusEditingChip(); }
+  function nextAsset() { focusIndex = (focusIndex + 1) % focusList.length; slideTo(focusList[focusIndex], 'next'); syncFocusFav(); focusEditingChip(); }
+  function backToTriage() { clearSelect(); setView(lastGrid); }
   function pickVersion(el, isOld) {
     document.querySelectorAll('.versions .vthumb').forEach(v => v.classList.remove('sel'));
     el.classList.add('sel');
