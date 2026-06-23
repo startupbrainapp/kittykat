@@ -241,6 +241,15 @@
   .prod-row .rm { color: var(--text-quaternary); cursor: pointer; padding: 4px; }
   .prod-row .rm:hover { color: var(--text-primary); }
   .block-foot { flex-shrink: 0; padding: 14px 16px; border-top: 1px solid var(--divider); }
+  .ref-picker { position: absolute; inset: 0; background: var(--bg-surface); display: none; flex-direction: column; z-index: 2; }
+  .ref-picker.show { display: flex; }
+  .picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .picker-tile { aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-standard); cursor: pointer; }
+  .picker-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .picker-tile:hover { border-color: var(--brand-accent); }
+  .prod-row.pick { cursor: pointer; }
+  .prod-row.pick:hover { border-color: var(--brand-accent); }
+  .picker-empty { font-size: 12px; color: var(--text-quaternary); padding: 8px 2px; }
   .block-foot .btn { width: 100%; display: flex; align-items: center; justify-content: center; }
   .blk-hide { display: none; }
 </style>
@@ -412,6 +421,14 @@
       <div id="prodList"></div>
       <div class="ref-add" style="aspect-ratio:auto;padding:9px;margin-top:2px;gap:6px;" onclick="addProduct()"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Add a product</div>
     </div>
+  </div>
+  <!-- Reference / product chooser — opened by the + tiles, so nothing is added at random -->
+  <div class="ref-picker" id="refPicker">
+    <div class="block-head">
+      <div class="x" style="margin-left:0" onclick="closePicker()"><svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M7 2L3 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3 id="pickerTitle">Add a reference</h3>
+    </div>
+    <div class="block-body"><div id="pickerGrid"></div></div>
   </div>
   <div class="block-foot">
     <button class="btn btn-primary" onclick="confirmBlock()">Done</button>
@@ -614,20 +631,47 @@
       return '<div class="prod-row"><img src="' + p.img + '"><div class="pn">' + p.name + '<small>product reference</small></div><span class="rm" onclick="removeProduct(' + i + ')">✕</span></div>';
     }).join('');
   }
-  function addRef(name) {
-    var pool = name === 'person' ? FACE_POOL : REF_POOL;
-    var refs = blockDraft[name].refs;
-    var next = pool.filter(function (s) { return refs.indexOf(s) === -1; })[0] || pool[refs.length % pool.length];
-    refs.push(next); renderRefs(name);
-  }
   function removeRef(name, i) { blockDraft[name].refs.splice(i, 1); renderRefs(name); }
-  function addProduct() {
-    var items = blockDraft.products.items;
-    var used = items.map(function (p) { return p.img; });
-    var next = PROD_POOL.filter(function (p) { return used.indexOf(p.img) === -1; })[0] || PROD_POOL[items.length % PROD_POOL.length];
-    items.push({ img: next.img, name: next.name }); renderProducts();
-  }
   function removeProduct(i) { blockDraft.products.items.splice(i, 1); renderProducts(); }
+
+  // The + tiles open a chooser — the user picks; nothing is added automatically.
+  var pickerFor = null;
+  function addRef(name) { openPicker(name); }
+  function addProduct() { openPicker('products'); }
+  function openPicker(name) {
+    pickerFor = name;
+    var grid = document.getElementById('pickerGrid');
+    document.getElementById('pickerTitle').textContent = name === 'products' ? 'Add a product' : 'Add a reference';
+    if (name === 'products') {
+      var used = blockDraft.products.items.map(function (p) { return p.img; });
+      var avail = PROD_POOL.filter(function (p) { return used.indexOf(p.img) === -1; });
+      grid.className = '';
+      grid.innerHTML = avail.length
+        ? avail.map(function (p) { return '<div class="prod-row pick" onclick="pickItem(\'' + p.img + '\')"><img src="' + p.img + '"><div class="pn">' + p.name + '<small>product reference</small></div></div>'; }).join('')
+        : '<div class="picker-empty">All products added.</div>';
+    } else {
+      var pool = name === 'person' ? FACE_POOL : REF_POOL;
+      var have = blockDraft[name].refs;
+      var availR = pool.filter(function (s) { return have.indexOf(s) === -1; });
+      grid.className = 'picker-grid';
+      grid.innerHTML = availR.length
+        ? availR.map(function (s) { return '<div class="picker-tile" onclick="pickItem(\'' + s + '\')"><img src="' + s + '"></div>'; }).join('')
+        : '<div class="picker-empty">All references added.</div>';
+    }
+    document.getElementById('refPicker').classList.add('show');
+  }
+  function closePicker() { document.getElementById('refPicker').classList.remove('show'); }
+  function pickItem(val) {
+    if (pickerFor === 'products') {
+      var meta = PROD_POOL.filter(function (p) { return p.img === val; })[0] || { img: val, name: 'Product' };
+      blockDraft.products.items.push({ img: meta.img, name: meta.name });
+      renderProducts();
+    } else {
+      blockDraft[pickerFor].refs.push(val);
+      renderRefs(pickerFor);
+    }
+    closePicker();
+  }
   function blockDirty(name) {
     if (!blockDraft) return;
     if (name === 'environment') blockDraft.environment.desc = document.getElementById('envDesc').value;
@@ -636,6 +680,7 @@
   function openBlock(name) {
     currentBlock = name;
     blockDraft = blankBlocks();
+    closePicker();
     document.querySelectorAll('.blk-content').forEach(function (c) { c.classList.add('blk-hide'); });
     document.getElementById('blk-' + name).classList.remove('blk-hide');
     document.getElementById('blockTitle').textContent = blockMeta[name].title;

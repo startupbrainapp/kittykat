@@ -125,11 +125,14 @@ ok(!!focusFavBtn && sw.KK.finalSelects(created.id).length === selectsBefore + 1,
 // Environment / Person / Products controls save real per-brief settings
 sw.backToTriage();
 sw.openBlock("environment");
-sw.addRef("environment");
+sw.addRef("environment"); // tap + → opens chooser, adds nothing yet
+ok(sw.document.getElementById("refPicker").classList.contains("show") && sw.blockDraft.environment.refs.length === 0, "tapping + opens a chooser without auto-adding a reference");
+const firstChoice = sw.document.querySelector("#pickerGrid .picker-tile img").getAttribute("src");
+sw.pickItem(firstChoice);
 sw.document.getElementById("envDesc").value = "Neon Tokyo alley, rain-slick.";
 sw.confirmBlock();
 const savedEnv = sw.KK.getBlocks(created.id).environment;
-ok(savedEnv && savedEnv.refs.length === 1 && /Neon Tokyo/.test(savedEnv.desc), "Environment panel saves references + description to the brief");
+ok(savedEnv && savedEnv.refs.length === 1 && savedEnv.refs[0] === firstChoice && /Neon Tokyo/.test(savedEnv.desc), "Environment panel saves the chosen reference + description to the brief");
 ok(sw.document.getElementById("pill-environment").classList.contains("set"), "a configured control marks its pill as set");
 sw.generateAssets();
 ok(sw.KK.history(created.id).slice(-1)[0].scene === savedEnv.desc, "generation records the locked scene that fed it");
