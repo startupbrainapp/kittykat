@@ -40,11 +40,12 @@ ok(w.document.querySelectorAll("#briefList .brief-row").length === w.KK.briefs()
 // default order is latest-updated (demo recency), not clustered by status
 ok(/Sakura Camo/.test(w.document.querySelector("#briefList .brief-row .brief-name").textContent), "default order leads with the most-recently-updated brief (not status order)");
 w.openNewBrief();
-w.nbOpenRefPicker();
-const thumb = w.document.querySelector('#nbMenu div[title="images/2.jpg"]');
-ok(!!thumb, "reference picker offers a Visual Vault to choose from");
-if (thumb) thumb.click();
-ok(w.nbState.refs.includes("images/2.jpg"), "reference is user-chosen, not auto");
+w.openVault();
+ok(w.document.getElementById("newBriefDrawer").classList.contains("stacked") && w.document.getElementById("vaultSheet").classList.contains("open"), "Visual Vault opens as a stacked sheet over the brief drawer");
+ok(w.document.querySelectorAll("#vaultGrid .vault-tile").length > 8 && w.document.querySelectorAll("#vaultFilters .vault-chip").length > 1, "vault has a large grid + filters");
+w.vaultToggle("images/2.jpg");
+w.vaultAddSelected();
+ok(w.nbState.refs.includes("images/2.jpg") && !w.document.getElementById("vaultSheet").classList.contains("open"), "selecting from the vault adds the ref and closes the sheet");
 w.document.getElementById("nbTitle").value = "DOM Test Brief";
 w.nbSetCampaign("SS26 · Hana Matsuri");
 w.nbSetAssignee("Grace L.");
