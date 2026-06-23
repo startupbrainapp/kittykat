@@ -232,12 +232,12 @@
       if (!b) return [];
       var n = Math.max(1, Math.min(parseInt(count, 10) || 8, 12));
       if (!b.tiles) b.tiles = [];
+      var startLen = b.tiles.length;
       var added = [];
       for (var i = 0; i < n; i++) {
-        var tile = (b.tiles.length % 8) + 1; // cycle images/1.jpg .. 8.jpg
-        b.tiles.push(tile);
-        added.push(tile);
+        added.push(((startLen + i) % 8) + 1); // cycle images/1.jpg .. 8.jpg
       }
+      b.tiles = added.concat(b.tiles); // newest batch on top
       b.assetsDone = Math.min(b.tiles.length, b.assetsTotal || b.tiles.length);
       if (b.status === 'draft') { b.status = 'production'; b.statusLabel = STATUS_LABEL.production; }
       if (!b.history) b.history = [];
