@@ -850,7 +850,7 @@
         <button class="d-btn secondary">View assets</button>`;
     } else if (b.status === 'shipped') {
       footer = `
-        <button class="d-btn primary" onclick="window.location.href='asset_manager.html?brief=${b.id}'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4h3l1.5 1.5H10v5H2V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>View in Asset Manager</button>
+        <button class="d-btn primary" onclick="window.location.href='asset_manager.html?brief=${b.id}'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4h3l1.5 1.5H10v5H2V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>View in Shortlist</button>
         <button class="d-btn secondary">Duplicate</button>`;
     }
     document.getElementById('drawerFooter').innerHTML = footer;
