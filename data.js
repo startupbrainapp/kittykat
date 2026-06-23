@@ -240,9 +240,23 @@
       }
       b.assetsDone = Math.min(b.tiles.length, b.assetsTotal || b.tiles.length);
       if (b.status === 'draft') { b.status = 'production'; b.statusLabel = STATUS_LABEL.production; }
+      if (!b.history) b.history = [];
+      b.history.push({ tiles: added.slice(), at: now() });
       b.updatedAt = now();
       save();
       return added;
+    },
+
+    // Real generation history for a brief, oldest first. If a pre-existing
+    // brief has tiles but no recorded history, surface them as one seed batch.
+    history: function (id) {
+      var b = this.brief(id);
+      if (!b) return [];
+      var h = (b.history || []).slice();
+      if (!h.length && b.tiles && b.tiles.length) {
+        h = [{ tiles: b.tiles.slice(), at: b.updatedAt || now(), seed: true }];
+      }
+      return h;
     },
 
     // edit a brief after creation

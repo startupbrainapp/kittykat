@@ -107,6 +107,11 @@ ok(s.errors.length === 0, "loads with no script errors" + (s.errors[0] ? " -> " 
 ok(sw.KK.brief(created.id) !== null, "studio resolves ?brief=");
 ok(sw.document.querySelectorAll("#candGrid .cand").length >= 8, "studio auto-generates 8 concepts on entry");
 ok(/starting concepts/.test(sw.document.querySelector("#chatMsgs .bubble").textContent), "chat opens with a contextual KittyKat message");
+// Timeline reflects REAL generation history, not dummy data
+const tlBefore = sw.document.querySelectorAll("#tlBody .tl-step").length;
+ok(tlBefore >= 1 && /generated/.test(sw.document.querySelector("#tlBody .tl-meta").textContent), "Timeline shows real generation batches (count · favorited · time)");
+sw.generateAssets();
+ok(sw.document.querySelectorAll("#tlBody .tl-step").length === tlBefore + 1, "pressing Generate adds a new timeline batch");
 if (typeof sw.generateAssets === "function") sw.generateAssets();
 ok(sw.KK.brief(created.id).tiles.length >= 8, "generate produces assets");
 sw.KK.toggleFinal(created.id, "images/" + sw.KK.brief(created.id).tiles[0] + ".jpg");

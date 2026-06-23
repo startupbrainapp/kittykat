@@ -55,6 +55,7 @@
   .tl-head .collapse { margin-left: auto; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); cursor: pointer; }
   .tl-head .collapse:hover { background: var(--surface-2); color: var(--text-primary); }
   .tl { flex: 1; overflow-y: auto; padding: 0 12px 16px; display: flex; flex-direction: column; }
+  .tl-empty { font-size: 12px; color: var(--text-quaternary); padding: 16px 4px; }
   .tl-step { display: flex; gap: 11px; padding: 9px 0; cursor: pointer; }
   .tl-step:hover .tl-title { color: var(--text-primary); }
   .tl-gutter { width: 10px; display: flex; flex-direction: column; align-items: center; position: relative; }
@@ -264,57 +265,8 @@
         <span class="t">Timeline</span>
         <div class="collapse" title="Collapse" onclick="toggleTimeline()"><svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M7 2L3 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
-      <div class="tl">
-        <!-- main spine (linear, newest on top) -->
-        <div class="tl-step cur" onclick="openFocus('images/v2.jpg', false)">
-          <div class="tl-gutter"><span class="tl-dot"></span></div>
-          <div class="tl-thumb"><img src="images/v2.jpg"></div>
-          <div class="tl-info"><div class="tl-title">Darker hair, kept face</div><div class="tl-meta">v3 · now showing · 2m ago</div></div>
-        </div>
-        <div class="tl-step" onclick="openFocus('images/v3.jpg', false)">
-          <div class="tl-gutter"><span class="tl-dot"></span></div>
-          <div class="tl-thumb"><img src="images/v3.jpg"></div>
-          <div class="tl-info"><div class="tl-title">Warmer tone</div><div class="tl-meta">v2 · 10m ago</div></div>
-        </div>
-        <div class="tl-step" onclick="openFocus('images/v4.jpg', false)">
-          <div class="tl-gutter"><span class="tl-dot"></span></div>
-          <div class="tl-thumb"><img src="images/v4.jpg"></div>
-          <div class="tl-info"><div class="tl-title">Refined pick</div><div class="tl-meta">v1 · 15m ago</div></div>
-        </div>
-
-        <!-- branch off v1: data forks, timeline stays linear (collapsible lane) -->
-        <div class="tl-branch" id="branchWS">
-          <div class="tl-branch-spine"></div>
-          <div class="tl-branch-lane">
-            <div class="tl-branch-head" onclick="toggleBranch('branchWS')">
-              <div class="tl-thumb"><img src="images/c3.jpg"></div>
-              <div class="tl-info"><div class="tl-title">White Shirt</div><div class="tl-meta">branched from v1 · 2 versions</div></div>
-              <svg class="tl-branch-chev" width="11" height="11" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="tl-branch-body">
-              <div class="tl-sub" onclick="openFocus('images/c3.jpg', true)">
-                <div class="tl-thumb sm"><img src="images/c3.jpg"></div>
-                <div class="tl-info"><div class="tl-title">White shirt + cap</div><div class="tl-meta">WS v2 · 9m ago</div></div>
-              </div>
-              <div class="tl-sub" onclick="openFocus('images/c5.jpg', true)">
-                <div class="tl-thumb sm"><img src="images/c5.jpg"></div>
-                <div class="tl-info"><div class="tl-title">White shirt base</div><div class="tl-meta">WS v1 · 11m ago</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="tl-step" onclick="backToTriage()">
-          <div class="tl-gutter"><span class="tl-dot"></span></div>
-          <div class="tl-thumb quad"><img src="images/v2.jpg"><img src="images/v3.jpg"><img src="images/v4.jpg"><img src="images/v5.jpg"></div>
-          <div class="tl-info"><div class="tl-title">8 candidates generated</div><div class="tl-meta">2 favorited · 18m ago</div></div>
-        </div>
-        <div class="tl-step" onclick="backToTriage()">
-          <div class="tl-gutter"><span class="tl-dot"></span></div>
-          <div class="tl-thumb quad"><img src="images/c2.jpg"><img src="images/c4.jpg"><img src="images/v6.jpg"><img src="images/v1.jpg"></div>
-          <div class="tl-info"><div class="tl-title">Hero shot from brief</div><div class="tl-meta">first pass · 1h ago</div></div>
-        </div>
-      </div>
+      <!-- Real generation history, newest on top. Rendered by renderTimeline(). -->
+      <div class="tl" id="tlBody"></div>
     </div>
 
     <!-- CENTER: canvas (images only) -->
@@ -479,6 +431,7 @@
         var fav = cand.querySelector('.fav');
         if (img && fav) fav.classList.toggle('on', KK.isFinal(BRIEF_ID, img.getAttribute('src')));
       });
+      renderTimeline();
     }
   }
   // Build one candidate card with the exact markup of the static cards (design preserved).
@@ -507,6 +460,37 @@
     var ac = document.querySelector('.asset-count');
     if (ac) ac.innerHTML = '<b>' + srcs.length + '</b> ' + (srcs.length === 1 ? 'asset' : 'assets') + ' produced';
     syncFinalUI();
+  }
+
+  // Relative time for the timeline ("just now", "12m ago", "3h ago", "2d ago").
+  function timeAgo(ms) {
+    var s = Math.floor((Date.now() - ms) / 1000);
+    if (s < 45) return 'just now';
+    var m = Math.floor(s / 60); if (m < 60) return m + 'm ago';
+    var h = Math.floor(m / 60); if (h < 24) return h + 'h ago';
+    return Math.floor(h / 24) + 'd ago';
+  }
+
+  // Build the Timeline from this brief's REAL generation history (newest first).
+  function renderTimeline() {
+    if (!(BRIEF_ID && window.KK)) return;
+    var body = document.getElementById('tlBody');
+    if (!body) return;
+    var hist = KK.history(BRIEF_ID).slice().sort(function (a, b) { return b.at - a.at; });
+    if (!hist.length) { body.innerHTML = '<div class="tl-empty">No generations yet — generate to start.</div>'; return; }
+    var total = hist.length;
+    body.innerHTML = hist.map(function (ev, i) {
+      var batchNo = total - i; // oldest batch = 1
+      var quad = (ev.tiles || []).slice(0, 4).map(function (n) { return '<img src="images/' + n + '.jpg">'; }).join('');
+      var fav = (ev.tiles || []).filter(function (n) { return KK.isFinal(BRIEF_ID, 'images/' + n + '.jpg'); }).length;
+      var label = batchNo === 1 ? 'First pass from brief' : (i === 0 ? 'Latest generation' : 'Generation ' + batchNo);
+      var meta = (ev.tiles || []).length + ' generated · ' + fav + ' favorited · ' + timeAgo(ev.at);
+      return '<div class="tl-step' + (i === 0 ? ' cur' : '') + '" onclick="backToTriage()">' +
+        '<div class="tl-gutter"><span class="tl-dot"></span></div>' +
+        '<div class="tl-thumb quad">' + quad + '</div>' +
+        '<div class="tl-info"><div class="tl-title">' + label + '</div><div class="tl-meta">' + meta + '</div></div>' +
+      '</div>';
+    }).join('');
   }
 
   // Generate button — append candidates via the engine, then re-render.
