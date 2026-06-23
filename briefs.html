@@ -596,17 +596,19 @@
   }
   function renderTable() {
     const list = document.getElementById('briefList');
-    const rows = visibleBriefs().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    const rows = visibleBriefs();
     const countEl = document.querySelector('.filter-count');
     if (countEl) countEl.textContent = rows.length + (rows.length === 1 ? ' brief' : ' briefs');
-    let html = rows.map(renderRow).join('');
-    // Show brief-less campaigns (e.g. just created) as their own row so they're visible.
+    // Merge briefs + brief-less campaigns into one list, sorted by latest updated (newest first),
+    // so a just-created campaign or just-edited brief lands at the top.
+    const items = rows.map(b => ({ kind: 'brief', at: b.updatedAt || 0, b: b }));
     if (briefView === 'active' || briefView === 'all') {
       const briefed = {};
       briefs.forEach(b => { if (b.campaign) briefed[b.campaign] = 1; });
-      KK.campaigns().forEach(c => { if (!briefed[c]) html += emptyCampaignRow(c); });
+      KK.campaigns().forEach(c => { if (!briefed[c]) items.push({ kind: 'campaign', at: KK.campaignUpdatedAt(c) || 0, name: c }); });
     }
-    list.innerHTML = html;
+    items.sort((a, b) => b.at - a.at);
+    list.innerHTML = items.map(it => it.kind === 'brief' ? renderRow(it.b) : emptyCampaignRow(it.name)).join('');
   }
 
   function renderRow(b) {

@@ -127,6 +127,7 @@
   var state = read() || JSON.parse(JSON.stringify(SEED));
   if (!state.customCampaigns) state.customCampaigns = [];
   if (!state.shares) state.shares = [];
+  if (!state.campaignTimes) state.campaignTimes = {};
   // last-touched time so lists can sort by latest updated
   function now() { return Date.now(); }
   (function () {
@@ -181,11 +182,15 @@
     addCampaign: function (name) {
       name = (name || '').trim();
       if (!state.customCampaigns) state.customCampaigns = [];
+      if (!state.campaignTimes) state.campaignTimes = {};
       if (name && this.campaigns().indexOf(name) < 0) {
-        state.customCampaigns.push(name); save();
+        state.customCampaigns.push(name);
+        state.campaignTimes[name] = now();
+        save();
       }
       return name;
     },
+    campaignUpdatedAt: function (name) { return (state.campaignTimes && state.campaignTimes[name]) || 0; },
 
     // create a brief from the New Brief form
     createBrief: function (input) {
