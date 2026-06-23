@@ -80,11 +80,13 @@ const activeExpected = w.KK.briefs().filter((x) => x.status !== "shipped" && !x.
 ok(w.document.querySelectorAll("#briefList .brief-row").length === activeExpected, "Active view excludes shipped briefs");
 w.setBriefView("active"); // reset view
 
-// Create a campaign on its own — shows (empty) in the group-by-campaign view
+// Create a campaign on its own; Campaign is the leading column (no grouping headers)
 ok(typeof w.newCampaign === "function" && [...w.document.querySelectorAll(".topbar-right button")].some((b) => /New campaign/.test(b.textContent)), "standalone New campaign action exists");
 w.KK.addCampaign("Standalone Test Camp");
-const groupedHtml = w.groupRowsByCampaign(w.visibleBriefs());
-ok(/Standalone Test Camp/.test(groupedHtml) && /No briefs yet/.test(groupedHtml), "a brief-less campaign appears in the group-by-campaign view");
+ok(w.KK.campaigns().includes("Standalone Test Camp"), "New campaign is registered and available to briefs");
+const hdr = [...w.document.querySelectorAll(".table-header > div")].map((d) => d.textContent);
+ok(hdr[0] === "Campaign" && hdr[1] === "Brief", "Campaign is the first column, then Brief");
+ok(w.document.querySelectorAll("#briefList .campaign-group-header").length === 0, "no campaign grouping headers");
 
 // ---- creator_studio.html ----
 console.log("creator_studio.html");
