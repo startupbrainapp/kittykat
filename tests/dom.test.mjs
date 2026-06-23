@@ -200,6 +200,9 @@ const dupState = {
 const dupw = loadPage("asset_manager.html", { seedState: dupState }).dom.window;
 const dupShown = dupw.LAST_RENDERED.filter((a) => a.brief === "Dup Brief");
 ok(dupShown.length === 2, "shortlist collapses 56 duplicate tiles to 2 distinct hearted images");
+// stat cards are computed live + deduped (not the old hardcoded placeholders)
+const expectedTotal = dupw.dedupByImage(dupw.liveAssets().filter((a) => !dupw.ARCHIVED_LOCAL[a.id])).length;
+ok(dupw.document.getElementById("statTotal").textContent === String(expectedTotal), "Total assets stat is computed from deduped assets");
 
 // batch Send to Reviews submits the selected briefs
 slw.toggleSelectMode();
