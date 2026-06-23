@@ -83,7 +83,10 @@ w.setBriefView("active"); // reset view
 // Create a campaign on its own; Campaign is the leading column (no grouping headers)
 ok(typeof w.newCampaign === "function" && [...w.document.querySelectorAll(".topbar-right button")].some((b) => /New campaign/.test(b.textContent)), "standalone New campaign action exists");
 w.KK.addCampaign("Standalone Test Camp");
-ok(w.KK.campaigns().includes("Standalone Test Camp"), "New campaign is registered and available to briefs");
+w.renderTable();
+ok(w.KK.campaigns().includes("Standalone Test Camp"), "New campaign is registered");
+const listHtml = w.document.getElementById("briefList").innerHTML;
+ok(/Standalone Test Camp/.test(listHtml) && /No briefs yet/.test(listHtml), "a brief-less campaign shows as its own row");
 const hdr = [...w.document.querySelectorAll(".table-header > div")].map((d) => d.textContent);
 ok(hdr[0] === "Campaign" && hdr[1] === "Brief", "Campaign is the first column, then Brief");
 ok(w.document.querySelectorAll("#briefList .campaign-group-header").length === 0, "no campaign grouping headers");

@@ -587,12 +587,26 @@
   function toggleBriefFav(id) { KK.toggleFavourite(id); renderTable(); }
   function archiveBrief(id) { KK.toggleArchive(id); renderTable(); }
 
+  function emptyCampaignRow(c) {
+    return `<div class="brief-row" style="cursor:default;">
+        <div class="cell-campaign">${c}</div>
+        <div class="brief-main"><div class="brief-info"><div class="brief-name" style="color:var(--text-quaternary);font-weight:400;font-style:italic;">No briefs yet &middot; <a onclick="event.stopPropagation(); openNewBriefFor('${c.replace(/'/g, "\\'")}')" style="color:var(--brand-accent);cursor:pointer;font-style:normal;">Create one</a></div></div></div>
+        <div></div><div></div><div></div>
+      </div>`;
+  }
   function renderTable() {
     const list = document.getElementById('briefList');
     const rows = visibleBriefs();
     const countEl = document.querySelector('.filter-count');
     if (countEl) countEl.textContent = rows.length + (rows.length === 1 ? ' brief' : ' briefs');
-    list.innerHTML = rows.map(renderRow).join('');
+    let html = rows.map(renderRow).join('');
+    // Show brief-less campaigns (e.g. just created) as their own row so they're visible.
+    if (briefView === 'active' || briefView === 'all') {
+      const briefed = {};
+      briefs.forEach(b => { if (b.campaign) briefed[b.campaign] = 1; });
+      KK.campaigns().forEach(c => { if (!briefed[c]) html += emptyCampaignRow(c); });
+    }
+    list.innerHTML = html;
   }
 
   function renderRow(b) {
