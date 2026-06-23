@@ -362,16 +362,10 @@
     <!-- RIGHT: chat / manual -->
     <div class="panel">
       <div class="chat-view" id="chatView">
-        <div class="chat-msgs">
-          <div class="m u">Sakura Camo hero shot — premium product photography, dark background, editorial lighting. Give me 8.</div>
+        <div class="chat-msgs" id="chatMsgs">
           <div class="m a">
             <div class="who">KittyKat</div>
-            <div class="bubble">Here are 8 candidates. Favorite the keepers, or open one to refine.</div>
-          </div>
-          <div class="m u">Open the first — keep the face, make the hair darker.</div>
-          <div class="m a">
-            <div class="who">KittyKat</div>
-            <div class="bubble">Done — kept the locked face, darkened the hair. Saved as v3.<div class="result"><img src="images/v2.jpg"><div class="meta">v3 · current</div></div></div>
+            <div class="bubble">Here are 8 starting concepts. Favorite the keepers, or tell me what to change.</div>
           </div>
         </div>
         <div class="composer">
@@ -521,6 +515,12 @@
     }
   }
 
+  function studioOpening(b) {
+    var msgs = document.getElementById('chatMsgs');
+    if (!msgs) return;
+    var n = (b.tiles || []).length || 8;
+    msgs.innerHTML = '<div class="m a"><div class="who">KittyKat</div><div class="bubble">Here are ' + n + ' starting concepts for <b>' + b.name + '</b>. Favorite the keepers, or tell me what to change — lighting, background, the product, or the person. Generate more anytime.</div></div>';
+  }
   (function () {
     try {
       var id = new URLSearchParams(location.search).get('brief');
@@ -529,10 +529,12 @@
         if (b) {
           BRIEF_ID = id;
           KK.enterStudio(id);
+          if (!(b.tiles && b.tiles.length)) { KK.generate(id, 8); } // auto-create the first 8 on entry
           document.getElementById('briefName').textContent = b.name;
           document.getElementById('briefCampaign').textContent = b.campaign;
           document.title = 'KittyKat — ' + b.name;
           renderTiles();
+          studioOpening(KK.brief(id));
         }
       }
     } catch (e) {}

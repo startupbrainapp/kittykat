@@ -105,6 +105,8 @@ const s = loadPage("creator_studio.html", { query: `?brief=${created.id}`, seedS
 const sw = s.dom.window;
 ok(s.errors.length === 0, "loads with no script errors" + (s.errors[0] ? " -> " + s.errors[0] : ""));
 ok(sw.KK.brief(created.id) !== null, "studio resolves ?brief=");
+ok(sw.document.querySelectorAll("#candGrid .cand").length >= 8, "studio auto-generates 8 concepts on entry");
+ok(/starting concepts/.test(sw.document.querySelector("#chatMsgs .bubble").textContent), "chat opens with a contextual KittyKat message");
 if (typeof sw.generateAssets === "function") sw.generateAssets();
 ok(sw.KK.brief(created.id).tiles.length >= 8, "generate produces assets");
 sw.KK.toggleFinal(created.id, "images/" + sw.KK.brief(created.id).tiles[0] + ".jpg");
