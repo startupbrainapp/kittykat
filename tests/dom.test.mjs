@@ -37,6 +37,9 @@ const w = b.dom.window;
 ok(b.errors.length === 0, "loads with no script errors" + (b.errors[0] ? " -> " + b.errors[0] : ""));
 ok(w.KK.briefs().length === 12, "12 seed briefs loaded");
 ok(w.document.querySelectorAll("#briefList .brief-row").length === w.KK.briefs().filter((x) => x.status !== "shipped" && !x.archived).length, "Active view shows in-flight briefs (shipped excluded)");
+// stat strip is computed live from real brief statuses (not hardcoded)
+ok(w.document.getElementById("statActive").textContent === String(w.KK.briefs().filter((x) => x.status !== "shipped" && !x.archived).length), "Active briefs stat is the live in-flight count");
+ok(w.document.getElementById("statShipped").textContent === String(w.KK.briefs().filter((x) => x.status === "shipped" && !x.archived).length), "Shipped stat is the live shipped count");
 // default order is latest-updated (demo recency), not clustered by status
 ok(/Sakura Camo/.test(w.document.querySelector("#briefList .brief-row .brief-name").textContent), "default order leads with the most-recently-updated brief (not status order)");
 w.openNewBrief();
