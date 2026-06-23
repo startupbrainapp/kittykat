@@ -116,6 +116,12 @@ if (typeof sw.generateAssets === "function") sw.generateAssets();
 ok(sw.KK.brief(created.id).tiles.length >= 8, "generate produces assets");
 sw.KK.toggleFinal(created.id, "images/" + sw.KK.brief(created.id).tiles[0] + ".jpg");
 ok(sw.KK.finalSelects(created.id).length >= 1, "hearting records a final select");
+// Fullscreen view has a working heart that syncs back to the brief's selects
+sw.openFocus(sw.focusList[1]);
+const focusFavBtn = sw.document.getElementById("focusFav");
+const selectsBefore = sw.KK.finalSelects(created.id).length;
+sw.focusFav();
+ok(!!focusFavBtn && sw.KK.finalSelects(created.id).length === selectsBefore + 1, "fullscreen heart favorites the viewed image");
 
 // ---- share.html (client-facing selects view) ----
 console.log("share.html");

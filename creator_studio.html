@@ -137,6 +137,12 @@
   .focus-nav:hover { background: #ececee; }
   .focus-nav.prev { left: 18px; }
   .focus-nav.next { right: 18px; }
+  .focus-fav { position: absolute; right: 18px; top: 14px; z-index: 5; width: 40px; height: 40px; border-radius: 50%; background: #ffffff; border: 1px solid #08090a; color: #08090a; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+  .focus-fav:hover { background: #ececee; }
+  .focus-fav svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+  .focus-fav.on { background: var(--pink); border-color: var(--pink); color: #fff; }
+  .focus-fav.on:hover { background: var(--pink); }
+  .focus-fav.on svg { fill: currentColor; }
   .focus.show { display: flex; }
   .branch-banner { display: none; width: 100%; max-width: 720px; align-items: center; gap: 9px; margin-bottom: 14px; padding: 10px 13px; background: rgba(113,112,255,0.08); border: 1px solid rgba(113,112,255,0.28); border-radius: 8px; font-size: 12px; color: #cdd2ff; letter-spacing: -0.13px; }
   .branch-banner.show { display: flex; }
@@ -303,6 +309,7 @@
         <button class="focus-back" onclick="backToTriage()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7 2L3 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
         <button class="focus-nav prev" onclick="prevAsset()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="focus-nav next" onclick="nextAsset()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="focus-fav" id="focusFav" onclick="focusFav()" title="Favorite"><svg viewBox="0 0 16 16"><path d="M8 14S2.5 10.4 2.5 6.5A3 3 0 0 1 8 4.6 3 3 0 0 1 13.5 6.5C13.5 10.4 8 14 8 14Z"/></svg></button>
         <div class="branch-banner" id="branchBanner">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 3v6M5 9a3 3 0 003 3h3M11 9l2-2-2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           You edited an older version — started a new direction: <b style="margin-left:4px;">White Shirt</b>.
@@ -624,7 +631,19 @@
   function openFocus(src, isBranch) {
     if (src) { focusIndex = Math.max(0, focusList.indexOf(src)); document.getElementById('assetImg').src = src; }
     showFocus();
+    syncFocusFav();
     document.getElementById('branchBanner').classList.toggle('show', !!isBranch);
+  }
+  // Reflect the current image's favorite state on the fullscreen heart.
+  function syncFocusFav() {
+    var btn = document.getElementById('focusFav');
+    if (!btn) return;
+    btn.classList.toggle('on', !!(BRIEF_ID && window.KK && KK.isFinal(BRIEF_ID, focusList[focusIndex])));
+  }
+  // Favorite the image you're viewing fullscreen — syncs grid, selects count, timeline.
+  function focusFav() {
+    if (BRIEF_ID && window.KK) { KK.toggleFinal(BRIEF_ID, focusList[focusIndex]); syncFinalUI(); syncFocusFav(); }
+    else { var btn = document.getElementById('focusFav'); if (btn) btn.classList.toggle('on'); }
   }
   function slideTo(newSrc, dir) {
     var img = document.getElementById('assetImg');
@@ -643,8 +662,8 @@
       img.style.opacity = '1';
     }, 200);
   }
-  function prevAsset() { focusIndex = (focusIndex - 1 + focusList.length) % focusList.length; slideTo(focusList[focusIndex], 'prev'); }
-  function nextAsset() { focusIndex = (focusIndex + 1) % focusList.length; slideTo(focusList[focusIndex], 'next'); }
+  function prevAsset() { focusIndex = (focusIndex - 1 + focusList.length) % focusList.length; slideTo(focusList[focusIndex], 'prev'); syncFocusFav(); }
+  function nextAsset() { focusIndex = (focusIndex + 1) % focusList.length; slideTo(focusList[focusIndex], 'next'); syncFocusFav(); }
   function backToTriage() { setView(lastGrid); }
   function pickVersion(el, isOld) {
     document.querySelectorAll('.versions .vthumb').forEach(v => v.classList.remove('sel'));
