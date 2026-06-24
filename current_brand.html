@@ -126,8 +126,8 @@
   /* ═══ Ingestion Zone ═══ */
   .ingest-section { margin-bottom: 24px; }
   .ingest-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
+    display: flex;
+    flex-direction: column;
     gap: 12px;
   }
 
@@ -200,7 +200,6 @@
     border-radius: 12px;
     padding: 16px 18px;
     display: flex; flex-direction: column;
-    min-height: 220px;
   }
   .sources-header {
     display: flex; align-items: center; gap: 8px;
@@ -211,7 +210,7 @@
   .sources-title { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; flex: 1; }
   .sources-count { font-size: 11px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; letter-spacing: -0.13px; }
 
-  .source-list { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .source-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
   .source-item {
     display: flex; align-items: center; gap: 10px;
     padding: 8px 10px;
@@ -265,8 +264,9 @@
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
   .add-source-btn {
-    margin-top: 8px;
-    padding: 6px 10px;
+    margin-top: 10px;
+    width: 100%;
+    padding: 8px 10px;
     background: transparent;
     border: 1px dashed var(--border-standard);
     border-radius: 6px;
@@ -399,6 +399,16 @@
     letter-spacing: 0.8px;
     text-transform: uppercase;
   }
+
+  /* ═══ Generate CTA ═══ */
+  .generate-cta { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 44px 24px; margin: 32px 0 8px; border: 1px dashed var(--border-standard); border-radius: 12px; text-align: center; }
+  .generate-cta-title { font-size: 16px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.2px; }
+  .generate-cta-desc { font-size: 13px; color: var(--text-tertiary); max-width: 440px; line-height: 1.5; letter-spacing: -0.13px; }
+  .generate-btn { margin-top: 4px; padding: 10px 20px; background: var(--brand-accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 590; letter-spacing: -0.15px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.12s; }
+  .generate-btn:hover { opacity: 0.9; }
+  .generate-btn:disabled { opacity: 0.55; cursor: default; }
+  .gen-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: genspin 0.7s linear infinite; }
+  @keyframes genspin { to { transform: rotate(360deg); } }
 
   /* ═══ Brand Hero ═══ */
   .brand-hero { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 10px; padding: 20px 22px; margin-bottom: 12px; position: relative; }
@@ -664,10 +674,6 @@
       <div class="page-eyebrow">Brand · Source of Truth</div>
       <h1 class="page-title">Define BAPE — once. Use everywhere.</h1>
       <p class="page-desc">Drop everything you have about your brand — guidelines, voice docs, websites, decks. We'll synthesize it into a single definition that every team, agency, and tool reads from. Update once, propagate everywhere.</p>
-      <span class="ref-pill">
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8M3 3l6 6M3 9l6-6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Powers 8 surfaces across KittyKat
-      </span>
 
       <!-- ═══ Completeness banner ═══ -->
       <div class="completeness-panel">
@@ -719,29 +725,6 @@
       <!-- ═══ Ingestion ═══ -->
       <div class="ingest-section">
         <div class="ingest-grid">
-          <!-- Drop zone -->
-          <div class="dropzone">
-            <div class="dropzone-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4l-4 4M12 4l4 4M4 20h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="dropzone-title">Drop your brand here</div>
-            <div class="dropzone-desc">Brand guidelines, voice &amp; tone docs, positioning decks, website URLs, Figma boards — whatever you have. We'll synthesize.</div>
-            <div class="dropzone-actions">
-              <button class="dz-btn primary">Browse files</button>
-              <span class="dz-or">or</span>
-              <button class="dz-btn">Paste URL</button>
-            </div>
-            <div class="dz-formats">
-              <span class="dz-format">PDF</span>
-              <span class="dz-format">DOCX</span>
-              <span class="dz-format">URL</span>
-              <span class="dz-format">Figma</span>
-              <span class="dz-format">Miro</span>
-              <span class="dz-format">Keynote</span>
-              <span class="dz-format">Notion</span>
-            </div>
-          </div>
-
           <!-- Sources -->
           <div class="sources-panel">
             <div class="sources-header">
@@ -782,13 +765,45 @@
                 <span class="source-status processing"><span class="status-dot pulse"></span>62%</span>
               </div>
             </div>
-            <button class="add-source-btn">
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-              Add source
-            </button>
+          </div>
+
+          <!-- Drop zone -->
+          <div class="dropzone">
+            <div class="dropzone-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4l-4 4M12 4l4 4M4 20h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="dropzone-title">Drop your brand here</div>
+            <div class="dropzone-desc">Brand guidelines, voice &amp; tone docs, positioning decks, website URLs, Figma boards — whatever you have. We'll synthesize.</div>
+            <div class="dropzone-actions">
+              <button class="dz-btn primary">Browse files</button>
+              <span class="dz-or">or</span>
+              <button class="dz-btn">Paste URL</button>
+            </div>
+            <div class="dz-formats">
+              <span class="dz-format">PDF</span>
+              <span class="dz-format">DOCX</span>
+              <span class="dz-format">URL</span>
+              <span class="dz-format">Figma</span>
+              <span class="dz-format">Miro</span>
+              <span class="dz-format">Keynote</span>
+              <span class="dz-format">Notion</span>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- ═══ Generate CTA (shown until book is generated) ═══ -->
+      <div class="generate-cta" id="generateCta">
+        <div class="generate-cta-title">Ready to build your brand book</div>
+        <div class="generate-cta-desc">KittyKat will synthesize your connected sources into a single brand definition that every team, agency, and tool reads from.</div>
+        <button class="generate-btn" id="generateBtn" onclick="generateBrandBook()">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.6 4L13 6.2 9.8 9.1 10.6 13 7 10.9 3.4 13l.8-3.9L1 6.2 5.4 5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+          Generate Brand Book
+        </button>
+      </div>
+
+      <!-- ═══ Generated Brand Book (hidden until generated) ═══ -->
+      <div id="brandBook" style="display: none;">
 
       <!-- ═══ Book divider ═══ -->
       <div class="book-divider">
@@ -1102,6 +1117,8 @@
         </div>
       </div>
 
+      </div><!-- /brandBook -->
+
     </div>
   </div>
 </main>
@@ -1117,6 +1134,18 @@
   function toggleCompleteness() {
     document.getElementById('cpExpand').classList.toggle('open');
     document.getElementById('cpChev').classList.toggle('open');
+  }
+
+  function generateBrandBook() {
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="gen-spinner"></span>Synthesizing your brand…';
+    setTimeout(function () {
+      document.getElementById('generateCta').style.display = 'none';
+      const book = document.getElementById('brandBook');
+      book.style.display = 'block';
+      book.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 1400);
   }
 </script>
 
