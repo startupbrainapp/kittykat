@@ -68,7 +68,10 @@
 
   /* Stat strip */
   .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-  .stat-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .stat-card { background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.12s, border-color 0.12s; text-align: left; font-family: inherit; }
+  .stat-card:hover { background: var(--surface-2); border-color: var(--border-standard); }
+  .stat-card.selected { border-color: var(--brand); background: var(--surface-2); }
+  .stat-card.selected .stat-value { color: var(--brand-accent); }
   .stat-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border-standard); display: flex; align-items: center; justify-content: center; color: var(--brand-accent); flex-shrink: 0; }
   .stat-icon.green { color: var(--status-green); }
   .stat-icon.amber { color: var(--status-amber); }
@@ -131,6 +134,20 @@
   }
   .brief-row:hover .row-studio { opacity: 1; }
   .row-studio:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+  /* Completed pill count + "where it went" microinteraction */
+  .pill-count {
+    display: inline-block; margin-left: 6px; min-width: 16px; padding: 1px 5px;
+    border-radius: 9px; background: var(--surface-3); color: var(--text-tertiary);
+    font-size: 11px; font-weight: 590; line-height: 1.4; text-align: center;
+    font-variant-numeric: tabular-nums; transition: background 0.3s, color 0.3s;
+  }
+  @keyframes pillBump { 0% { transform: scale(1); } 35% { transform: scale(1.16); } 100% { transform: scale(1); } }
+  .view-pill.pill-bump { animation: pillBump 0.42s cubic-bezier(0.34,1.56,0.64,1); }
+  .view-pill.pill-bump .pill-count { background: var(--brand); color: #fff; }
+  /* Row leaving the active list when marked completed */
+  @keyframes rowArchiveOut { to { opacity: 0; transform: translateX(14px); } }
+  .brief-row.row-archiving { animation: rowArchiveOut 0.22s ease forwards; pointer-events: none; }
 
   .brief-main { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
   .brief-status-dot {
@@ -377,7 +394,7 @@
 
       <!-- Stat strip -->
       <div class="stat-strip">
-        <div class="stat-card">
+        <button type="button" class="stat-card" data-view="active" onclick="setBriefView('active')">
           <div class="stat-icon">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
           </div>
@@ -385,8 +402,8 @@
             <div class="stat-value" id="statActive">0</div>
             <div class="stat-label">Active briefs</div>
           </div>
-        </div>
-        <div class="stat-card">
+        </button>
+        <button type="button" class="stat-card" data-view="production" onclick="setBriefView('production')">
           <div class="stat-icon">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="5" width="12" height="9" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M6 5V3h4v2" stroke="currentColor" stroke-width="1.2"/></svg>
           </div>
@@ -394,8 +411,8 @@
             <div class="stat-value" id="statProduction">0</div>
             <div class="stat-label">In production</div>
           </div>
-        </div>
-        <div class="stat-card">
+        </button>
+        <button type="button" class="stat-card" data-view="review" onclick="setBriefView('review')">
           <div class="stat-icon amber">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
           </div>
@@ -403,8 +420,8 @@
             <div class="stat-value" id="statReview">0</div>
             <div class="stat-label">Awaiting review</div>
           </div>
-        </div>
-        <div class="stat-card">
+        </button>
+        <button type="button" class="stat-card" data-view="shipped" onclick="setBriefView('shipped')">
           <div class="stat-icon green">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
@@ -412,7 +429,7 @@
             <div class="stat-value" id="statShipped">0</div>
             <div class="stat-label">Shipped</div>
           </div>
-        </div>
+        </button>
       </div>
 
       <!-- Filter row -->
@@ -421,11 +438,8 @@
         <button class="filter-dropdown"><span class="filter-dropdown-label">Campaign</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="filter-dropdown"><span class="filter-dropdown-label">Assignee</span><span>Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div id="viewSeg" style="display:flex; gap:2px; background:var(--surface-1); border:1px solid var(--border-standard); border-radius:7px; padding:2px;">
-          <button class="view-pill" data-view="active" onclick="setBriefView('active')" style="padding:4px 10px; border:none; border-radius:5px; background:var(--surface-3); color:var(--text-primary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Active</button>
-          <button class="view-pill" data-view="shipped" onclick="setBriefView('shipped')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Shipped</button>
-          <button class="view-pill" data-view="favourites" onclick="setBriefView('favourites')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">★ Favourites</button>
-          <button class="view-pill" data-view="archived" onclick="setBriefView('archived')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Archived</button>
           <button class="view-pill" data-view="all" onclick="setBriefView('all')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">All</button>
+          <button class="view-pill" data-view="archived" onclick="setBriefView('archived')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Completed<span class="pill-count" id="completedCount">0</span></button>
         </div>
         <div class="filter-spacer"></div>
         <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Latest updated</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -587,7 +601,7 @@
   function openStudio(id){ if(window.KK) KK.enterStudio(id); window.location.href='creator_studio.html?brief='+encodeURIComponent(id); }
 
   // Render table
-  let briefView = 'active'; // active | favourites | archived | all
+  let briefView = 'active'; // active | shipped | archived | all
   let groupByCampaign = false;
   function toggleGroupByCampaign() {
     groupByCampaign = !groupByCampaign;
@@ -601,10 +615,15 @@
   }
   function setBriefView(v) {
     briefView = v;
+    // Pills (All / Completed) — the two views the stat cards can't express
     document.querySelectorAll('#viewSeg .view-pill').forEach(p => {
       const on = p.getAttribute('data-view') === v;
       p.style.background = on ? 'var(--surface-3)' : 'transparent';
       p.style.color = on ? 'var(--text-primary)' : 'var(--text-tertiary)';
+    });
+    // Stat cards double as the primary filter — highlight the matching one
+    document.querySelectorAll('.stat-card').forEach(c => {
+      c.classList.toggle('selected', c.getAttribute('data-view') === v);
     });
     renderTable();
   }
@@ -612,14 +631,39 @@
     return briefs.filter(b => {
       if (briefView === 'archived') return b.archived;
       if (briefView === 'all') return true;
-      if (b.archived) return false; // active / favourites / shipped hide archived
-      if (briefView === 'favourites') return b.favourite;
+      if (b.archived) return false; // every non-archived view hides completed briefs
       if (briefView === 'shipped') return b.status === 'shipped';
-      return b.status !== 'shipped'; // active = in-flight only (draft / production / review)
+      if (briefView === 'production') return b.status === 'production';
+      if (briefView === 'review') return b.status === 'review';
+      return b.status !== 'shipped'; // active = in-flight (draft / production / review)
     });
   }
-  function toggleBriefFav(id) { KK.toggleFavourite(id); renderTable(); }
-  function archiveBrief(id) { KK.toggleArchive(id); renderTable(); }
+  function updateCompletedCount() {
+    const el = document.getElementById('completedCount');
+    if (el) el.textContent = briefs.filter(b => b.archived).length;
+  }
+  function bumpCompletedPill() {
+    const pill = document.querySelector('#viewSeg [data-view="archived"]');
+    if (!pill) return;
+    pill.classList.remove('pill-bump');
+    void pill.offsetWidth; // restart the animation
+    pill.classList.add('pill-bump');
+    setTimeout(() => pill.classList.remove('pill-bump'), 450);
+  }
+  function archiveBrief(id) {
+    const b = KK.brief(id);
+    const becomingCompleted = b && !b.archived;
+    KK.toggleArchive(id);          // state change is synchronous
+    updateCompletedCount();
+    if (becomingCompleted) bumpCompletedPill();
+    const row = document.querySelector('[data-brief-row="' + id + '"]');
+    if (row && becomingCompleted) {
+      row.classList.add('row-archiving'); // let the row glide out, then re-render
+      setTimeout(renderTable, 240);
+    } else {
+      renderTable();
+    }
+  }
 
   function emptyCampaignRow(c) {
     return `<div class="brief-row" style="cursor:default;">
@@ -643,6 +687,7 @@
     }
     items.sort((a, b) => b.at - a.at);
     list.innerHTML = items.map(it => it.kind === 'brief' ? renderRow(it.b) : emptyCampaignRow(it.name)).join('');
+    updateCompletedCount();
     renderBriefStats();
   }
 
@@ -664,20 +709,20 @@
     const studioBtn = (b.status === 'draft' || b.status === 'production')
       ? `<button class="row-studio" onclick="event.stopPropagation(); openStudio('${b.id}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>`
       : '';
-    const arch = `<button title="${b.archived ? 'Unarchive' : 'Archive — remove from list'}" onclick="event.stopPropagation(); archiveBrief('${b.id}')" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text-quaternary);display:flex;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v3H2z" stroke="currentColor" stroke-width="1.2"/><path d="M3 7v7h10V7M6.5 9.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>`;
+    const arch = `<button title="${b.archived ? 'Reopen — move back to active' : 'Mark completed — remove from list'}" onclick="event.stopPropagation(); archiveBrief('${b.id}')" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text-quaternary);display:flex;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v3H2z" stroke="currentColor" stroke-width="1.2"/><path d="M3 7v7h10V7M6.5 9.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>`;
     return `
-        <div class="brief-row${b.archived ? ' archived' : ''}" onclick="openDrawer('${b.id}')" style="${b.archived ? 'opacity:0.55;' : ''}">
+        <div class="brief-row${b.archived ? ' archived' : ''}" data-brief-row="${b.id}" onclick="openDrawer('${b.id}')" style="${b.archived ? 'opacity:0.55;' : ''}">
           <div class="cell-campaign">${b.campaign}</div>
           <div class="brief-main">
             <div class="brief-status-dot ${b.status}"></div>
             <div class="brief-info">
               <div class="brief-name">${b.name}</div>
             </div>
-            <div class="row-actions" style="margin-left:auto; display:flex; align-items:center; gap:2px;">${star}${arch}</div>
           </div>
           <div><span class="status-pill ${b.status}">${b.statusLabel}</span></div>
           <div class="cell-assignee"><div class="cell-assignee-avatar">${b.initial}</div>${b.assignee}</div>
           <div class="cell-assets${assetsMuted}">${assetsText}</div>
+          <div class="cell-complete" style="display:flex; justify-content:center; align-items:center;">${arch}</div>
           ${studioBtn}
         </div>`;
   }

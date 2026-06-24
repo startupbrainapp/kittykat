@@ -65,11 +65,10 @@ w.document.getElementById("nbTitle").value = "Edited Title";
 w.nbSave("production"); // edit mode updates (no navigation)
 ok(w.KK.brief(created.id).name === "Edited Title", "edit saves via updateBrief");
 
-// favourite + view filter
-w.toggleBriefFav(created.id);
-ok(w.KK.isFavourite(created.id), "favourite toggles on");
-w.setBriefView("favourites");
-ok(w.document.querySelectorAll("#briefList .brief-row").length >= 1, "favourites view lists favourited briefs");
+// each row exposes an archive control in the Completed column (no favourite stars)
+w.setBriefView("active");
+ok(w.document.querySelector("#briefList .cell-complete button"), "Completed column renders an archive control per row");
+ok(!w.toggleBriefFav, "favourite toggle is removed");
 
 // archive hides from active view
 w.archiveBrief(created.id);
@@ -77,10 +76,16 @@ w.setBriefView("active");
 const archivedShows = Array.from(w.document.querySelectorAll("#briefList .brief-name")).some((n) => n.textContent === "Edited Title");
 ok(!archivedShows, "archived brief is hidden from the Active view");
 
-// Active excludes shipped; the Shipped pill lists only shipped
+// Active excludes shipped; the Shipped card lists only shipped
 const shippedExpected = w.KK.briefs().filter((x) => x.status === "shipped" && !x.archived).length;
 w.setBriefView("shipped");
-ok(shippedExpected > 0 && w.document.querySelectorAll("#briefList .brief-row").length === shippedExpected, "Shipped pill lists only shipped briefs");
+ok(shippedExpected > 0 && w.document.querySelectorAll("#briefList .brief-row").length === shippedExpected, "Shipped card lists only shipped briefs");
+ok(w.document.querySelector('.stat-card[data-view="shipped"]').classList.contains("selected"), "selected stat card is highlighted");
+
+// Stat cards double as the stage filter (In production isolates production briefs)
+const prodExpected = w.KK.briefs().filter((x) => x.status === "production" && !x.archived).length;
+w.setBriefView("production");
+ok(w.document.querySelectorAll("#briefList .brief-row").length === prodExpected, "In production card filters to production briefs");
 w.setBriefView("active");
 const activeExpected = w.KK.briefs().filter((x) => x.status !== "shipped" && !x.archived).length;
 ok(w.document.querySelectorAll("#briefList .brief-row").length === activeExpected, "Active view excludes shipped briefs");
