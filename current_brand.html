@@ -193,24 +193,12 @@
     letter-spacing: -0.13px;
   }
 
-  /* Sources panel */
-  .sources-panel {
-    background: var(--surface-1);
-    border: 1px solid var(--border-standard);
-    border-radius: 12px;
-    padding: 16px 18px;
-    display: flex; flex-direction: column;
-  }
-  .sources-header {
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 14px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-  .sources-title { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.13px; flex: 1; }
+  /* Sources (inside completeness banner) */
   .sources-count { font-size: 11px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; letter-spacing: -0.13px; }
-
-  .source-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+  .source-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; margin-top: 10px; }
+  .cp-sources { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-subtle); }
+  .cp-sources-label { font-size: 10px; font-weight: 510; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .cp-sources-count { margin-right: 2px; }
   .source-item {
     display: flex; align-items: center; gap: 10px;
     padding: 8px 10px;
@@ -338,7 +326,7 @@
     overflow: hidden;
     transition: max-height 0.25s ease;
   }
-  .cp-expand.open { max-height: 280px; }
+  .cp-expand.open { max-height: 660px; }
   .cp-expand-inner {
     padding: 0 14px 14px;
     border-top: 1px solid rgba(16,185,129,0.15);
@@ -401,12 +389,11 @@
   }
 
   /* ═══ Generate CTA ═══ */
-  .generate-cta { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 44px 24px; margin: 32px 0 8px; border: 1px dashed var(--border-standard); border-radius: 12px; text-align: center; }
-  .generate-cta-title { font-size: 16px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.2px; }
-  .generate-cta-desc { font-size: 13px; color: var(--text-tertiary); max-width: 440px; line-height: 1.5; letter-spacing: -0.13px; }
-  .generate-btn { margin-top: 4px; padding: 10px 20px; background: var(--brand-accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 590; letter-spacing: -0.15px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.12s; }
-  .generate-btn:hover { opacity: 0.9; }
-  .generate-btn:disabled { opacity: 0.55; cursor: default; }
+  .generate-btn { width: 100%; margin: 32px 0 8px; padding: 16px 20px; background: var(--brand-accent); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 590; letter-spacing: -0.15px; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; opacity: 0; transform: translateY(6px); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .generate-btn.visible { opacity: 1; transform: none; }
+  .generate-btn.visible:hover { opacity: 0.9; }
+  .generate-btn:disabled { opacity: 0.7; cursor: default; }
+  .source-item.clickable { cursor: pointer; }
   .gen-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: genspin 0.7s linear infinite; }
   @keyframes genspin { to { transform: rotate(360deg); } }
 
@@ -681,8 +668,9 @@
           <div class="cp-score-circle">78%</div>
           <div class="cp-meta">
             <div class="cp-title">Brand definition is 78% complete</div>
-            <div class="cp-subtitle">Strong enough to power downstream tools. Click to see what's left.</div>
+            <div class="cp-subtitle">Strong enough to power downstream tools. Click to see what's left and your sources.</div>
           </div>
+          <span class="sources-count cp-sources-count">4 of 6 ready</span>
           <svg class="cp-chevron" id="cpChev" width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M3.5 5l3.5 3.5L10.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -718,6 +706,44 @@
                 <span class="cp-check-action">Upload</span>
               </div>
             </div>
+
+            <div class="cp-sources">
+              <div class="cp-sources-label">Connected Sources</div>
+              <div class="source-list">
+                <div class="source-item">
+                  <div class="source-icon">PDF</div>
+                  <div class="source-info">
+                    <div class="source-name">BAPE-Brand-Book-2024.pdf</div>
+                    <div class="source-meta">28 pages · 12.4 MB · uploaded Nov 15</div>
+                  </div>
+                  <span class="source-status ready"><span class="status-dot"></span>Ready</span>
+                </div>
+                <div class="source-item">
+                  <div class="source-icon">DOC</div>
+                  <div class="source-info">
+                    <div class="source-name">Voice-Guide-v3.docx</div>
+                    <div class="source-meta">2.1 MB · uploaded Nov 12</div>
+                  </div>
+                  <span class="source-status ready"><span class="status-dot"></span>Ready</span>
+                </div>
+                <div class="source-item">
+                  <div class="source-icon">URL</div>
+                  <div class="source-info">
+                    <div class="source-name">us.bape.com/about</div>
+                    <div class="source-meta">Crawled 127 pages · 2h ago</div>
+                  </div>
+                  <span class="source-status ready"><span class="status-dot"></span>Ready</span>
+                </div>
+                <div class="source-item">
+                  <div class="source-icon">FIG</div>
+                  <div class="source-info">
+                    <div class="source-name">Brand Board · Figma</div>
+                    <div class="source-meta">Syncing 6 frames</div>
+                  </div>
+                  <span class="source-status processing"><span class="status-dot pulse"></span>62%</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -725,48 +751,6 @@
       <!-- ═══ Ingestion ═══ -->
       <div class="ingest-section">
         <div class="ingest-grid">
-          <!-- Sources -->
-          <div class="sources-panel">
-            <div class="sources-header">
-              <span class="sources-title">Connected Sources</span>
-              <span class="sources-count">4 of 6 ready</span>
-            </div>
-            <div class="source-list">
-              <div class="source-item">
-                <div class="source-icon">PDF</div>
-                <div class="source-info">
-                  <div class="source-name">BAPE-Brand-Book-2024.pdf</div>
-                  <div class="source-meta">28 pages · 12.4 MB · uploaded Nov 15</div>
-                </div>
-                <span class="source-status ready"><span class="status-dot"></span>Ready</span>
-              </div>
-              <div class="source-item">
-                <div class="source-icon">DOC</div>
-                <div class="source-info">
-                  <div class="source-name">Voice-Guide-v3.docx</div>
-                  <div class="source-meta">2.1 MB · uploaded Nov 12</div>
-                </div>
-                <span class="source-status ready"><span class="status-dot"></span>Ready</span>
-              </div>
-              <div class="source-item">
-                <div class="source-icon">URL</div>
-                <div class="source-info">
-                  <div class="source-name">us.bape.com/about</div>
-                  <div class="source-meta">Crawled 127 pages · 2h ago</div>
-                </div>
-                <span class="source-status ready"><span class="status-dot"></span>Ready</span>
-              </div>
-              <div class="source-item">
-                <div class="source-icon">FIG</div>
-                <div class="source-info">
-                  <div class="source-name">Brand Board · Figma</div>
-                  <div class="source-meta">Syncing 6 frames</div>
-                </div>
-                <span class="source-status processing"><span class="status-dot pulse"></span>62%</span>
-              </div>
-            </div>
-          </div>
-
           <!-- Drop zone -->
           <div class="dropzone">
             <div class="dropzone-icon">
@@ -775,9 +759,9 @@
             <div class="dropzone-title">Drop your brand here</div>
             <div class="dropzone-desc">Brand guidelines, voice &amp; tone docs, positioning decks, website URLs, Figma boards — whatever you have. We'll synthesize.</div>
             <div class="dropzone-actions">
-              <button class="dz-btn primary">Browse files</button>
+              <button class="dz-btn primary" onclick="addBrandSource('file')">Browse files</button>
               <span class="dz-or">or</span>
-              <button class="dz-btn">Paste URL</button>
+              <button class="dz-btn" onclick="addBrandSource('url')">Paste URL</button>
             </div>
             <div class="dz-formats">
               <span class="dz-format">PDF</span>
@@ -792,15 +776,11 @@
         </div>
       </div>
 
-      <!-- ═══ Generate CTA (shown until book is generated) ═══ -->
-      <div class="generate-cta" id="generateCta">
-        <div class="generate-cta-title">Ready to build your brand book</div>
-        <div class="generate-cta-desc">KittyKat will synthesize your connected sources into a single brand definition that every team, agency, and tool reads from.</div>
-        <button class="generate-btn" id="generateBtn" onclick="generateBrandBook()">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.6 4L13 6.2 9.8 9.1 10.6 13 7 10.9 3.4 13l.8-3.9L1 6.2 5.4 5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-          Generate Brand Book
-        </button>
-      </div>
+      <!-- ═══ Generate CTA (shown once there's enough info; hidden after generating) ═══ -->
+      <button class="generate-btn" id="generateBtn" style="display: none;" onclick="generateBrandBook()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.6 4L13 6.2 9.8 9.1 10.6 13 7 10.9 3.4 13l.8-3.9L1 6.2 5.4 5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        Generate Brand Book
+      </button>
 
       <!-- ═══ Generated Brand Book (hidden until generated) ═══ -->
       <div id="brandBook" style="display: none;">
@@ -1136,17 +1116,97 @@
     document.getElementById('cpChev').classList.toggle('open');
   }
 
+  function openSources() {
+    document.getElementById('cpExpand').classList.add('open');
+    document.getElementById('cpChev').classList.add('open');
+  }
+
   function generateBrandBook() {
     const btn = document.getElementById('generateBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="gen-spinner"></span>Synthesizing your brand…';
     setTimeout(function () {
-      document.getElementById('generateCta').style.display = 'none';
+      btn.style.display = 'none';
       const book = document.getElementById('brandBook');
       book.style.display = 'block';
       book.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 1400);
   }
+
+  // ── Generate gating: button appears only once sources are ready ──
+  function refreshSourceGate() {
+    const items = document.querySelectorAll('.source-item');
+    let ready = 0, processing = 0;
+    items.forEach(function (it) {
+      const st = it.querySelector('.source-status');
+      if (!st) return;
+      if (st.classList.contains('ready')) ready++;
+      else if (st.classList.contains('processing')) processing++;
+    });
+    const countEl = document.querySelector('.sources-count');
+    if (countEl) countEl.textContent = ready + ' of ' + items.length + ' ready';
+
+    const btn = document.getElementById('generateBtn');
+    const book = document.getElementById('brandBook');
+    const alreadyGenerated = book && book.style.display === 'block';
+    if (!btn || alreadyGenerated) return;
+
+    // "Enough info" = at least one source ready and none still processing.
+    const enough = ready >= 1 && processing === 0;
+    if (enough) {
+      btn.style.display = 'flex';
+      requestAnimationFrame(function () { btn.classList.add('visible'); });
+    } else {
+      btn.classList.remove('visible');
+      btn.style.display = 'none';
+    }
+  }
+
+  function finishSync(item) {
+    const st = item.querySelector('.source-status');
+    if (!st || !st.classList.contains('processing')) return;
+    st.classList.remove('processing');
+    st.classList.add('ready');
+    st.innerHTML = '<span class="status-dot"></span>Ready';
+    const meta = item.querySelector('.source-meta');
+    if (meta) meta.textContent = 'Synced · just now';
+    item.classList.remove('clickable');
+    refreshSourceGate();
+  }
+
+  let sourceSeq = 0;
+  function addBrandSource(kind) {
+    const list = document.querySelector('.source-list');
+    if (!list) return;
+    sourceSeq++;
+    const isUrl = kind === 'url';
+    const item = document.createElement('div');
+    item.className = 'source-item clickable';
+    item.innerHTML =
+      '<div class="source-icon">' + (isUrl ? 'URL' : 'DOC') + '</div>' +
+      '<div class="source-info">' +
+        '<div class="source-name">' + (isUrl ? 'pasted-link-' + sourceSeq : 'upload-' + sourceSeq + '.pdf') + '</div>' +
+        '<div class="source-meta">Uploaded · just now</div>' +
+      '</div>' +
+      '<span class="source-status processing"><span class="status-dot pulse"></span>Syncing</span>';
+    list.appendChild(item);
+    item.onclick = function () { finishSync(item); };
+    openSources();
+    refreshSourceGate();
+    setTimeout(function () { finishSync(item); }, 1800);
+  }
+
+  // init: make any in-progress source clickable-to-finish, run the gate,
+  // and let the pre-loaded syncing source finish shortly after load.
+  document.querySelectorAll('.source-status.processing').forEach(function (st) {
+    const item = st.closest('.source-item');
+    if (item) { item.classList.add('clickable'); item.onclick = function () { finishSync(item); }; }
+  });
+  refreshSourceGate();
+  setTimeout(function () {
+    const syncing = document.querySelector('.source-status.processing');
+    if (syncing) finishSync(syncing.closest('.source-item'));
+  }, 2500);
 </script>
 
 <script src="data.js"></script>
