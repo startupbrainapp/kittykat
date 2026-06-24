@@ -88,6 +88,22 @@
   .filter-spacer { flex: 1; }
   .filter-count { font-size: 12px; color: var(--text-tertiary); font-weight: 510; letter-spacing: -0.13px; }
 
+  /* Filter dropdown menus */
+  .filter-menu {
+    position: fixed; z-index: 200; min-width: 160px; max-height: 280px; overflow-y: auto;
+    background: var(--surface-1); border: 1px solid var(--border-standard); border-radius: 8px;
+    padding: 4px; box-shadow: 0 10px 28px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 1px;
+  }
+  .filter-menu-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 7px 10px; border: none; border-radius: 5px; background: transparent;
+    color: var(--text-secondary); font-size: 12px; font-weight: 510; letter-spacing: -0.13px;
+    cursor: pointer; font-family: inherit; text-align: left; white-space: nowrap;
+  }
+  .filter-menu-item:hover { background: var(--surface-3); color: var(--text-primary); }
+  .filter-menu-item.active { color: var(--text-primary); }
+  .filter-menu-item.active::after { content: '✓'; color: var(--brand-accent); font-size: 11px; }
+
   /* Table header */
   .table-header {
     display: grid;
@@ -434,15 +450,14 @@
 
       <!-- Filter row -->
       <div class="filter-bar">
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Status</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Campaign</span><span>All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Assignee</span><span>Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="openCampaignFilter(this)"><span class="filter-dropdown-label">Campaign</span><span id="campaignVal">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="openAssigneeFilter(this)"><span class="filter-dropdown-label">Assignee</span><span id="assigneeVal">Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div id="viewSeg" style="display:flex; gap:2px; background:var(--surface-1); border:1px solid var(--border-standard); border-radius:7px; padding:2px;">
           <button class="view-pill" data-view="all" onclick="setBriefView('all')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">All</button>
           <button class="view-pill" data-view="archived" onclick="setBriefView('archived')" style="padding:4px 10px; border:none; border-radius:5px; background:transparent; color:var(--text-tertiary); font-size:12px; font-weight:510; cursor:pointer; font-family:inherit;">Completed<span class="pill-count" id="completedCount">0</span></button>
         </div>
         <div class="filter-spacer"></div>
-        <button class="filter-dropdown"><span class="filter-dropdown-label">Sort</span><span>Latest updated</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="openSortFilter(this)"><span class="filter-dropdown-label">Sort</span><span id="sortVal">Latest updated</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <span class="filter-count">12 briefs</span>
       </div>
 
@@ -601,8 +616,69 @@
   function openStudio(id){ if(window.KK) KK.enterStudio(id); window.location.href='creator_studio.html?brief='+encodeURIComponent(id); }
 
   // Render table
-  let briefView = 'active'; // active | shipped | archived | all
+  let briefView = 'active'; // active | production | review | shipped | archived | all
+  let filterCampaign = 'All';   // 'All' or a campaign name
+  let filterAssignee = 'Anyone'; // 'Anyone' or an assignee name
+  let sortMode = 'updated';     // updated | name | assets
   let groupByCampaign = false;
+
+  // --- Functional filter dropdowns (Campaign / Assignee / Sort) ---
+  function closeFilterMenu() { const m = document.getElementById('activeFilterMenu'); if (m) m.remove(); }
+  function openFilterMenu(btn, options, isActive, onPick) {
+    const open = document.getElementById('activeFilterMenu');
+    closeFilterMenu();
+    if (open && open.dataset.owner === btn.id) return; // toggle off if same button
+    const menu = document.createElement('div');
+    menu.className = 'filter-menu'; menu.id = 'activeFilterMenu'; menu.dataset.owner = btn.id || '';
+    options.forEach(opt => {
+      const item = document.createElement('button');
+      item.className = 'filter-menu-item' + (isActive(opt) ? ' active' : '');
+      item.textContent = opt.label;
+      item.onclick = (e) => { e.stopPropagation(); closeFilterMenu(); onPick(opt); };
+      menu.appendChild(item);
+    });
+    const r = btn.getBoundingClientRect();
+    menu.style.top = (r.bottom + 6) + 'px';
+    menu.style.left = r.left + 'px';
+    document.body.appendChild(menu);
+    setTimeout(() => document.addEventListener('mousedown', closeFilterMenu, { once: true }), 0);
+  }
+  function uniqueAssignees() {
+    const seen = [];
+    briefs.forEach(b => { if (b.assignee && b.assignee !== 'Unassigned' && seen.indexOf(b.assignee) < 0) seen.push(b.assignee); });
+    return seen;
+  }
+  function openCampaignFilter(btn) {
+    btn.id = btn.id || 'fCampaign';
+    const opts = [{ label: 'All', value: 'All' }].concat(KK.campaigns().map(c => ({ label: c, value: c })));
+    openFilterMenu(btn, opts, o => o.value === filterCampaign, o => {
+      filterCampaign = o.value;
+      document.getElementById('campaignVal').textContent = o.value === 'All' ? 'All' : o.label;
+      renderTable();
+    });
+  }
+  function openAssigneeFilter(btn) {
+    btn.id = btn.id || 'fAssignee';
+    const opts = [{ label: 'Anyone', value: 'Anyone' }].concat(uniqueAssignees().map(a => ({ label: a, value: a })));
+    openFilterMenu(btn, opts, o => o.value === filterAssignee, o => {
+      filterAssignee = o.value;
+      document.getElementById('assigneeVal').textContent = o.label;
+      renderTable();
+    });
+  }
+  function openSortFilter(btn) {
+    btn.id = btn.id || 'fSort';
+    const opts = [
+      { label: 'Latest updated', value: 'updated' },
+      { label: 'Name A–Z', value: 'name' },
+      { label: 'Most assets', value: 'assets' },
+    ];
+    openFilterMenu(btn, opts, o => o.value === sortMode, o => {
+      sortMode = o.value;
+      document.getElementById('sortVal').textContent = o.label;
+      renderTable();
+    });
+  }
   function toggleGroupByCampaign() {
     groupByCampaign = !groupByCampaign;
     const btn = document.getElementById('groupToggle');
@@ -629,13 +705,17 @@
   }
   function visibleBriefs() {
     return briefs.filter(b => {
-      if (briefView === 'archived') return b.archived;
-      if (briefView === 'all') return true;
-      if (b.archived) return false; // every non-archived view hides completed briefs
-      if (briefView === 'shipped') return b.status === 'shipped';
-      if (briefView === 'production') return b.status === 'production';
-      if (briefView === 'review') return b.status === 'review';
-      return b.status !== 'shipped'; // active = in-flight (draft / production / review)
+      if (briefView === 'archived') { if (!b.archived) return false; }
+      else if (briefView === 'all') { /* no status gate */ }
+      else if (b.archived) return false; // every non-archived view hides completed briefs
+      else if (briefView === 'shipped') { if (b.status !== 'shipped') return false; }
+      else if (briefView === 'production') { if (b.status !== 'production') return false; }
+      else if (briefView === 'review') { if (b.status !== 'review') return false; }
+      else if (b.status === 'shipped') return false; // active = in-flight (draft / production / review)
+      // Campaign + Assignee dropdowns
+      if (filterCampaign !== 'All' && b.campaign !== filterCampaign) return false;
+      if (filterAssignee !== 'Anyone' && b.assignee !== filterAssignee) return false;
+      return true;
     });
   }
   function updateCompletedCount() {
@@ -680,12 +760,21 @@
     // Merge briefs + brief-less campaigns into one list, sorted by latest updated (newest first),
     // so a just-created campaign or just-edited brief lands at the top.
     const items = rows.map(b => ({ kind: 'brief', at: b.updatedAt || 0, b: b }));
-    if (briefView === 'active' || briefView === 'all') {
+    // Brief-less campaigns only surface in the unfiltered Active / All views
+    const noSecondaryFilter = filterCampaign === 'All' && filterAssignee === 'Anyone';
+    if ((briefView === 'active' || briefView === 'all') && noSecondaryFilter) {
       const briefed = {};
       briefs.forEach(b => { if (b.campaign) briefed[b.campaign] = 1; });
       KK.campaigns().forEach(c => { if (!briefed[c]) items.push({ kind: 'campaign', at: KK.campaignUpdatedAt(c) || 0, name: c }); });
     }
-    items.sort((a, b) => b.at - a.at);
+    if (sortMode === 'name') {
+      items.sort((a, b) => (a.kind === 'brief' ? a.b.name : a.name).localeCompare(b.kind === 'brief' ? b.b.name : b.name));
+    } else if (sortMode === 'assets') {
+      const tot = it => it.kind === 'brief' ? (it.b.assetsTotal || 0) : -1;
+      items.sort((a, b) => tot(b) - tot(a));
+    } else {
+      items.sort((a, b) => b.at - a.at);
+    }
     list.innerHTML = items.map(it => it.kind === 'brief' ? renderRow(it.b) : emptyCampaignRow(it.name)).join('');
     updateCompletedCount();
     renderBriefStats();

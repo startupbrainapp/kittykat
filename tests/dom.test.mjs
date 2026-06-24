@@ -91,6 +91,32 @@ const activeExpected = w.KK.briefs().filter((x) => x.status !== "shipped" && !x.
 ok(w.document.querySelectorAll("#briefList .brief-row").length === activeExpected, "Active view excludes shipped briefs");
 w.setBriefView("active"); // reset view
 
+// Redundant Status dropdown is gone (stat cards are the status filter now)
+ok(!/>Status</.test(w.document.querySelector(".filter-bar").innerHTML), "redundant Status dropdown removed");
+
+// Campaign dropdown is functional: opens a menu and narrows the list
+const campBtn = [...w.document.querySelectorAll(".filter-dropdown")].find((b) => /Campaign/.test(b.textContent));
+campBtn.click();
+const campMenu = w.document.getElementById("activeFilterMenu");
+ok(campMenu && campMenu.querySelectorAll(".filter-menu-item").length > 1, "Campaign dropdown opens with options");
+const camp = "SS26 · Hana Matsuri";
+[...campMenu.querySelectorAll(".filter-menu-item")].find((i) => i.textContent === camp).click();
+const campExpected = w.KK.briefs().filter((x) => x.campaign === camp && x.status !== "shipped" && !x.archived).length;
+ok(campExpected > 0 && w.document.querySelectorAll("#briefList .brief-row").length === campExpected, "Campaign filter narrows the list");
+// reset campaign filter back to All
+campBtn.click();
+[...w.document.getElementById("activeFilterMenu").querySelectorAll(".filter-menu-item")].find((i) => i.textContent === "All").click();
+
+// Sort dropdown is functional: Name A–Z orders rows alphabetically
+const sortBtn = [...w.document.querySelectorAll(".filter-dropdown")].find((b) => /Sort/.test(b.textContent));
+sortBtn.click();
+[...w.document.getElementById("activeFilterMenu").querySelectorAll(".filter-menu-item")].find((i) => i.textContent === "Name A–Z").click();
+const names = [...w.document.querySelectorAll("#briefList .brief-name")].map((n) => n.textContent);
+ok(names.length > 1 && names.join("|") === [...names].sort((a, b) => a.localeCompare(b)).join("|"), "Sort Name A–Z orders rows alphabetically");
+// reset sort
+sortBtn.click();
+[...w.document.getElementById("activeFilterMenu").querySelectorAll(".filter-menu-item")].find((i) => i.textContent === "Latest updated").click();
+
 // Create a campaign on its own; Campaign is the leading column (no grouping headers)
 ok(typeof w.newCampaign === "function" && [...w.document.querySelectorAll(".topbar-right button")].some((b) => /New campaign/.test(b.textContent)), "standalone New campaign action exists");
 w.KK.addCampaign("Standalone Test Camp");
