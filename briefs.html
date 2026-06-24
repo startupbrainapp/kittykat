@@ -88,7 +88,7 @@
   /* Table header */
   .table-header {
     display: grid;
-    grid-template-columns: 180px 1fr 100px 110px 70px;
+    grid-template-columns: 180px 1fr 100px 110px 70px 80px;
     gap: 14px;
     padding: 8px 16px;
     border-bottom: 1px solid var(--border-subtle);
@@ -103,7 +103,7 @@
   .brief-list { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
   .brief-row {
     display: grid;
-    grid-template-columns: 180px 1fr 100px 110px 70px;
+    grid-template-columns: 180px 1fr 100px 110px 70px 80px;
     gap: 14px;
     padding: 14px 16px;
     background: transparent;
@@ -121,7 +121,7 @@
     border-bottom-color: var(--border-standard);
   }
   .row-studio {
-    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    position: absolute; right: 90px; top: 50%; transform: translateY(-50%);
     display: inline-flex; align-items: center; gap: 6px;
     padding: 6px 12px; border-radius: 7px;
     background: var(--brand); color: #fff; border: 1px solid var(--brand);
@@ -439,6 +439,7 @@
         <div>Status</div>
         <div>Assignee</div>
         <div class="th-right">Assets</div>
+        <div style="text-align:center;">Completed</div>
       </div>
       <div class="brief-list" id="briefList"></div>
     </div>
@@ -663,8 +664,7 @@
     const studioBtn = (b.status === 'draft' || b.status === 'production')
       ? `<button class="row-studio" onclick="event.stopPropagation(); openStudio('${b.id}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>`
       : '';
-    const star = `<button title="Favourite" onclick="event.stopPropagation(); toggleBriefFav('${b.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:2px;color:${b.favourite ? 'var(--brand-accent)' : 'var(--text-quaternary)'};">${b.favourite ? '★' : '☆'}</button>`;
-    const arch = `<button title="${b.archived ? 'Unarchive' : 'Archive'}" onclick="event.stopPropagation(); archiveBrief('${b.id}')" style="background:none;border:none;cursor:pointer;padding:2px;color:var(--text-quaternary);display:flex;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v3H2z" stroke="currentColor" stroke-width="1.2"/><path d="M3 7v7h10V7M6.5 9.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>`;
+    const arch = `<button title="${b.archived ? 'Unarchive' : 'Archive — remove from list'}" onclick="event.stopPropagation(); archiveBrief('${b.id}')" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text-quaternary);display:flex;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v3H2z" stroke="currentColor" stroke-width="1.2"/><path d="M3 7v7h10V7M6.5 9.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>`;
     return `
         <div class="brief-row${b.archived ? ' archived' : ''}" onclick="openDrawer('${b.id}')" style="${b.archived ? 'opacity:0.55;' : ''}">
           <div class="cell-campaign">${b.campaign}</div>

@@ -149,14 +149,15 @@ ok(!!focusFavBtn && sw.KK.finalSelects(created.id).length === selectsBefore + 1,
 // Environment / Person / Products controls save real per-brief settings
 sw.backToTriage();
 sw.openBlock("environment");
-sw.addRef("environment"); // tap + → opens chooser, adds nothing yet
-ok(sw.document.getElementById("refPicker").classList.contains("show") && sw.blockDraft.environment.refs.length === 0, "tapping + opens a chooser without auto-adding a reference");
-const firstChoice = sw.document.querySelector("#pickerGrid .picker-tile img").getAttribute("src");
-sw.pickItem(firstChoice);
+sw.addRef("environment"); // tap + → opens the native upload (no invented catalog)
+ok(sw.blockDraft.environment.refs.length === 0 && sw.document.getElementById("refPicker") === null, "tapping + uploads your own image — no invented catalog/chooser");
+const upFile = new sw.File([Buffer.from("img-bytes")], "moodboard.png", { type: "image/png" });
+sw.handlePickerFile({ target: { files: [upFile], value: "x" } });
+await new Promise((r) => setTimeout(r, 30)); // FileReader is async
 sw.document.getElementById("envDesc").value = "Neon Tokyo alley, rain-slick.";
 sw.confirmBlock();
 const savedEnv = sw.KK.getBlocks(created.id).environment;
-ok(savedEnv && savedEnv.refs.length === 1 && savedEnv.refs[0] === firstChoice && /Neon Tokyo/.test(savedEnv.desc), "Environment panel saves the chosen reference + description to the brief");
+ok(savedEnv && savedEnv.refs.length === 1 && /^data:image/.test(savedEnv.refs[0]) && /Neon Tokyo/.test(savedEnv.desc), "Environment saves the uploaded reference + description to the brief");
 ok(sw.document.getElementById("pill-environment").classList.contains("set"), "a configured control marks its pill as set");
 sw.generateAssets();
 ok(sw.KK.history(created.id).slice(-1)[0].scene === savedEnv.desc, "generation records the locked scene that fed it");
