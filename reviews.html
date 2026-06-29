@@ -272,12 +272,7 @@
       <span class="bc-sep">/</span>
       <span class="bc-current">Reviews</span>
     </div>
-    <div class="topbar-right">
-      <button class="btn btn-ghost" onclick="markAllRead()">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Mark all read
-      </button>
-    </div>
+    <div class="topbar-right"></div>
   </div>
 
   <div class="content">
@@ -430,10 +425,6 @@
     var el = document.getElementById(f.id);
     if (el) el.textContent = f.opts[f.i];
     renderList();
-  }
-  function markAllRead() {
-    var p = document.getElementById('statPending'); if (p) p.textContent = '0';
-    var nb = document.querySelector('.nav-badge'); if (nb) nb.textContent = '0';
   }
   function renderList() {
     const list = buildList();

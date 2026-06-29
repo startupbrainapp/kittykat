@@ -208,14 +208,14 @@
 
       <div class="page-eyebrow">Settings &middot; Presets</div>
       <div class="page-title">Presets</div>
-      <div class="page-desc">Manage reusable templates, export formats, audience segments, and scoring weights across your campaigns.</div>
+      <div class="page-desc">Manage reusable templates and export formats across your campaigns.</div>
 
       <!-- Brief Templates -->
       <div class="section">
         <div class="section-header">
           <div>
-            <div class="section-title">Brief Templates</div>
-            <div class="section-subtitle">Reusable brief structures to speed up campaign creation</div>
+            <div class="section-title">Image Job Templates</div>
+            <div class="section-subtitle">Reusable image-job structures to speed up creation</div>
           </div>
           <button class="btn btn-ghost btn-sm">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -336,102 +336,6 @@
             </div>
             <div class="export-card-specs">1000x1500 &middot; PNG</div>
           </div>
-        </div>
-      </div>
-
-      <!-- Audience Presets -->
-      <div class="section">
-        <div class="section-header">
-          <div>
-            <div class="section-title">Audience Presets</div>
-            <div class="section-subtitle">Saved audience segments for quick campaign targeting</div>
-          </div>
-          <button class="btn btn-ghost btn-sm">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            New Audience
-          </button>
-        </div>
-        <div class="audience-table">
-          <div class="audience-header">
-            <div>Name</div>
-            <div>Age / Region</div>
-            <div>Interests</div>
-            <div>Usage</div>
-          </div>
-          <div class="audience-list">
-            <div class="audience-row">
-              <div class="audience-name">Gen Z Streetwear</div>
-              <div class="audience-detail">18-24, US+JP</div>
-              <div class="audience-detail">Streetwear interest</div>
-              <div class="audience-usage">Used in 8 campaigns</div>
-            </div>
-            <div class="audience-row">
-              <div class="audience-name">Millennial Collectors</div>
-              <div class="audience-detail">25-34, Global</div>
-              <div class="audience-detail">Sneaker/archive interest</div>
-              <div class="audience-usage">Used in 5 campaigns</div>
-            </div>
-            <div class="audience-row">
-              <div class="audience-name">JP Hypebeast</div>
-              <div class="audience-detail">18-30, Japan only</div>
-              <div class="audience-detail">Harajuku/Shibuya</div>
-              <div class="audience-usage">Used in 4 campaigns</div>
-            </div>
-            <div class="audience-row">
-              <div class="audience-name">UK Skate</div>
-              <div class="audience-detail">16-28, UK</div>
-              <div class="audience-detail">Skateboarding/street</div>
-              <div class="audience-usage">Used in 3 campaigns</div>
-            </div>
-            <div class="audience-row">
-              <div class="audience-name">Luxury Crossover</div>
-              <div class="audience-detail">28-45, US+EU</div>
-              <div class="audience-detail">Designer/luxury</div>
-              <div class="audience-usage">Used in 2 campaigns</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Scoring Weights -->
-      <div class="section">
-        <div class="section-header">
-          <div>
-            <div class="section-title">Scoring Weights</div>
-            <div class="section-subtitle">How opportunities are ranked across dimensions</div>
-          </div>
-          <button class="btn btn-ghost btn-sm">Edit Weights</button>
-        </div>
-        <div class="weights-card">
-          <div class="weight-row">
-            <div class="weight-label">Brand DNA fit</div>
-            <div class="weight-bar-track">
-              <div class="weight-bar-fill" style="width: 30%; background: var(--brand-accent);"></div>
-            </div>
-            <div class="weight-value">30%</div>
-          </div>
-          <div class="weight-row">
-            <div class="weight-label">Audience overlap</div>
-            <div class="weight-bar-track">
-              <div class="weight-bar-fill" style="width: 25%; background: var(--status-green);"></div>
-            </div>
-            <div class="weight-value">25%</div>
-          </div>
-          <div class="weight-row">
-            <div class="weight-label">Competitor whitespace</div>
-            <div class="weight-bar-track">
-              <div class="weight-bar-fill" style="width: 25%; background: var(--status-amber);"></div>
-            </div>
-            <div class="weight-value">25%</div>
-          </div>
-          <div class="weight-row">
-            <div class="weight-label">Trending signal</div>
-            <div class="weight-bar-track">
-              <div class="weight-bar-fill" style="width: 20%; background: var(--status-red);"></div>
-            </div>
-            <div class="weight-value">20%</div>
-          </div>
-          <div class="weights-note">These weights determine how opportunities are ranked</div>
         </div>
       </div>
 
@@ -582,54 +486,6 @@
     if (confirm('Delete export format "' + (f ? f.name : '') + '"?')) { A.removeFormat(id); renderFormats(); }
   });
 
-  /* ---------- 3. Audience Presets ---------- */
-  var audienceList = document.querySelector('.audience-list');
-  function renderAudiences() {
-    audienceList.innerHTML = A.audiences().map(function (a) {
-      return '<div class="audience-row" data-id="' + esc(a.id) + '">' +
-        '<div class="audience-name">' + esc(a.name) + '</div>' +
-        '<div class="audience-detail">' + esc(a.region) + '</div>' +
-        '<div class="audience-detail">' + esc(a.interests) + '</div>' +
-        '<div class="audience-usage" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
-          '<span>Used in ' + (a.used || 0) + ' campaigns</span>' +
-          '<button class="btn btn-ghost btn-sm" data-act="del">' + deleteSvg + '</button>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  }
-  audienceList.addEventListener('click', function (e) {
-    var btn = e.target.closest('button[data-act="del"]');
-    if (!btn) return;
-    var id = btn.closest('.audience-row').getAttribute('data-id');
-    var a = A.audiences().find(function (x) { return x.id === id; });
-    if (confirm('Delete audience "' + (a ? a.name : '') + '"?')) { A.removeAudience(id); renderAudiences(); }
-  });
-
-  /* ---------- 4. Scoring Weights ---------- */
-  var weightsCard = document.querySelector('.weights-card');
-  function renderWeights() {
-    var ws = A.weights();
-    var total = A.weightsTotal();
-    var rows = ws.map(function (w) {
-      return '<div class="weight-row">' +
-        '<div class="weight-label">' + esc(w.label) + '</div>' +
-        '<div class="weight-bar-track"><div class="weight-bar-fill" style="width:' + (w.value || 0) + '%; background:' + w.color + ';"></div></div>' +
-        '<div class="weight-value">' + (w.value || 0) + '%</div>' +
-      '</div>';
-    }).join('');
-    var note = (total !== 100)
-      ? 'Weights total ' + total + '% — they don’t add up to 100%.'
-      : 'These weights determine how opportunities are ranked';
-    weightsCard.innerHTML = rows + '<div class="weights-note">' + note + '</div>';
-  }
-  var editWeightsBtn = document.querySelector('.section:last-of-type .section-header .btn');
-  editWeightsBtn.addEventListener('click', function () {
-    var ws = A.weights();
-    openModal('Edit Weights', ws.map(function (w) {
-      return { key: w.id, label: w.label + ' (%)', type: 'number', value: w.value, min: 0, max: 100 };
-    }), function (out) { A.setWeights(out); renderWeights(); });
-  });
-
   /* ---------- "New" buttons ---------- */
   var sections = document.querySelectorAll('.section');
   // Templates: New Template
@@ -652,23 +508,10 @@
       A.addFormat({ name: out.name, specs: out.specs }); renderFormats();
     });
   });
-  // Audiences: New Audience
-  sections[2].querySelector('.section-header .btn').addEventListener('click', function () {
-    openModal('New Audience', [
-      { key: 'name', label: 'Name', type: 'text', value: '' },
-      { key: 'region', label: 'Age / Region', type: 'text', value: '' },
-      { key: 'interests', label: 'Interests', type: 'text', value: '' }
-    ], function (out) {
-      if (!out.name.trim()) return;
-      A.addAudience({ name: out.name, region: out.region, interests: out.interests }); renderAudiences();
-    });
-  });
 
   /* ---------- initial render ---------- */
   renderTemplates();
   renderFormats();
-  renderAudiences();
-  renderWeights();
 })();
 </script>
 
