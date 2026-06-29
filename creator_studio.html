@@ -202,6 +202,16 @@
   .fld label { display: block; font-size: 10px; font-weight: 510; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-quaternary); margin-bottom: 7px; }
   .prompt-box { background: rgba(255,255,255,0.02); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 14px; }
   .prompt-textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text-secondary); font-size: 13px; line-height: 1.55; resize: none; min-height: 84px; letter-spacing: -0.13px; font-family: inherit; }
+  /* collapsible prompt banner pinned to the bottom of the canvas — tap to expand full prompt */
+  .prompt-bar { display: flex; align-items: flex-start; gap: 10px; padding: 10px 24px; border-top: 1px solid var(--border-standard); background: rgba(255,255,255,0.015); flex: none; }
+  .prompt-bar .pb-label { display: flex; align-items: center; gap: 6px; flex: none; cursor: pointer; color: var(--text-quaternary); font-size: 10px; font-weight: 590; letter-spacing: 0.5px; text-transform: uppercase; user-select: none; line-height: 1.5; }
+  .prompt-bar .pb-label:hover { color: var(--text-tertiary); }
+  .prompt-bar .pb-chev { transition: transform 0.15s; transform: rotate(-90deg); }
+  .prompt-bar.expanded .pb-chev { transform: rotate(0deg); }
+  .prompt-bar .pb-text { flex: 1; min-width: 0; color: var(--text-tertiary); font-size: 12px; line-height: 1.5; letter-spacing: -0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; cursor: pointer; }
+  .prompt-bar.expanded .pb-text { white-space: normal; overflow-y: auto; max-height: 32vh; text-overflow: clip; }
+  .prompt-bar .pb-copy { flex: none; display: flex; align-items: center; gap: 5px; background: transparent; border: 1px solid var(--border-standard); color: var(--text-tertiary); border-radius: 5px; padding: 3px 9px; font-size: 11px; font-weight: 510; letter-spacing: -0.13px; cursor: pointer; transition: background 0.1s, color 0.1s; }
+  .prompt-bar .pb-copy:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
   .ctrl-dropdown { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-standard); border-radius: 6px; color: var(--text-primary); font-size: 13px; cursor: pointer; font-family: inherit; width: 100%; }
   .ctrl-dropdown .auto { font-size: 9px; font-weight: 510; color: var(--brand-accent); background: rgba(113,112,255,0.1); border: 1px solid rgba(113,112,255,0.3); border-radius: 9999px; padding: 1px 7px; text-transform: uppercase; letter-spacing: 0.4px; }
   .ctrl-dropdown .sp { flex: 1; }
@@ -319,6 +329,15 @@
           <span class="x" onclick="this.parentElement.classList.remove('show')">✕</span>
         </div>
         <div class="asset"><img id="assetImg" src="images/v2.jpg" alt="asset"></div>
+      </div>
+
+      <div class="prompt-bar" id="promptBar">
+        <div class="pb-label" onclick="togglePromptBar()">
+          <svg class="pb-chev" width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Prompt
+        </div>
+        <div class="pb-text" id="pbText" onclick="togglePromptBar()"></div>
+        <button class="pb-copy" onclick="copyPrompt(this)" title="Copy prompt to refine"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 11V3a1 1 0 011-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Copy</button>
       </div>
 
     </div>
@@ -502,6 +521,7 @@
       KK.generate(BRIEF_ID, 8);
       renderTiles();
       noteGeneration();
+      refreshPromptBar();
     }
   }
   // Make the locked controls visible in chat — what actually fed this batch.
@@ -519,6 +539,40 @@
       : 'Generated 8 more concepts. Lock an Environment, Person, or Products below to steer the next batch.';
     msgs.insertAdjacentHTML('beforeend', '<div class="m a"><div class="who">KittyKat</div><div class="bubble">' + line + '</div></div>');
     msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  // Build the live prompt feeding generation, from the brief + locked controls.
+  function currentPrompt() {
+    if (!(BRIEF_ID && window.KK)) return '';
+    var b = KK.brief(BRIEF_ID) || {};
+    var bl = KK.getBlocks(BRIEF_ID) || {};
+    var segs = [];
+    if (b.desc) segs.push(b.desc.trim());
+    var env = bl.environment && bl.environment.desc && bl.environment.desc.trim();
+    var per = bl.person && bl.person.desc && bl.person.desc.trim();
+    if (env) segs.push('scene: ' + env);
+    if (per) segs.push('person: ' + per);
+    var prods = (bl.products && bl.products.items) || [];
+    if (prods.length) segs.push('product: ' + prods.map(function (p) { return p.name; }).join(', '));
+    segs.push('on-brand product photography, editorial lighting, dark background');
+    return segs.join(' · ');
+  }
+  function refreshPromptBar() {
+    var el = document.getElementById('pbText');
+    if (!el) return;
+    el.textContent = currentPrompt() || 'Lock a scene, person, or product below to shape the prompt.';
+  }
+  function togglePromptBar() {
+    var bar = document.getElementById('promptBar');
+    if (bar) bar.classList.toggle('expanded');
+  }
+  function copyPrompt(btn) {
+    var t = currentPrompt();
+    if (!t) return;
+    if (navigator.clipboard) navigator.clipboard.writeText(t);
+    var prev = btn.innerHTML;
+    btn.innerHTML = 'Copied';
+    setTimeout(function () { btn.innerHTML = prev; }, 1200);
   }
 
   function studioOpening(b) {
@@ -540,6 +594,7 @@
           document.getElementById('briefCampaign').textContent = b.campaign;
           document.title = 'KittyKat — ' + b.name;
           renderTiles();
+          refreshPromptBar();
           studioOpening(KK.brief(id));
           refreshPills();
         }
@@ -658,6 +713,7 @@
       blockDirty(currentBlock);
       KK.setBlock(BRIEF_ID, currentBlock, blockDraft[currentBlock]);
       refreshPills();
+      refreshPromptBar();
     }
     closeBlock();
   }
