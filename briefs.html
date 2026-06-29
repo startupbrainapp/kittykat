@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
-<title>KittyKat — Execution / Briefs</title>
+<title>KittyKat — Image Creation / Image Studio</title>
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 <style>
   :root {
@@ -322,8 +322,8 @@
     </div>
 
   <div class="nav-section">
-    <div class="nav-section-label">Execution</div>
-    <a class="nav-item active" href="briefs.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Briefs</span></a>
+    <div class="nav-section-label">Image Creation</div>
+    <a class="nav-item active" href="briefs.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Image Studio</span></a>
     <a class="nav-item" href="asset_manager.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Shortlisted</span></a>
     <a class="nav-item" href="reviews.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
   </div>
@@ -351,9 +351,9 @@
 <main class="main">
   <div class="topbar">
     <div class="breadcrumb">
-      <span class="bc-root">Execution</span>
+      <span class="bc-root">Image Creation</span>
       <span class="bc-sep">/</span>
-      <span class="bc-current">Briefs</span>
+      <span class="bc-current">Image Studio</span>
     </div>
     <div class="topbar-right">
       <button class="btn btn-ghost" onclick="newCampaign()">
@@ -362,16 +362,16 @@
       </button>
       <button class="btn btn-primary" onclick="openNewBrief()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        New brief
+        New image job
       </button>
     </div>
   </div>
 
   <div class="content">
     <div class="content-max">
-      <div class="page-eyebrow">Execution &middot; Briefs</div>
-      <h1 class="page-title">Creative briefs for BAPE</h1>
-      <p class="page-desc">Every brief inherits your brand context automatically. Write what to make &mdash; palette, voice, audience, and reference imagery are pre-loaded from your Brand definition.</p>
+      <div class="page-eyebrow">Image Creation &middot; Image Studio</div>
+      <h1 class="page-title">Image Studio for BAPE</h1>
+      <p class="page-desc">Every image job inherits your brand context automatically. Write what to make &mdash; palette, voice, audience, and reference imagery are pre-loaded from your Brand definition.</p>
 
       <!-- Stat strip -->
       <div class="stat-strip">
@@ -381,7 +381,7 @@
           </div>
           <div class="stat-meta">
             <div class="stat-value" id="statActive">0</div>
-            <div class="stat-label">Active briefs</div>
+            <div class="stat-label">Active jobs</div>
           </div>
         </button>
         <button type="button" class="stat-card" data-view="production" onclick="setBriefView('production')">
@@ -423,13 +423,13 @@
         </div>
         <div class="filter-spacer"></div>
         <button class="filter-dropdown" onclick="openSortFilter(this)"><span class="filter-dropdown-label">Sort</span><span id="sortVal">Latest updated</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <span class="filter-count">12 briefs</span>
+        <span class="filter-count">12 image jobs</span>
       </div>
 
       <!-- Table -->
       <div class="table-header">
         <div>Campaign</div>
-        <div>Brief</div>
+        <div>Image</div>
         <div>Status</div>
         <div>Assignee</div>
         <div class="th-right">Assets</div>
@@ -445,7 +445,7 @@
 <aside class="drawer" id="drawer">
   <div class="drawer-header">
     <div class="drawer-title-wrap">
-      <div class="drawer-eyebrow">Brief</div>
+      <div class="drawer-eyebrow">Image job</div>
       <div class="drawer-title" id="drawerTitle">&mdash;</div>
     </div>
     <button class="drawer-close" onclick="closeDrawer()">&times;</button>
@@ -459,8 +459,8 @@
 <aside class="drawer" id="newBriefDrawer" style="width: 660px;">
   <div class="drawer-header">
     <div class="drawer-title-wrap">
-      <div class="drawer-eyebrow">New Brief</div>
-      <div class="drawer-title">Create a brief</div>
+      <div class="drawer-eyebrow">New image job</div>
+      <div class="drawer-title">Create an image job</div>
     </div>
     <button class="drawer-close" onclick="closeNewBrief()">×</button>
   </div>
@@ -476,12 +476,12 @@
         <span id="nbCampaign" style="font-size: 13px; font-weight: 510; color: var(--text-quaternary);">Select a campaign...</span>
         <svg style="margin-left: auto; color: var(--text-tertiary);" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <div style="font-size: 10px; color: var(--text-quaternary); margin-top: 4px; letter-spacing: -0.13px;">Optional — standalone briefs don't need a campaign</div>
+      <div style="font-size: 10px; color: var(--text-quaternary); margin-top: 4px; letter-spacing: -0.13px;">Optional — standalone image jobs don't need a campaign</div>
     </div>
 
     <!-- Brief title -->
     <div style="margin-bottom: 20px;">
-      <input id="nbTitle" type="text" value="" style="width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border-subtle); outline: none; font-size: 20px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.24px; padding: 0 0 8px; font-family: inherit; font-feature-settings: 'cv01', 'ss03';" placeholder="Brief title...">
+      <input id="nbTitle" type="text" value="" style="width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border-subtle); outline: none; font-size: 20px; font-weight: 510; color: var(--text-primary); letter-spacing: -0.24px; padding: 0 0 8px; font-family: inherit; font-feature-settings: 'cv01', 'ss03';" placeholder="Image job title...">
     </div>
 
     <!-- Description -->
@@ -498,7 +498,7 @@
           <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3 .5-2.2 2.2.5 3.3L6 8.5 3.2 10l.5-3.3L1.5 4.5l3-.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.2"/></svg>
           Auto-loaded
         </span>
-        <a href="current_brand.html" style="margin-left: auto; font-size: 11px; font-weight: 510; color: var(--text-tertiary); text-decoration: none; letter-spacing: -0.13px;">Edit in Brand →</a>
+        <a href="current_brand.html" target="_blank" rel="noopener" title="Opens the Brand product in a new tab" style="margin-left: auto; font-size: 11px; font-weight: 510; color: var(--text-tertiary); text-decoration: none; letter-spacing: -0.13px;">Edit in Brand ↗</a>
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; letter-spacing: -0.13px;">
         <div style="display: flex; align-items: center; gap: 6px;">
@@ -713,7 +713,7 @@
   function emptyCampaignRow(c) {
     return `<div class="brief-row" style="cursor:default;">
         <div class="cell-campaign">${c}</div>
-        <div class="brief-main"><div class="brief-info"><div class="brief-name" style="color:var(--text-quaternary);font-weight:400;font-style:italic;">No briefs yet &middot; <a onclick="event.stopPropagation(); openNewBriefFor('${c.replace(/'/g, "\\'")}')" style="color:var(--brand-accent);cursor:pointer;font-style:normal;">Create one</a></div></div></div>
+        <div class="brief-main"><div class="brief-info"><div class="brief-name" style="color:var(--text-quaternary);font-weight:400;font-style:italic;">No image jobs yet &middot; <a onclick="event.stopPropagation(); openNewBriefFor('${c.replace(/'/g, "\\'")}')" style="color:var(--brand-accent);cursor:pointer;font-style:normal;">Create one</a></div></div></div>
         <div></div><div></div><div></div>
       </div>`;
   }
@@ -721,7 +721,7 @@
     const list = document.getElementById('briefList');
     const rows = visibleBriefs();
     const countEl = document.querySelector('.filter-count');
-    if (countEl) countEl.textContent = rows.length + (rows.length === 1 ? ' brief' : ' briefs');
+    if (countEl) countEl.textContent = rows.length + (rows.length === 1 ? ' image job' : ' image jobs');
     // Merge briefs + brief-less campaigns into one list, sorted by latest updated (newest first),
     // so a just-created campaign or just-edited brief lands at the top.
     const items = rows.map(b => ({ kind: 'brief', at: b.updatedAt || 0, b: b }));
@@ -784,14 +784,14 @@
   function groupRowsByCampaign(rows) {
     const order = [], groups = {};
     rows.forEach(b => { const c = b.campaign || 'Standalone'; if (!groups[c]) { groups[c] = []; order.push(c); } groups[c].push(b); });
-    // surface campaigns that have no briefs yet (e.g. just created) so they're visible
+    // surface campaigns that have no image jobs yet (e.g. just created) so they're visible
     const briefed = {};
     (window.KK ? KK.briefs() : []).forEach(b => { if (b.campaign) briefed[b.campaign] = 1; });
     (window.KK ? KK.campaigns() : []).forEach(c => { if (!briefed[c] && !groups[c]) { groups[c] = []; order.push(c); } });
     return order.map((c, i) => {
       const body = groups[c].length
         ? groups[c].map(renderRow).join('')
-        : `<div style="padding:8px 16px 14px;color:var(--text-quaternary);font-size:12px;letter-spacing:-0.13px;">No briefs yet &middot; <a onclick="openNewBriefFor('${c.replace(/'/g, "\\'")}')" style="color:var(--brand-accent);cursor:pointer;">Create one</a></div>`;
+        : `<div style="padding:8px 16px 14px;color:var(--text-quaternary);font-size:12px;letter-spacing:-0.13px;">No image jobs yet &middot; <a onclick="openNewBriefFor('${c.replace(/'/g, "\\'")}')" style="color:var(--brand-accent);cursor:pointer;">Create one</a></div>`;
       return `<div class="campaign-group-header" style="display:flex;align-items:center;gap:8px;padding:16px 16px 7px;${i ? 'border-top:1px solid var(--border-subtle);margin-top:4px;' : ''}">
          <span style="font-size:11px;font-weight:590;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">${c}</span>
          <span style="font-size:11px;font-weight:510;color:var(--text-quaternary);">${groups[c].length}</span>
@@ -819,7 +819,7 @@
     title.textContent = 'New campaign';
     title.style.cssText = 'font-size:14px;font-weight:590;color:var(--text-primary);margin-bottom:4px;';
     var sub = document.createElement('div');
-    sub.textContent = 'A bucket to group briefs and their assets.';
+    sub.textContent = 'A bucket to group image jobs and their assets.';
     sub.style.cssText = 'font-size:12px;color:var(--text-tertiary);margin-bottom:14px;letter-spacing:-0.13px;';
     var inp = document.createElement('input');
     inp.type = 'text'; inp.placeholder = 'Campaign name…';
@@ -836,7 +836,7 @@
       KK.addCampaign(n);
       close();
       renderTable();
-      kkToast('Campaign “' + n + '” created — choose it when you make a brief');
+      kkToast('Campaign “' + n + '” created — choose it when you make an image job');
     }
     cancel.onclick = close;
     create.onclick = commit;
@@ -951,11 +951,11 @@
     if (b.status === 'draft') {
       footer = `
         <button class="d-btn primary" onclick="openStudio('${b.id}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>
-        <button class="d-btn secondary" onclick="openEditBrief('${b.id}')">Edit brief</button>`;
+        <button class="d-btn secondary" onclick="openEditBrief('${b.id}')">Edit image job</button>`;
     } else if (b.status === 'production') {
       footer = `
         <button class="d-btn primary" onclick="openStudio('${b.id}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.3 2.7L10 4l-2 1.9.5 2.8L6 7.3 3.5 8.7 4 5.9 2 4l2.7-.3z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>Open Studio</button>
-        <button class="d-btn secondary" onclick="openEditBrief('${b.id}')">Edit brief</button>`;
+        <button class="d-btn secondary" onclick="openEditBrief('${b.id}')">Edit image job</button>`;
     } else if (b.status === 'review') {
       footer = (window.KK && KK.isCreator())
         ? `<button class="d-btn secondary" disabled style="opacity:0.7;cursor:default;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>In review — awaiting approval</button>
@@ -1191,7 +1191,7 @@
   function nbResetForm() {
     nbState = { campaign: null, assignee: null, refs: [] };
     nbEditId = null;
-    document.querySelector('#newBriefDrawer .drawer-eyebrow').textContent = 'New Brief';
+    document.querySelector('#newBriefDrawer .drawer-eyebrow').textContent = 'New image job';
     document.querySelector('#newBriefDrawer .drawer-title').textContent = 'Create a brief';
     document.getElementById('nbBtnDraft').style.display = '';
     document.getElementById('nbBtnPrimaryLabel').textContent = 'Start production';

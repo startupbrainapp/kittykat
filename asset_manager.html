@@ -326,8 +326,8 @@
     </div>
 
   <div class="nav-section">
-    <div class="nav-section-label">Execution</div>
-    <a class="nav-item" href="briefs.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Briefs</span></a>
+    <div class="nav-section-label">Image Creation</div>
+    <a class="nav-item" href="briefs.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9h5M5 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Image Studio</span></a>
     <div class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h5l1.5 2H14v8H2V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="nav-label">Shortlisted</span></div>
     <a class="nav-item" href="reviews.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
   </div>
@@ -355,7 +355,7 @@
 <main class="main">
   <div class="topbar">
     <div class="breadcrumb">
-      <span class="bc-root">Execution</span>
+      <span class="bc-root">Image Creation</span>
       <span class="bc-sep">/</span>
       <span class="bc-current">Shortlisted</span>
     </div>
@@ -364,6 +364,7 @@
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Upload
       </button>
+      <input type="file" id="uploadInput" accept="image/*" multiple style="display:none" onchange="handleUploadFiles(event)">
       <button class="btn btn-ghost" onclick="downloadSelected()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 8V2M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Download selected
@@ -374,7 +375,7 @@
   <div class="content">
     <div class="content-max">
       <div id="amHeader">
-      <div class="page-eyebrow">Execution &middot; Shortlisted</div>
+      <div class="page-eyebrow">Image Creation &middot; Shortlisted</div>
       <h1 class="page-title">Shortlisted for BAPE</h1>
       <p class="page-desc">Your curated keepers from Creator Studio &mdash; the assets you hearted, ready for approval. Select a few to batch-send to Reviews, or send one at a time.</p>
       </div><!-- /amHeader -->
@@ -783,19 +784,35 @@
   })();
 
   /* Topbar / footer actions (prototype stubs — non-destructive) */
-  function uploadAsset() {
-    // Stub: add a placeholder asset to the currently-filtered campaign (or first).
+  // Open the native file picker.
+  function uploadAsset() { document.getElementById('uploadInput').click(); }
+  // Read the chosen image file(s) and add them to the shortlist as Draft assets.
+  function handleUploadFiles(e) {
+    var files = (e.target.files ? Array.prototype.slice.call(e.target.files) : [])
+      .filter(function (f) { return /^image\//.test(f.type); });
+    if (!files.length) { e.target.value = ''; return; }
     var camp = curVal('campaign');
-    var template = assets.filter(function (a) { return camp === 'All' || a.campaign === camp; })[0] || assets[0];
-    var nextId = assets.reduce(function (m, a) { return Math.max(m, a.id); }, 0) + 1;
-    var imgN = ((nextId - 1) % 20) + 1;
-    assets.unshift({
-      id: nextId, img: 'images/' + imgN + '.jpg', name: 'Uploaded Asset ' + nextId,
-      brief: template.brief, campaign: template.campaign, status: 'draft', statusLabel: 'Draft',
-      format: template.format, created: 'Just now', creator: 'Kathy S.'
+    var template = assets.filter(function (a) { return camp === 'All' || a.campaign === camp; })[0] || assets[0]
+      || { brief: '', campaign: (camp === 'All' ? '' : camp), format: '' };
+    var baseId = assets.reduce(function (m, a) { return Math.max(m, a.id); }, 0);
+    files.forEach(function (file, i) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var nextId = baseId + i + 1;
+        var nm = file.name.replace(/\.[^.]+$/, '') || ('Uploaded Asset ' + nextId);
+        assets.unshift({
+          id: nextId, img: reader.result, name: nm,
+          brief: template.brief, campaign: template.campaign, status: 'draft', statusLabel: 'Draft',
+          format: template.format, created: 'Just now', creator: 'Kathy S.'
+        });
+        renderGrid();
+      };
+      reader.readAsDataURL(file);
     });
-    renderGrid();
-    toast('Asset uploaded to ' + template.campaign);
+    toast(files.length > 1
+      ? (files.length + ' assets uploaded to ' + (template.campaign || 'Shortlist'))
+      : ('Asset uploaded to ' + (template.campaign || 'Shortlist')));
+    e.target.value = '';
   }
   function downloadSelected() { toast('Preparing download…'); }
   function downloadAsset(id) {
