@@ -62,7 +62,64 @@
   .row-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
   .node-chip{font-size:11px;font-weight:510;color:var(--text-tertiary);background:var(--surface-3);border:1px solid var(--border-standard);padding:2px 8px;border-radius:9999px;}
   .chev{color:var(--text-quaternary);}
-  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-standard);color:var(--text-primary);font-size:13px;font-weight:510;padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:100;}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-standard);color:var(--text-primary);font-size:13px;font-weight:510;padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:200;}
+  /* ── Builder modal overlay ── */
+  .builder-backdrop{position:fixed;inset:0;background:rgba(4,5,6,0.6);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;padding:24px;z-index:120;}
+  .builder-backdrop[hidden]{display:none;}
+  .modal{width:min(720px,94vw);height:min(86vh,860px);background:var(--bg-panel);border:1px solid var(--border-standard);border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden;}
+  .m-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border-subtle);flex-shrink:0;}
+  .wf-name{background:transparent;border:1px solid transparent;border-radius:6px;color:var(--text-primary);font-size:15px;font-weight:590;padding:5px 8px;letter-spacing:-0.16px;flex:1;min-width:0;}
+  .wf-name:hover{border-color:var(--border-standard);}
+  .wf-name:focus{outline:none;border-color:var(--brand-accent);background:var(--surface-1);}
+  .step-pill{font-size:11px;font-weight:590;letter-spacing:0.3px;color:var(--text-tertiary);background:var(--surface-2);border:1px solid var(--border-standard);padding:4px 10px;border-radius:9999px;white-space:nowrap;}
+  .m-close{width:30px;height:30px;border-radius:7px;border:none;background:transparent;color:var(--text-tertiary);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;}
+  .m-close:hover{background:var(--surface-3);color:var(--text-primary);}
+  .m-body{flex:1;overflow-y:auto;padding:22px 24px 28px;}
+  .m-foot{display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border-subtle);flex-shrink:0;}
+  .m-foot .spacer{flex:1;}
+  .step-intro{font-size:13px;color:var(--text-tertiary);margin-bottom:18px;letter-spacing:-0.13px;}
+  .step-eyebrow{font-size:10px;font-weight:590;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-quaternary);margin-bottom:6px;}
+  .step-title{font-size:18px;font-weight:510;color:var(--text-primary);margin-bottom:4px;}
+  .addwrap{position:relative;margin-bottom:14px;}
+  .add-btn{width:100%;border:1px dashed var(--border-standard);background:var(--surface-1);border-radius:10px;padding:12px;color:var(--text-secondary);font-size:13px;font-weight:510;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;}
+  .add-btn:hover{background:var(--surface-2);border-color:rgba(255,255,255,0.18);color:var(--text-primary);}
+  .add-menu{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--bg-surface);border:1px solid var(--border-standard);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.5);padding:8px;z-index:20;}
+  .add-grp{font-size:10px;font-weight:590;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-quaternary);padding:8px 8px 5px;}
+  .add-opt{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:7px;cursor:pointer;}
+  .add-opt:hover{background:var(--surface-3);}
+  .add-ic{width:26px;height:26px;border-radius:6px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);flex-shrink:0;}
+  .add-name{font-size:13px;font-weight:510;color:var(--text-primary);}
+  .add-sub{font-size:11px;color:var(--text-quaternary);}
+  .node{background:var(--surface-1);border:1px solid var(--border-standard);border-radius:12px;padding:12px 14px;margin-bottom:6px;}
+  .node-head{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .node-ic{width:24px;height:24px;border-radius:6px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);flex-shrink:0;}
+  .node-type{font-size:10px;font-weight:590;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-tertiary);}
+  .node-tag{font-size:9px;font-weight:590;letter-spacing:0.4px;text-transform:uppercase;padding:1px 6px;border-radius:9999px;margin-left:2px;}
+  .tag-hidden{background:rgba(255,255,255,0.05);color:var(--text-quaternary);}
+  .tag-asks{background:rgba(113,112,255,0.14);color:var(--brand-accent);}
+  .node-acts{margin-left:auto;display:flex;gap:2px;}
+  .node-act{width:24px;height:24px;border-radius:6px;border:none;background:transparent;color:var(--text-quaternary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .node-act:hover{background:var(--surface-3);color:var(--text-primary);}
+  .node-field{width:100%;background:var(--bg-canvas);border:1px solid var(--border-standard);border-radius:7px;color:var(--text-secondary);font-size:13px;padding:8px 10px;letter-spacing:-0.13px;}
+  .node-field:focus{outline:none;border-color:var(--brand-accent);}
+  textarea.node-field{resize:vertical;min-height:50px;line-height:1.5;}
+  .node-flabel{font-size:10px;font-weight:510;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.4px;margin:8px 0 5px;}
+  .connector{width:1px;height:14px;background:var(--border-standard);margin:0 auto;}
+  .flow-empty{color:var(--text-quaternary);font-size:13px;text-align:center;padding:36px 0;}
+  .pv-behind{background:var(--surface-1);border:1px dashed var(--border-standard);border-radius:10px;padding:12px 14px;margin-bottom:18px;}
+  .pv-behind-t{font-size:10px;font-weight:590;letter-spacing:0.4px;text-transform:uppercase;color:var(--text-quaternary);margin-bottom:9px;}
+  .pv-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:510;color:var(--text-tertiary);background:var(--surface-3);border:1px solid var(--border-standard);padding:3px 9px;border-radius:9999px;margin:0 5px 5px 0;}
+  .pv-step{margin-bottom:16px;}
+  .pv-q{font-size:13px;font-weight:510;color:var(--text-primary);margin-bottom:6px;letter-spacing:-0.13px;}
+  .pv-input,.pv-select{width:100%;background:var(--bg-canvas);border:1px solid var(--border-standard);border-radius:7px;color:var(--text-tertiary);font-size:13px;padding:9px 11px;}
+  .pv-heading{font-size:11px;font-weight:590;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-quaternary);margin:4px 0 2px;border-top:1px solid var(--border-subtle);padding-top:14px;}
+  .pv-imgs{display:flex;gap:7px;}
+  .pv-img{width:52px;height:52px;border-radius:8px;background:var(--surface-3);border:1px solid var(--border-standard);display:flex;align-items:center;justify-content:center;color:var(--text-quaternary);}
+  .pv-ready{margin-top:20px;background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.3);border-radius:10px;padding:16px;text-align:center;}
+  .pv-ready-ic{width:36px;height:36px;border-radius:50%;background:#3fb950;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;}
+  .pv-ready-t{font-size:12px;font-weight:590;letter-spacing:0.4px;text-transform:uppercase;color:#3fb950;}
+  .pv-ready-s{font-size:11px;color:var(--text-tertiary);margin-top:3px;}
+  .pv-none{color:var(--text-quaternary);font-size:12px;text-align:center;padding:24px 0;}
 </style>
 </head>
 <body>
@@ -105,7 +162,7 @@
     </div>
     <div class="topbar-right">
       <a class="btn btn-ghost" href="agentic_moodboards.html"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 11l3-2.5 2 1.5 3-3 3 3.5" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Manage moodboards</a>
-      <button class="btn btn-primary" onclick="toast('Flow builder is stubbed for now')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>New workflow</button>
+      <button class="btn btn-primary" onclick="openBuilder()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>New workflow</button>
     </div>
   </div>
   <div class="content">
@@ -114,7 +171,7 @@
       <h1 class="page-title">Workflows</h1>
       <p class="page-desc">Reusable agent flows your team runs. Build the logic once — system prompt, brand guardrails, inputs, image options, a moodboard — then finish and launch a simplified studio. Output flows straight to Shortlisted and Reviews.</p>
 
-      <div class="create-card" onclick="toast('Flow builder coming next — drag nodes + simulate')">
+      <div class="create-card" onclick="openBuilder()">
         <div class="create-plus"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <div><div class="create-title">Create new workflow</div><div class="create-sub">Build a node-based agent flow with a live simulation</div></div>
       </div>
@@ -144,12 +201,114 @@
   </div>
 </main>
 
+<!-- Builder modal overlay -->
+<div class="builder-backdrop" id="builderBackdrop" hidden onclick="if(event.target===this) closeBuilder()">
+  <div class="modal">
+    <div class="m-head">
+      <input class="wf-name" id="wfName" value="New Marketing Rail">
+      <span class="step-pill" id="stepPill">Step 1 of 2 · Build</span>
+      <button class="m-close" title="Close" onclick="closeBuilder()">&times;</button>
+    </div>
+    <div class="m-body" id="mBody"></div>
+    <div class="m-foot" id="mFoot"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <script>
   function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';},2000);}
   function rowName(btn){var row=btn.closest('.list-row');return row?row.querySelector('.row-name').textContent:'';}
-  function editNodes(btn){toast('Editing nodes · ' + rowName(btn) + ' — flow builder coming next');}
-  function launchChat(btn){toast('Launching chat mode · ' + rowName(btn) + ' (output → Shortlisted)');}
+  function editNodes(btn){openBuilder(rowName(btn));}
+  function launchChat(btn){window.location='agentic_run.html?wf=' + encodeURIComponent(rowName(btn));}
+
+  /* ── Builder modal ── */
+  var DEFS = {
+    system:     { name: 'System Prompt',      visible: false, icon: gear(),   sub: 'Hidden AI instructions' },
+    data:       { name: 'Data Injection',     visible: false, icon: db(),     sub: 'Feed in real data' },
+    guardrails: { name: 'Brand Guardrails',   visible: false, icon: shield(), sub: 'On-brand rules' },
+    input:      { name: 'User Input',         visible: true,  icon: chat(),   sub: 'A text question' },
+    dropdown:   { name: 'Dropdown Selection', visible: true,  icon: caret(),  sub: 'A pick-one question' },
+    image:      { name: 'Image Popup',        visible: true,  icon: imgIc(),  sub: 'Pick from images' },
+    label:      { name: 'Section Label',      visible: true,  icon: lines(),  sub: 'A heading' }
+  };
+  var DATA_SOURCES = ['Brand profile', 'Product list', 'Campaign data', 'Performance data'];
+  var IMG_GROUPS = ['Shot Type', 'Flower Species', 'Backdrops', 'Model Looks'];
+  function defaults(t){ return ({
+    system:{value:'You are BAPE’s brand designer. Produce premium streetwear visuals.'},
+    data:{value:'Brand profile'},
+    guardrails:{value:'Tone: confident, not cocky · Logo prominent · No neutral palette'},
+    input:{label:'Campaign name'},
+    dropdown:{label:'Select target platform',options:'Instagram, TikTok, Facebook'},
+    image:{label:'Review image options',group:'Shot Type'},
+    label:{label:'Creative direction'}
+  })[t] || {}; }
+
+  var uid=0, flow=[], step=1, addOpen=false;
+  function seed(){ [['input',{label:'Campaign name'}],['system',{}],['guardrails',{value:'Tone: premium & minimalist · Logo prominent'}],['dropdown',{}],['image',{}]]
+    .forEach(function(p){ flow.push(Object.assign({id:++uid,type:p[0]},defaults(p[0]),p[1])); }); }
+
+  function openBuilder(name){ flow=[]; uid=0; step=1; addOpen=false; document.getElementById('wfName').value = name || 'New Marketing Rail'; seed(); document.getElementById('builderBackdrop').hidden=false; render(); }
+  function closeBuilder(){ document.getElementById('builderBackdrop').hidden=true; addOpen=false; }
+
+  function addNode(t){ flow.push(Object.assign({id:++uid,type:t},defaults(t))); addOpen=false; render(); }
+  function removeNode(id){ flow=flow.filter(function(n){return n.id!==id;}); render(); }
+  function moveNode(id,d){ var i=flow.findIndex(function(n){return n.id===id;}),j=i+d; if(i<0||j<0||j>=flow.length)return; var t=flow[i];flow[i]=flow[j];flow[j]=t; render(); }
+  function setField(id,k,v){ var n=flow.find(function(x){return x.id===id;}); if(n){n[k]=v; if(step===2) render();} }
+  function toggleAdd(){ addOpen=!addOpen; render(); }
+  function goStep(n){ step=n; addOpen=false; render(); }
+  function esc(s){ return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+  function addMenu(){
+    function opt(t){ var d=DEFS[t]; return '<div class="add-opt" onclick="addNode(\''+t+'\')"><div class="add-ic">'+d.icon+'</div><div><div class="add-name">'+d.name+'</div><div class="add-sub">'+d.sub+'</div></div></div>'; }
+    return '<div class="add-menu"><div class="add-grp">Questions the runner sees</div>'+['input','dropdown','image','label'].map(opt).join('')+'<div class="add-grp">Behind the scenes</div>'+['system','data','guardrails'].map(opt).join('')+'</div>';
+  }
+  function nodeFields(n){
+    if(n.type==='system'||n.type==='guardrails') return '<textarea class="node-field" oninput="setField('+n.id+',\'value\',this.value)">'+esc(n.value)+'</textarea>';
+    if(n.type==='data') return '<select class="node-field" onchange="setField('+n.id+',\'value\',this.value)">'+DATA_SOURCES.map(function(s){return '<option'+(s===n.value?' selected':'')+'>'+s+'</option>';}).join('')+'</select>';
+    if(n.type==='input'||n.type==='label') return '<div class="node-flabel">'+(n.type==='label'?'Heading':'Question label')+'</div><input class="node-field" value="'+esc(n.label)+'" oninput="setField('+n.id+',\'label\',this.value)">';
+    if(n.type==='dropdown') return '<div class="node-flabel">Question label</div><input class="node-field" value="'+esc(n.label)+'" oninput="setField('+n.id+',\'label\',this.value)"><div class="node-flabel">Options (comma-separated)</div><input class="node-field" value="'+esc(n.options)+'" oninput="setField('+n.id+',\'options\',this.value)">';
+    if(n.type==='image') return '<div class="node-flabel">Question label</div><input class="node-field" value="'+esc(n.label)+'" oninput="setField('+n.id+',\'label\',this.value)"><div class="node-flabel">Linked image group</div><select class="node-field" onchange="setField('+n.id+',\'group\',this.value)">'+IMG_GROUPS.map(function(s){return '<option'+(s===n.group?' selected':'')+'>'+s+'</option>';}).join('')+'</select>';
+    return '';
+  }
+  function buildStep(){
+    var nodes = flow.length ? flow.map(function(n,i){ var d=DEFS[n.type]; var tag=d.visible?'<span class="node-tag tag-asks">Asks runner</span>':'<span class="node-tag tag-hidden">Hidden</span>';
+      return '<div class="node"><div class="node-head"><div class="node-ic">'+d.icon+'</div><span class="node-type">'+d.name+'</span>'+tag+'<div class="node-acts"><button class="node-act" title="Up" onclick="moveNode('+n.id+',-1)">↑</button><button class="node-act" title="Down" onclick="moveNode('+n.id+',1)">↓</button><button class="node-act" title="Remove" onclick="removeNode('+n.id+')">✕</button></div></div>'+nodeFields(n)+'</div>'+(i<flow.length-1?'<div class="connector"></div>':'');
+    }).join('') : '<div class="flow-empty">No blocks yet. Tap “Add block” to start.</div>';
+    return '<div class="step-eyebrow">Step 1 · Build</div><div class="step-title">Assemble the flow</div><p class="step-intro">Add the questions the runner answers and the brand setup that runs behind them. Reorder or remove anything.</p><div class="addwrap"><button class="add-btn" onclick="event.stopPropagation(); toggleAdd()"><svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Add block</button>'+(addOpen?addMenu():'')+'</div>'+nodes;
+  }
+  function previewStep(){
+    var hidden=flow.filter(function(n){return !DEFS[n.type].visible;}), visible=flow.filter(function(n){return DEFS[n.type].visible;});
+    var html='<div class="step-eyebrow">Step 2 · Preview</div><div class="step-title">What the runner sees</div><p class="step-intro">This is the experience when someone launches this workflow. The brand setup runs behind the scenes.</p>';
+    if(hidden.length) html+='<div class="pv-behind"><div class="pv-behind-t">Runs behind the scenes</div>'+hidden.map(function(n){return '<span class="pv-chip">'+DEFS[n.type].name+(n.type==='data'?' · '+n.value:'')+'</span>';}).join('')+'</div>';
+    if(!visible.length) html+='<div class="pv-none">No runner questions yet — go back and add a User Input, Dropdown, or Image Popup.</div>';
+    else html+=visible.map(function(n){
+      if(n.type==='label') return '<div class="pv-heading">'+esc(n.label)+'</div>';
+      if(n.type==='input') return '<div class="pv-step"><div class="pv-q">'+esc(n.label)+'</div><input class="pv-input" placeholder="Runner types here…" disabled></div>';
+      if(n.type==='dropdown') return '<div class="pv-step"><div class="pv-q">'+esc(n.label)+'</div><select class="pv-select" disabled>'+(n.options||'').split(',').map(function(o){return '<option>'+o.trim()+'</option>';}).join('')+'</select></div>';
+      if(n.type==='image'){ var t=[0,1,2].map(function(){return '<div class="pv-img"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2.5 11l3-2.5 2 1.5 3-3 3 3.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>';}).join(''); return '<div class="pv-step"><div class="pv-q">'+esc(n.label)+' <span style="color:var(--text-quaternary);font-weight:400;">· '+esc(n.group)+'</span></div><div class="pv-imgs">'+t+'</div></div>'; }
+      return '';
+    }).join('');
+    html+='<div class="pv-ready"><div class="pv-ready-ic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8.5l2.5 2.5L12 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="pv-ready-t">Ready to launch</div><div class="pv-ready-s">'+visible.length+' step'+(visible.length===1?'':'s')+' for the runner · '+flow.length+' blocks total</div></div>';
+    return html;
+  }
+  function render(){
+    document.getElementById('stepPill').textContent = step===1?'Step 1 of 2 · Build':'Step 2 of 2 · Preview';
+    document.getElementById('mBody').innerHTML = step===1?buildStep():previewStep();
+    document.getElementById('mFoot').innerHTML = step===1
+      ? '<button class="btn btn-ghost" onclick="closeBuilder()">Cancel</button><div class="spacer"></div><button class="btn btn-primary" onclick="goStep(2)">Next: Preview →</button>'
+      : '<button class="btn btn-ghost" onclick="goStep(1)">← Back</button><div class="spacer"></div><button class="btn btn-ghost" onclick="saveRail()">Save workflow</button><button class="btn btn-primary" onclick="modalLaunch()"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4a2 2 0 012-2h8a2 2 0 012 2v5a2 2 0 01-2 2H6l-3 3V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Launch</button>';
+  }
+  function saveRail(){ toast('Saved “'+document.getElementById('wfName').value+'” · '+flow.length+' blocks'); }
+  function modalLaunch(){ window.location='agentic_run.html?wf=' + encodeURIComponent(document.getElementById('wfName').value); }
+  document.addEventListener('click', function(e){ if(addOpen && !e.target.closest('.addwrap')){ addOpen=false; render(); } });
+
+  function gear(){return '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.3" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';}
+  function db(){return '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4" stroke="currentColor" stroke-width="1.2"/><path d="M3 8c0 1.1 2.2 2 5 2s5-.9 5-2" stroke="currentColor" stroke-width="1.2"/></svg>';}
+  function shield(){return '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4l5-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6 8l1.5 1.5L10.5 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+  function chat(){return '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 4a2 2 0 012-2h8a2 2 0 012 2v5a2 2 0 01-2 2H6l-3 3V4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>';}
+  function caret(){return '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="2.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 6l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+  function imgIc(){return '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2.5 11l3-2.5 2 1.5 3-3 3 3.5" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="6" cy="6" r="1.1" fill="currentColor"/></svg>';}
+  function lines(){return '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h7M3 12h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';}
 </script>
 </body>
 </html>

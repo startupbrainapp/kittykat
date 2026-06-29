@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KittyKat — Run Workflow</title>
+<style>
+  :root{--bg-canvas:#08090a;--bg-panel:#0f1011;--bg-surface:#191a1b;--bg-elevated:#28282c;--text-primary:#f7f8f8;--text-secondary:#d0d6e0;--text-tertiary:#8a8f98;--text-quaternary:#62666d;--brand:#5e6ad2;--brand-accent:#7170ff;--brand-hover:#828fff;--border-subtle:rgba(255,255,255,0.05);--border-standard:rgba(255,255,255,0.08);--surface-1:rgba(255,255,255,0.02);--surface-2:rgba(255,255,255,0.04);--surface-3:rgba(255,255,255,0.05);--green:#3fb950;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{font-family:'Inter var',Inter,-apple-system,system-ui,'Segoe UI',Roboto,sans-serif;font-feature-settings:'cv01','ss03';-webkit-font-smoothing:antialiased;}
+  body{background:var(--bg-canvas);color:var(--text-primary);height:100vh;overflow:hidden;font-size:15px;line-height:1.5;letter-spacing:-0.165px;display:flex;flex-direction:column;}
+  button,input{font-family:inherit;}
+  .topbar{height:52px;flex-shrink:0;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px;padding:0 16px;}
+  .brand-dot{width:26px;height:26px;border-radius:7px;background:var(--bg-elevated);padding:3px;object-fit:contain;}
+  .tb-name{font-size:14px;font-weight:590;color:var(--text-primary);letter-spacing:-0.16px;}
+  .tb-sub{font-size:11px;color:var(--text-quaternary);}
+  .tb-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+  .btn{padding:6px 13px;border-radius:8px;font-size:13px;font-weight:510;letter-spacing:-0.13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;font-family:inherit;text-decoration:none;}
+  .btn-ghost{background:var(--surface-1);border:1px solid var(--border-standard);color:var(--text-secondary);}
+  .btn-ghost:hover{background:var(--surface-3);color:var(--text-primary);}
+  .btn-primary{background:var(--brand);border:1px solid var(--brand);color:#fff;}
+  .btn-primary:hover{background:var(--brand-hover);}
+  .icon-btn{width:32px;height:32px;border-radius:7px;background:transparent;border:none;color:var(--text-tertiary);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .icon-btn:hover{background:var(--surface-3);color:var(--text-primary);}
+  .scroll{flex:1;overflow-y:auto;padding:28px 16px 40px;}
+  .chat{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+  .row{display:flex;gap:10px;}
+  .row.user{justify-content:flex-end;}
+  .ava{width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .bubble{max-width:80%;padding:10px 13px;border-radius:12px;font-size:14px;letter-spacing:-0.13px;line-height:1.5;}
+  .bubble.a{background:var(--surface-2);color:var(--text-secondary);border-top-left-radius:4px;}
+  .bubble.u{background:var(--brand);color:#fff;border-top-right-radius:4px;}
+  /* response controls */
+  .ctl{max-width:560px;margin:2px auto 0;padding-left:36px;}
+  .composer{display:flex;gap:8px;}
+  .composer input{flex:1;background:var(--bg-surface);border:1px solid var(--border-standard);border-radius:10px;color:var(--text-primary);font-size:14px;padding:11px 13px;}
+  .composer input:focus{outline:none;border-color:var(--brand-accent);}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{padding:9px 15px;border-radius:9999px;border:1px solid var(--border-standard);background:var(--surface-1);color:var(--text-secondary);font-size:13px;font-weight:510;cursor:pointer;}
+  .chip:hover{background:var(--surface-3);color:var(--text-primary);border-color:rgba(255,255,255,0.2);}
+  .imgpick{display:flex;gap:10px;flex-wrap:wrap;}
+  .imgopt{width:96px;height:96px;border-radius:10px;overflow:hidden;border:2px solid transparent;cursor:pointer;background:var(--surface-3);}
+  .imgopt:hover{border-color:var(--brand-accent);}
+  .imgopt img{width:100%;height:100%;object-fit:cover;display:block;}
+  /* result */
+  .result{max-width:560px;margin:6px auto 0;padding-left:36px;}
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .result-grid img{width:100%;border-radius:12px;display:block;border:1px solid var(--border-standard);}
+  .saved{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:510;color:var(--green);background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.3);padding:6px 11px;border-radius:9999px;margin-bottom:14px;}
+  .result-acts{display:flex;gap:8px;}
+  .typing{display:inline-flex;gap:4px;padding:12px 14px;}
+  .typing span{width:6px;height:6px;border-radius:50%;background:var(--text-quaternary);animation:blink 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.2s;}.typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,60%,100%{opacity:.25}30%{opacity:1}}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-standard);color:var(--text-primary);font-size:13px;font-weight:510;padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:100;}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <img class="brand-dot" src="bape-logo.png" alt="">
+    <div><div class="tb-name" id="wfName">Workflow</div><div class="tb-sub">BAPE · powered by KittyKat</div></div>
+    <div class="tb-right">
+      <button class="btn btn-ghost" onclick="share()"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 5a2 2 0 10-1.9-2.6L6.3 4.1a2 2 0 100 3.8l2.8 1.7A2 2 0 1010 8.2L7.2 6.5a2 2 0 000-1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Share</button>
+      <button class="icon-btn" title="Close" onclick="window.location='agentic_workflows.html'">&times;</button>
+    </div>
+  </div>
+
+  <div class="scroll"><div class="chat" id="chat"></div></div>
+  <div id="toast"></div>
+
+<script>
+  // The runner ONLY sees the visible questions — brand setup runs invisibly.
+  var STEPS = [
+    { type: 'text',   q: "What's the campaign name?" },
+    { type: 'choice', q: 'Which platform is this for?', options: ['Instagram', 'TikTok', 'Facebook'] },
+    { type: 'image',  q: 'Pick a shot style for the set.', options: ['images/2.jpg', 'images/4.jpg', 'images/9.jpg'] }
+  ];
+  var RESULT_IMGS = ['images/1.jpg', 'images/3.jpg', 'images/5.jpg', 'images/7.jpg'];
+
+  var WF = new URLSearchParams(location.search).get('wf') || 'Workflow';
+  document.getElementById('wfName').textContent = WF;
+  document.title = 'KittyKat — Run ' + WF;
+
+  var idx = 0, answers = [];
+  var chat = document.getElementById('chat');
+
+  function bubbleA(html){ return '<div class="row"><div class="ava"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.8l1.5 3.7 3.7 1.5-3.7 1.5L8 12.2 6.5 8.5 2.8 7l3.7-1.5z" fill="#fff"/></svg></div><div class="bubble a">' + html + '</div></div>'; }
+  function bubbleU(text){ return '<div class="row user"><div class="bubble u">' + text + '</div></div>'; }
+
+  function render(){
+    var html = bubbleA("Hi! Let's make an on-brand asset with <b>" + WF + "</b>. Just a couple of questions.");
+    // answered steps
+    for (var i = 0; i < answers.length; i++) html += bubbleA(STEPS[i].q) + bubbleU(answers[i]);
+    chat.innerHTML = html;
+    if (idx < STEPS.length) { askStep(STEPS[idx]); }
+    else { generate(); }
+    scroll();
+  }
+  function askStep(s){
+    chat.insertAdjacentHTML('beforeend', bubbleA(s.q));
+    var ctl = '';
+    if (s.type === 'text') ctl = '<div class="composer"><input id="ans" placeholder="Type your answer…" onkeydown="if(event.key===\'Enter\')answer(this.value)"><button class="btn btn-primary" onclick="answer(document.getElementById(\'ans\').value)">Send</button></div>';
+    if (s.type === 'choice') ctl = '<div class="chips">' + s.options.map(function(o){return '<button class="chip" onclick="answer(\'' + o + '\')">' + o + '</button>';}).join('') + '</div>';
+    if (s.type === 'image') ctl = '<div class="imgpick">' + s.options.map(function(o,i){return '<div class="imgopt" onclick="answer(\'Style ' + (i+1) + '\')"><img src="' + o + '"></div>';}).join('') + '</div>';
+    chat.insertAdjacentHTML('beforeend', '<div class="ctl" id="ctl">' + ctl + '</div>');
+    var inp = document.getElementById('ans'); if (inp) inp.focus();
+  }
+  function answer(val){
+    if (val == null || (typeof val === 'string' && !val.trim())) return;
+    answers.push(val);
+    idx++;
+    render();
+  }
+  function generate(){
+    chat.insertAdjacentHTML('beforeend', bubbleA('Got it — generating your on-brand set…') + '<div class="row"><div class="ava"></div><div class="typing"><span></span><span></span><span></span></div></div>');
+    scroll();
+    setTimeout(function(){
+      var imgs = RESULT_IMGS.map(function(s){return '<img src="' + s + '">';}).join('');
+      var html = bubbleA('Here’s your set for <b>' + answers[0] + '</b>.') +
+        '<div class="result"><div class="result-grid">' + imgs + '</div>' +
+        '<div class="saved"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8.5l2.5 2.5L12 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Saved to Shortlisted</div>' +
+        '<div class="result-acts"><button class="btn btn-ghost" onclick="restart()">Make another</button><a class="btn btn-primary" href="asset_manager.html">View in Shortlisted</a></div></div>';
+      // rebuild without the typing indicator
+      var base = bubbleA("Hi! Let's make an on-brand asset with <b>" + WF + "</b>. Just a couple of questions.");
+      for (var i = 0; i < answers.length; i++) base += bubbleA(STEPS[i].q) + bubbleU(answers[i]);
+      chat.innerHTML = base + html;
+      scroll();
+    }, 1300);
+  }
+  function restart(){ idx = 0; answers = []; render(); }
+  function scroll(){ var s = document.querySelector('.scroll'); s.scrollTop = s.scrollHeight; }
+  function toast(m){ var t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; clearTimeout(t._t); t._t = setTimeout(function(){t.style.opacity='0';},2200); }
+  function share(){
+    var url = location.origin + location.pathname + '?wf=' + encodeURIComponent(WF) + '&shared=1';
+    if (navigator.clipboard) navigator.clipboard.writeText(url);
+    toast('Link copied — anyone can remake this asset');
+  }
+
+  render();
+</script>
+</body>
+</html>
