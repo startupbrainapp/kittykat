@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KittyKat — Moodboard</title>
+<style>
+  :root{--bg-canvas:#08090a;--bg-panel:#0f1011;--bg-surface:#191a1b;--bg-elevated:#28282c;--text-primary:#f7f8f8;--text-secondary:#d0d6e0;--text-tertiary:#8a8f98;--text-quaternary:#62666d;--brand:#5e6ad2;--brand-accent:#7170ff;--brand-hover:#828fff;--border-subtle:rgba(255,255,255,0.05);--border-standard:rgba(255,255,255,0.08);--surface-1:rgba(255,255,255,0.02);--surface-2:rgba(255,255,255,0.04);--surface-3:rgba(255,255,255,0.05);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{font-family:'Inter var',Inter,-apple-system,system-ui,'Segoe UI',Roboto,sans-serif;font-feature-settings:'cv01','ss03';-webkit-font-smoothing:antialiased;}
+  body{background:var(--bg-canvas);color:var(--text-primary);min-height:100vh;font-size:15px;line-height:1.5;letter-spacing:-0.165px;}
+  button{font-family:inherit;}
+  .topbar{position:sticky;top:0;z-index:10;background:rgba(8,9,10,0.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px;padding:12px 20px;}
+  .brand-dot{width:26px;height:26px;border-radius:7px;background:var(--bg-elevated);padding:3px;object-fit:contain;}
+  .tb-name{font-size:15px;font-weight:590;color:var(--text-primary);letter-spacing:-0.16px;}
+  .tb-sub{font-size:11px;color:var(--text-quaternary);}
+  .tb-right{margin-left:auto;display:flex;gap:8px;}
+  .btn{padding:7px 13px;border-radius:8px;font-size:13px;font-weight:510;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;font-family:inherit;text-decoration:none;}
+  .btn-ghost{background:var(--surface-1);border:1px solid var(--border-standard);color:var(--text-secondary);}
+  .btn-ghost:hover{background:var(--surface-3);color:var(--text-primary);}
+  .wrap{max-width:1200px;margin:0 auto;padding:22px 20px 60px;}
+  .filters{display:flex;flex-wrap:wrap;gap:18px;margin-bottom:22px;}
+  .fgroup{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .flabel{font-size:10px;font-weight:590;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-quaternary);margin-right:2px;}
+  .chip{padding:6px 13px;border-radius:9999px;border:1px solid var(--border-standard);background:var(--surface-1);color:var(--text-tertiary);font-size:12.5px;font-weight:510;cursor:pointer;transition:all .12s;}
+  .chip:hover{color:var(--text-primary);}
+  .chip.on{background:var(--surface-3);color:var(--text-primary);border-color:rgba(255,255,255,0.2);}
+  .count{font-size:12px;color:var(--text-quaternary);margin-bottom:14px;}
+  .wrap{max-width:1600px;}
+  .masonry{column-count:5;column-gap:12px;}
+  .masonry img{width:100%;margin:0 0 12px;border-radius:12px;display:block;break-inside:avoid;border:1px solid var(--border-standard);transition:transform .12s;}
+  .masonry img:hover{transform:scale(1.01);}
+  @media (max-width:1280px){.masonry{column-count:4;}}
+  @media (max-width:900px){.masonry{column-count:3;}}
+  @media (max-width:600px){.masonry{column-count:2;}.filters{gap:12px;}}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-standard);color:var(--text-primary);font-size:13px;font-weight:510;padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:100;}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <img class="brand-dot" src="bape-logo.png" alt="">
+    <div><div class="tb-name" id="boardName">Moodboard</div><div class="tb-sub">BAPE · powered by KittyKat</div></div>
+    <div class="tb-right" id="tbRight"></div>
+  </div>
+  <div class="wrap">
+    <div class="filters" id="filters"></div>
+    <div class="count" id="count"></div>
+    <div class="masonry" id="grid"></div>
+  </div>
+  <div id="toast"></div>
+
+<script>
+  var POOL = [
+    {s:'images/1.jpg',cat:'Lifestyle',color:'Camo',vibe:'Playful'},{s:'images/2.jpg',cat:'On-model',color:'Camo',vibe:'Street'},
+    {s:'images/3.jpg',cat:'On-model',color:'Camo',vibe:'Street'},{s:'images/4.jpg',cat:'On-model',color:'Neon',vibe:'Street'},
+    {s:'images/5.jpg',cat:'Product',color:'Camo',vibe:'Editorial'},{s:'images/6.jpg',cat:'On-model',color:'Camo',vibe:'Editorial'},
+    {s:'images/7.jpg',cat:'Lifestyle',color:'Camo',vibe:'Street'},{s:'images/8.jpg',cat:'On-model',color:'Mono',vibe:'Editorial'},
+    {s:'images/9.jpg',cat:'On-model',color:'Pink',vibe:'Editorial'},{s:'images/10.jpg',cat:'On-model',color:'Neon',vibe:'Street'},
+    {s:'images/11.jpg',cat:'Product',color:'Neon',vibe:'Editorial'},{s:'images/12.jpg',cat:'Interior',color:'Camo',vibe:'Editorial'},
+    {s:'images/13.jpg',cat:'Lifestyle',color:'Pink',vibe:'Playful'},{s:'images/14.jpg',cat:'On-model',color:'Mono',vibe:'Street'},
+    {s:'images/15.jpg',cat:'Product',color:'Pink',vibe:'Editorial'},{s:'images/16.jpg',cat:'On-model',color:'Camo',vibe:'Playful'},
+    {s:'images/17.jpg',cat:'Lifestyle',color:'Neon',vibe:'Street'},{s:'images/18.jpg',cat:'Product',color:'Mono',vibe:'Editorial'},
+    {s:'images/19.jpg',cat:'On-model',color:'Camo',vibe:'Editorial'},{s:'images/20.jpg',cat:'Interior',color:'Pink',vibe:'Editorial'},
+    {s:'images/v1.jpg',cat:'On-model',color:'Camo',vibe:'Street'},{s:'images/v2.jpg',cat:'On-model',color:'Mono',vibe:'Editorial'},
+    {s:'images/v3.jpg',cat:'On-model',color:'Neon',vibe:'Playful'},{s:'images/v4.jpg',cat:'Product',color:'Camo',vibe:'Street'},
+    {s:'images/v5.jpg',cat:'On-model',color:'Pink',vibe:'Editorial'},{s:'images/v6.jpg',cat:'Lifestyle',color:'Mono',vibe:'Editorial'},
+    {s:'images/c1.jpg',cat:'Product',color:'Mono',vibe:'Editorial'},{s:'images/c2.jpg',cat:'Product',color:'Camo',vibe:'Editorial'},
+    {s:'images/c3.jpg',cat:'Lifestyle',color:'Pink',vibe:'Playful'},{s:'images/c4.jpg',cat:'Interior',color:'Mono',vibe:'Editorial'},
+    {s:'images/c5.jpg',cat:'On-model',color:'Neon',vibe:'Street'},{s:'images/c6.jpg',cat:'Product',color:'Camo',vibe:'Playful'}
+  ];
+  var GROUPS = {
+    Category: ['All','Product','On-model','Lifestyle','Interior'],
+    Color: ['All','Camo','Pink','Neon','Mono'],
+    Vibe: ['All','Street','Editorial','Playful']
+  };
+  var KEY = { Category:'cat', Color:'color', Vibe:'vibe' };
+  var active = { Category:'All', Color:'All', Vibe:'All' };
+
+  var shared = new URLSearchParams(location.search).get('shared') === '1';
+  var board = new URLSearchParams(location.search).get('board') || 'Moodboard';
+  document.getElementById('boardName').textContent = board;
+  document.title = 'KittyKat — ' + board;
+  document.getElementById('tbRight').innerHTML = shared ? '' :
+    '<button class="btn btn-ghost" onclick="share()"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 5a2 2 0 10-1.9-2.6L6.3 4.1a2 2 0 100 3.8l2.8 1.7A2 2 0 1010 8.2L7.2 6.5a2 2 0 000-1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Share</button>';
+
+  function renderFilters(){
+    document.getElementById('filters').innerHTML = Object.keys(GROUPS).map(function(g){
+      return '<div class="fgroup"><span class="flabel">'+g+'</span>'+GROUPS[g].map(function(v){
+        return '<button class="chip'+(active[g]===v?' on':'')+'" onclick="setF(\''+g+'\',\''+v+'\')">'+v+'</button>';
+      }).join('')+'</div>';
+    }).join('');
+  }
+  function setF(g,v){ active[g]=v; renderFilters(); renderGrid(); }
+  function renderGrid(){
+    var list = POOL.filter(function(p){
+      return Object.keys(GROUPS).every(function(g){ return active[g]==='All' || p[KEY[g]]===active[g]; });
+    });
+    document.getElementById('count').textContent = list.length + ' reference' + (list.length===1?'':'s');
+    document.getElementById('grid').innerHTML = list.map(function(p){ return '<img src="'+p.s+'" alt="">'; }).join('')
+      || '<div style="color:var(--text-quaternary);font-size:13px;padding:40px 0;">No references match these filters.</div>';
+  }
+  function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.style.opacity='1'; clearTimeout(t._t); t._t=setTimeout(function(){t.style.opacity='0';},2200); }
+  function share(){ var u=location.origin+location.pathname+'?board='+encodeURIComponent(board)+'&shared=1'; if(navigator.clipboard)navigator.clipboard.writeText(u); toast('Link copied — anyone can explore this board'); }
+
+  renderFilters(); renderGrid();
+</script>
+</body>
+</html>
