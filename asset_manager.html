@@ -332,7 +332,12 @@
     <a class="nav-item" href="reviews.html" style="text-decoration: none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
   </div>
 
-  <div class="sidebar-bottom-spacer"></div>
+    <div class="nav-section">
+    <div class="nav-section-label">Agentic Studio</div>
+    <a class="nav-item" href="agentic_workflows.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 6v1.5A2.5 2.5 0 0 0 6.5 10H10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Workflows</span></a>
+    </div>
+
+<div class="sidebar-bottom-spacer"></div>
 
   <div class="nav-section">
     <div class="nav-section-label">Settings</div>
@@ -387,6 +392,7 @@
           <input id="assetSearch" type="text" placeholder="Search shortlisted assets, briefs…" oninput="onSearchInput()" autocomplete="off">
         </div>
         <button class="filter-dropdown" onclick="cycleFilter('status')"><span class="filter-dropdown-label">Status</span><span id="fStatus">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="cycleFilter('source')"><span class="filter-dropdown-label">Source</span><span id="fSource">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="filter-dropdown" onclick="cycleFilter('campaign')"><span class="filter-dropdown-label">Campaign</span><span id="fCampaign">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="filter-dropdown" id="selectModeBtn" onclick="toggleSelectMode()"><svg class="filter-chev" viewBox="0 0 12 12" fill="none" style="width:12px;height:12px;"><path d="M2 6l2.5 2.5L10 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="selectModeLabel">Select</span></button>
         <div class="filter-spacer"></div>
@@ -440,9 +446,9 @@
     { id: 6, img: 'images/6.jpg', name: 'Green Camo \u00b7 On-Model Studio', brief: 'Green Camo Shark \u00b7 Product Hero', campaign: 'Green Camo Shark \u00b7 Anniversary', status: 'approved', statusLabel: 'Approved', format: '1080\u00d71080', created: 'Mar 12, 2026', creator: 'Kathy S.' },
     { id: 7, img: 'images/7.jpg', name: 'Green Camo \u00b7 Web Hero', brief: 'Green Camo Shark \u00b7 Product Hero', campaign: 'Green Camo Shark \u00b7 Anniversary', status: 'approved', statusLabel: 'Approved', format: '1920\u00d7800', created: 'Mar 13, 2026', creator: 'Kathy S.' },
     { id: 8, img: 'images/8.jpg', name: 'adidas Drop 3 \u00b7 Track Hero', brief: 'adidas Drop 3 \u00b7 Track Suit', campaign: 'Sport Luxe \u00b7 adidas Drop 3', status: 'approved', statusLabel: 'Approved', format: '1080\u00d71080', created: 'Mar 20, 2026', creator: 'Kathy S.' },
-    { id: 9, img: 'images/9.jpg', name: 'Tokyo \u00b7 Neon Camo Hero', brief: 'Neon ABC Camo \u00b7 Hero Product', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '1080\u00d71080', created: 'Apr 8, 2026', creator: 'Regional Lead' },
-    { id: 10, img: 'images/10.jpg', name: 'Tokyo \u00b7 Neon Story Frame', brief: 'Neon ABC Camo \u00b7 Hero Product', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '1080\u00d71920', created: 'Apr 8, 2026', creator: 'Regional Lead' },
-    { id: 11, img: 'images/11.jpg', name: 'Shibuya 3am \u00b7 Crossing Shot', brief: 'Shibuya 3am Street Shoot', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '1080\u00d71080', created: 'Apr 10, 2026', creator: 'Regional Lead' },
+    { id: 9, img: 'images/9.jpg', name: 'Tokyo \u00b7 Neon Camo Hero', source: 'Agentic', brief: 'Neon ABC Camo \u00b7 Hero Product', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '1080\u00d71080', created: 'Apr 8, 2026', creator: 'Regional Lead' },
+    { id: 10, img: 'images/10.jpg', name: 'Tokyo \u00b7 Neon Story Frame', source: 'Agentic', brief: 'Neon ABC Camo \u00b7 Hero Product', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '1080\u00d71920', created: 'Apr 8, 2026', creator: 'Regional Lead' },
+    { id: 11, img: 'images/11.jpg', name: 'Shibuya 3am \u00b7 Crossing Shot', source: 'Agentic', brief: 'Shibuya 3am Street Shoot', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '1080\u00d71080', created: 'Apr 10, 2026', creator: 'Regional Lead' },
     { id: 12, img: 'images/12.jpg', name: 'Shibuya 3am \u00b7 Neon Reflection', brief: 'Shibuya 3am Street Shoot', campaign: 'Tokyo After Dark', status: 'review', statusLabel: 'In Review', format: '2480\u00d73508', created: 'Apr 10, 2026', creator: 'Regional Lead' },
     { id: 13, img: 'images/13.jpg', name: 'Neo-Max \u00b7 Store Entrance Render', brief: 'Neo-Max Retail Concept \u00b7 Interior', campaign: 'Neo-Max Store \u00b7 Shibuya', status: 'review', statusLabel: 'In Review', format: '3840\u00d72160', created: 'Apr 12, 2026', creator: 'Kathy S.' },
     { id: 14, img: 'images/14.jpg', name: 'Neo-Max \u00b7 Interior Concept', brief: 'Neo-Max Retail Concept \u00b7 Interior', campaign: 'Neo-Max Store \u00b7 Shibuya', status: 'review', statusLabel: 'In Review', format: '3840\u00d72160', created: 'Apr 12, 2026', creator: 'Kathy S.' },
@@ -559,6 +565,7 @@
   // --- Filters / sort state (cycled via the dropdown buttons) ---
   var FILTERS = {
     status: { id: 'fStatus', i: 0, opts: ['All', 'Approved', 'In Review', 'In Production', 'Draft'] },
+    source: { id: 'fSource', i: 0, opts: ['All', 'Manual', 'Agentic'] },  // how the asset was made
     campaign: { id: 'fCampaign', i: 0, opts: ['All'] },  // internal: which campaign you drilled into
     brief: { id: 'fBrief', i: 0, opts: ['All'] },        // visible pill: briefs within that campaign
     format: { id: 'fFormat', i: 0, opts: ['All'] },      // populated from assets
@@ -584,7 +591,7 @@
     reconcile(FILTERS.brief, briefs);
   }
   function syncFilterLabels() {
-    ['status', 'campaign', 'sort'].forEach(function (key) {
+    ['status', 'source', 'campaign', 'sort'].forEach(function (key) {
       var f = FILTERS[key], el = document.getElementById(f.id);
       if (el) el.textContent = f.opts[f.i % f.opts.length];
     });
@@ -694,10 +701,11 @@
   function renderGrid() {
     const grid = document.getElementById('assetGrid');
     refreshFilterOptions();
-    var fStatus = curVal('status'), fCamp = curVal('campaign'), fSort = curVal('sort');
+    var fStatus = curVal('status'), fCamp = curVal('campaign'), fSort = curVal('sort'), fSource = curVal('source');
     let list = liveAssets().filter(isShortlisted).filter(function (a) {
       if (ARCHIVED_LOCAL[a.id]) return false;
       if (fStatus !== 'All' && liveStatus(a).status !== STATUS_VAL[fStatus]) return false;
+      if (fSource !== 'All' && (a.source || 'Manual') !== fSource) return false;
       if (fCamp !== 'All' && a.campaign !== fCamp) return false;
       if (!matchesSearch(a)) return false;
       return true;

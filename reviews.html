@@ -240,7 +240,12 @@
     <a class="nav-item active" href="reviews.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Reviews</span></a>
   </div>
 
-  <div class="sidebar-bottom-spacer"></div>
+    <div class="nav-section">
+    <div class="nav-section-label">Agentic Studio</div>
+    <a class="nav-item" href="agentic_workflows.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 6v1.5A2.5 2.5 0 0 0 6.5 10H10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="nav-label">Workflows</span></a>
+    </div>
+
+<div class="sidebar-bottom-spacer"></div>
 
   <div class="nav-section">
     <div class="nav-section-label">Settings</div>
@@ -285,6 +290,7 @@
       <div class="filter-bar">
         <label class="filter-selectall"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this.checked)"><span>Select all</span></label>
         <button class="filter-dropdown" onclick="cycleFilter('brief')"><span class="filter-dropdown-label">Brief</span><span id="fBrief">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="filter-dropdown" onclick="cycleFilter('source')"><span class="filter-dropdown-label">Source</span><span id="fSource">All</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="filter-dropdown" onclick="cycleFilter('reviewer')"><span class="filter-dropdown-label">Submitted by</span><span id="fReviewer">Anyone</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="filter-spacer"></div>
         <button class="filter-dropdown" onclick="cycleFilter('sort')"><span class="filter-dropdown-label">Sort</span><span id="fSort">Newest</span><svg class="filter-chev" viewBox="0 0 10 10" fill="none"><path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -323,10 +329,10 @@
 <script src="data.js"></script>
 <script>
   const items = [
-    { id: 0, name: 'Neon ABC Camo \u00b7 Hero Shot 1', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', submitter: 'Maya T.', time: '2h ago', img: 'images/v1.jpg', briefDesc: 'Neon-lit product hero for the Tokyo After Dark ABC Camo variant. Cyber-purple and electric-green palette. Studio shot with LED strip lighting.' },
-    { id: 1, name: 'Neon ABC Camo \u00b7 Hero Shot 2', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', submitter: 'Maya T.', time: '2h ago', img: 'images/v2.jpg', briefDesc: 'Neon-lit product hero for the Tokyo After Dark ABC Camo variant. Cyber-purple and electric-green palette. Studio shot with LED strip lighting.' },
-    { id: 2, name: 'Shibuya 3am \u00b7 Street Scene 1', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', submitter: 'Maya T.', time: '3h ago', img: 'images/v3.jpg', briefDesc: 'Guerrilla-style street photography at 3am in Shibuya. Neon reflections on wet pavement, convenience-store fluorescence, crossing lights.' },
-    { id: 3, name: 'Shibuya 3am \u00b7 Street Scene 2', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', submitter: 'Maya T.', time: '3h ago', img: 'images/v4.jpg', briefDesc: 'Guerrilla-style street photography at 3am in Shibuya. Neon reflections on wet pavement, convenience-store fluorescence, crossing lights.' },
+    { id: 0, name: 'Neon ABC Camo \u00b7 Hero Shot 1', source: 'Agentic', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', submitter: 'Maya T.',time: '2h ago', img: 'images/v1.jpg', briefDesc: 'Neon-lit product hero for the Tokyo After Dark ABC Camo variant. Cyber-purple and electric-green palette. Studio shot with LED strip lighting.' },
+    { id: 1, name: 'Neon ABC Camo \u00b7 Hero Shot 2', source: 'Agentic', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', submitter: 'Maya T.',time: '2h ago', img: 'images/v2.jpg', briefDesc: 'Neon-lit product hero for the Tokyo After Dark ABC Camo variant. Cyber-purple and electric-green palette. Studio shot with LED strip lighting.' },
+    { id: 2, name: 'Shibuya 3am \u00b7 Street Scene 1', source: 'Agentic', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', submitter: 'Maya T.',time: '3h ago', img: 'images/v3.jpg', briefDesc: 'Guerrilla-style street photography at 3am in Shibuya. Neon reflections on wet pavement, convenience-store fluorescence, crossing lights.' },
+    { id: 3, name: 'Shibuya 3am \u00b7 Street Scene 2', source: 'Agentic', brief: 'Tokyo After Dark', campaign: 'Tokyo After Dark', submitter: 'Maya T.',time: '3h ago', img: 'images/v4.jpg', briefDesc: 'Guerrilla-style street photography at 3am in Shibuya. Neon reflections on wet pavement, convenience-store fluorescence, crossing lights.' },
     { id: 4, name: 'Neo-Max Interior \u00b7 Wide', brief: 'Neo-Max Store', campaign: 'Neo-Max Store \u00b7 Shibuya', submitter: 'Kathy S.', time: '5h ago', img: 'images/1.jpg', briefDesc: 'Interior design renders + visual merchandising concepts for the Neo-Maximalist pop-up in Shibuya. Print-on-print walls, camo-tile floors, LED canopy ceiling.' },
     { id: 5, name: 'Neo-Max Interior \u00b7 Detail', brief: 'Neo-Max Store', campaign: 'Neo-Max Store \u00b7 Shibuya', submitter: 'Kathy S.', time: '5h ago', img: 'images/2.jpg', briefDesc: 'Interior design renders + visual merchandising concepts for the Neo-Maximalist pop-up in Shibuya. Print-on-print walls, camo-tile floors, LED canopy ceiling.' },
     { id: 6, name: 'Neo-Max Interior \u00b7 Entrance', brief: 'Neo-Max Store', campaign: 'Neo-Max Store \u00b7 Shibuya', submitter: 'Kathy S.', time: '6h ago', img: 'images/3.jpg', briefDesc: 'Interior design renders + visual merchandising concepts for the Neo-Maximalist pop-up in Shibuya. Print-on-print walls, camo-tile floors, LED canopy ceiling.' },
@@ -349,6 +355,7 @@
   // --- Filters / sort state (cycled via the dropdown buttons) ---
   var FILTERS = {
     brief: { id: 'fBrief', i: 0, opts: ['All'] },           // populated from review briefs
+    source: { id: 'fSource', i: 0, opts: ['All', 'Manual', 'Agentic'] },  // how the asset was made
     reviewer: { id: 'fReviewer', i: 0, opts: ['Anyone'] },  // populated from submitters
     sort: { id: 'fSort', i: 0, opts: ['Newest', 'Oldest'] }
   };
@@ -405,9 +412,10 @@
   function buildList() {
     var base = rawList();
     refreshFilterOptions(base);
-    var brief = curVal('brief'), reviewer = curVal('reviewer'), sort = curVal('sort');
+    var brief = curVal('brief'), reviewer = curVal('reviewer'), sort = curVal('sort'), src = curVal('source');
     var list = base.filter(function (it) {
       if (brief !== 'All' && it.brief !== brief) return false;
+      if (src !== 'All' && (it.source || 'Manual') !== src) return false;
       if (reviewer !== 'Anyone' && it.submitter !== reviewer) return false;
       return true;
     });
@@ -467,7 +475,7 @@
     var fc = document.getElementById('filterCount');
     if (fc) fc.textContent = rendered.length + ' item' + (rendered.length === 1 ? '' : 's');
     // keep dropdown labels in sync (option lists may have reconciled)
-    ['brief', 'reviewer', 'sort'].forEach(function (key) {
+    ['brief', 'source', 'reviewer', 'sort'].forEach(function (key) {
       var f = FILTERS[key], el = document.getElementById(f.id);
       if (el) el.textContent = f.opts[f.i % f.opts.length];
     });
