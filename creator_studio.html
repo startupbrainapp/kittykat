@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="UTF-8">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <title>KittyKat — Creator Studio</title>
@@ -844,5 +845,42 @@
     document.getElementById('modeAgent').classList.add('active');
   }
 </script>
+<!-- MOBILE-STUDIO -->
+<style>
+  .studio-tabs{display:none;flex-shrink:0;gap:6px;padding:7px 10px;border-bottom:1px solid var(--divider,var(--border-subtle));background:var(--bg-panel);}
+  .studio-tabs .stab{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border-standard);background:var(--surface-1);color:var(--text-tertiary);font-size:13px;font-weight:510;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+  .studio-tabs .stab.active{background:var(--surface-3);color:var(--text-primary);}
+  @media (max-width:768px){
+    .studio-tabs{display:flex;}
+    .modal-body{position:relative;}
+    .timeline-rail,.timeline{display:none !important;}
+    .canvas,.panel{position:absolute !important;top:0;left:0;right:0;bottom:0;width:100% !important;min-width:0 !important;}
+    .modal-body:not(.show-chat) .panel{display:none !important;}
+    .modal-body.show-chat .canvas{display:none !important;}
+    .block-modal{width:100% !important;left:0 !important;}
+    .cand-grid{grid-template-columns:repeat(2,1fr) !important;}
+    .modal-top{padding:0 10px !important;gap:8px !important;}
+    .brief-chip{flex:1 1 auto;min-width:0;overflow:hidden;}
+    .brief-chip #briefName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:100%;vertical-align:bottom;}
+    .brief-chip .sub{display:none !important;}
+    .top-actions{gap:6px !important;flex-shrink:0;}
+    .top-actions .final-count{display:none !important;}
+    .submit-btn{font-size:0 !important;gap:0 !important;padding:7px 9px !important;}
+  }
+</style>
+<script>
+(function(){
+  var body=document.querySelector('.modal-body'),top=document.querySelector('.modal-top');
+  if(!body||!top||document.querySelector('.studio-tabs'))return;
+  var t=document.createElement('div');t.className='studio-tabs';
+  t.innerHTML='<button class="stab active" data-p="canvas"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 11l3-2.5 2 1.5 3-3 3 3.5" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Images</button>'+
+    '<button class="stab" data-p="chat"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4a2 2 0 012-2h8a2 2 0 012 2v5a2 2 0 01-2 2H6l-3 3V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Chat</button>';
+  top.parentNode.insertBefore(t,body);
+  t.addEventListener('click',function(e){var b=e.target.closest('.stab');if(!b)return;
+    t.querySelectorAll('.stab').forEach(function(x){x.classList.remove('active');});b.classList.add('active');
+    body.classList.toggle('show-chat',b.getAttribute('data-p')==='chat');});
+})();
+</script>
+<!-- /MOBILE-STUDIO -->
 </body>
 </html>

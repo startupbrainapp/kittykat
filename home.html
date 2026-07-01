@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="UTF-8">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <title>KittyKat — Home</title>
@@ -734,5 +735,52 @@
 </script>
 
 <script src="data.js"></script>
+<!-- MOBILE-SHELL -->
+<style>
+  .hamburger{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--border-standard);background:var(--surface-1);color:var(--text-secondary);align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-right:6px;}
+  .hamburger:hover{background:var(--surface-3);color:var(--text-primary);}
+  @media (max-width:768px){
+    .sidebar{position:fixed;top:0;left:0;bottom:0;transform:translateX(-100%);transition:transform .22s ease;z-index:300;box-shadow:0 0 44px rgba(0,0,0,.55);}
+    .sidebar.nav-open{transform:translateX(0);}
+    .nav-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:290;opacity:0;pointer-events:none;transition:opacity .2s;}
+    .nav-backdrop.show{opacity:1;pointer-events:auto;}
+    .hamburger{display:flex !important;}
+    .topbar{padding-left:10px !important;height:auto !important;min-height:48px;}
+    .content{padding:20px 16px 80px !important;}
+    .content-max{max-width:100% !important;}
+    .nav-item{padding:9px 12px !important;}
+  }
+</style>
+<script>
+(function(){
+  var sb=document.querySelector('.sidebar'),tb=document.querySelector('.topbar');
+  if(!sb||!tb||document.querySelector('.hamburger'))return;
+  var bd=document.createElement('div');bd.className='nav-backdrop';document.body.appendChild(bd);
+  var h=document.createElement('button');h.className='hamburger';h.setAttribute('aria-label','Open menu');
+  h.innerHTML='<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  tb.insertBefore(h,tb.firstChild);
+  function close(){sb.classList.remove('nav-open');bd.classList.remove('show');}
+  h.addEventListener('click',function(){sb.classList.add('nav-open');bd.classList.add('show');});
+  bd.addEventListener('click',close);
+  sb.addEventListener('click',function(e){if(e.target.closest('a'))close();});
+})();
+</script>
+<!-- /MOBILE-SHELL -->
+<!-- MOBILE-REFLOW -->
+<style>
+@media (max-width:768px){
+  .stat-strip{grid-template-columns:1fr 1fr !important;}
+  .filter-bar{flex-wrap:wrap !important;row-gap:8px !important;}
+  .filter-spacer{display:none !important;}
+  .drawer{width:100% !important;max-width:100% !important;}
+  .asset-grid{grid-template-columns:repeat(2,1fr) !important;}
+  .region-cards{grid-template-columns:1fr !important;}
+  .template-grid{grid-template-columns:1fr !important;}
+  .export-grid{grid-template-columns:1fr 1fr !important;}
+  .campaign-cards,.cards{grid-template-columns:1fr !important;}
+  .bulk-bar{left:0 !important;right:0 !important;}
+}
+</style>
+<!-- /MOBILE-REFLOW -->
 </body>
 </html>
